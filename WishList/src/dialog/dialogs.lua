@@ -751,10 +751,11 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
                     and armorOrWeaponType == typeId
                     and equipType == slotId
                     and (allTraitsTraitId == traitId or traitType == traitId) then
+                local clientLang = WL.clientLang
 --d(">[WL.buildSetItemDataFromAddItemDialog]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
                 local data = {}
                 data.setId                  = WL.currentSetId
-                data.setName                = setsData.name
+                data.setName                = setsData.names[clientLang]
                 data.id                     = setItemId
                 data.itemType               = itemType
                 data.armorOrWeaponType      = armorOrWeaponType
@@ -776,8 +777,9 @@ end
 function WL.showAddItem(setData, comingFromWishListWindow)
     comingFromWishListWindow = comingFromWishListWindow or false
     WL.createWindow(false)
+    local clientLang = WL.clientLang
     WL.currentSetId = setData.setId
-    WL.currentSetName = setData.name
+    WL.currentSetName = setData.names[clientLang]
     WL.checkCurrentCharData()
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_ITEM_DIALOG", {set=setData.setId, wlWindow=comingFromWishListWindow})
 end

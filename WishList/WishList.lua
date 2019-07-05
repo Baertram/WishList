@@ -334,7 +334,7 @@ function WL.CreateEntryForSet( setId, setData )
 	return({
         type        = WL.sortType,
 		setId       = setId,
-		name        = setName,
+		--name        = setName,
         names       = setData.names,
 		itemLink    = itemLink,
 		bonuses     = numBonuses

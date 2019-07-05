@@ -446,12 +446,13 @@ end
 --Setup the data of each row which gets added to the ZO_SortFilterList
 function WishListWindow:SetupItemRow( control, data )
     if WL.comingFromSortScrollListSetupFunction then return end
---d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.name))
+    local clientLang = WL.clientLang
+--d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
 
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
-    nameColumn:SetText(data.name)
+    nameColumn:SetText(data.names[clientLang])
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
     local slotColumn = control:GetNamedChild("Slot")
     local traitColumn = control:GetNamedChild("Trait")
@@ -1128,8 +1129,9 @@ function WishListRow_OnMouseEnter( rowControlEnter )
     if showAdditionalTextTooltip then
         local data = rowControlEnter.data
         if data ~= nil then
+            local clientLang = WL.clientLang
             local tooltipText = ""
-            tooltipText = GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_CONST_SET) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.name .. "|r (" .. GetString(WISHLIST_CONST_BONUS) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.bonuses .. "|r, " .. GetString(WISHLIST_CONST_ID) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.setId .. "|r)"
+            tooltipText = GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_CONST_SET) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.names[clientLang] .. "|r (" .. GetString(WISHLIST_CONST_BONUS) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.bonuses .. "|r, " .. GetString(WISHLIST_CONST_ID) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.setId .. "|r)"
             tooltipText = tooltipText .. "\n" .. GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_HEADER_LOCALITY) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.locality .. "|r"
             tooltipText = tooltipText .. "\n" .. GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_HEADER_NAME) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) ..data.username .. "|r"
             if data.displayName ~= nil and data.displayName ~= "" then
