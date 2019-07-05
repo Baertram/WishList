@@ -27,6 +27,12 @@ if WL.addonMenu == nil and LibStub then LibStub:GetLibrary("LibAddonMenu-2.0") e
 WL.LMM2 = LibMainMenu2
 if WL.LMM2 == nil and LibStub then LibStub:GetLibrary("LibMainMenu-2.0") end
 WL.LibSets = LibSets
+--Check if the version is found and >= 0.06
+local libSets = WL.LibSets
+local libSetsVersionExists = libSets.version ~= nil
+local libSetsVersionIsGreaterEqualNeededValue = libSets.version >= 0.06
+local libSetsHTTPLinkEsoui = "https://www.esoui.com/downloads/info2241-LibSets.html"
+assert(libSetsVersionExists and libSetsVersionIsGreaterEqualNeededValue, "[WishList] ERROR - Needed library \'LibSets\' is not found or not loaded with the needed version 0.06 or higher!\nPlease download the newest version: " .. libSetsHTTPLinkEsoui)
 
 WL.CurrentState = WISHLIST_TAB_STATE_NO_SETS 	    --1=NoSets, 2=Loading, 3=SetsLoaded
 WL.CurrentTab   = WISHLIST_TAB_SEARCH               --1=Search, 2=WishList

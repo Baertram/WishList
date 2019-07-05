@@ -345,7 +345,7 @@
 
 				<!-- Last scanned set -->
 				<Label name="$(parent)SetsLastScanned" font="ZoFontGameSmall" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-					<Anchor point="BOTTOM" relativeTo="$(parent)Reload" relativePoint="BOTTOM" offsetY="20" offsetX="0" />
+					<Anchor point="BOTTOM" relativeTo="$(parent)Reload" relativePoint="BOTTOM" offsetY="30" offsetX="0" />
 				</Label>
 
 				<!-- Tab Buttons -->

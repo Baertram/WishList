@@ -257,6 +257,12 @@ function WishListWindow:UpdateUI(state)
             --Sets Loaded UI
             if WL.accData.setsLastScanned ~= nil and WL.accData.setsLastScanned > 0 then
                 local setsLastScanned = WL.getDateTimeFormatted(WL.accData.setsLastScanned)
+                local libSetsVersionInfo = ""
+                local libSets = WL.LibSets
+                if libSets and libSets.name and libSets.version then
+                    libSetsVersionInfo = setsLastScanned .. "\n" .. libSets.name .. " v" .. tostring(libSets.version)
+                    setsLastScanned = libSetsVersionInfo
+                end
                 self.frame:GetNamedChild("SetsLastScanned"):SetText(setsLastScanned)
                 self.frame:GetNamedChild("SetsLastScanned"):SetHidden(false)
             end
