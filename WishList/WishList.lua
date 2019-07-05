@@ -322,12 +322,14 @@ function WL.CreateEntryForSet( setId, setData )
     local itemLink = WL.buildItemLink(itemId)
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     --Remove the gender stuff from the setname
-    local setName = zo_strformat("<<C:1>>", setData.name)
+    local clientLang = WL.clientLang
+    local setName = setData.names[clientLang]
 --Table entry for the ZO_ScrollList data
 	return({
         type        = WL.sortType,
 		setId       = setId,
 		name        = setName,
+        names       = setData.names,
 		itemLink    = itemLink,
 		bonuses     = numBonuses
 	})
@@ -979,6 +981,9 @@ function WL.init(_, addonName)
 
     --Unregister for on loaded event
     EVENT_MANAGER:UnregisterForEvent(addonVars.addonName, EVENT_ADD_ON_LOADED)
+
+    --The client language
+    WL.clientLang = GetCVar("language.2")
 
     --Load the settings
     WL.loadSettings()

@@ -1412,7 +1412,7 @@ function WL.GetAllSetData()
     local allSetIds             = libSets.GetAllSetIds()
     local setCount = 0
     if allSetIds and setItemIdsPreloaded and setNamesPreloaded then
-        local clientLang = GetCVar("language.2")
+        --local clientLang = WL.clientLang
         local setsData = WL.accData.sets
         --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
         for setId, _ in pairs(allSetIds) do
@@ -1424,10 +1424,10 @@ function WL.GetAllSetData()
                 setNamesAdded = true
                 local setNames = setNamesPreloaded[setId]
                 setsData[setId].names = setNames
-                if setNames[clientLang] ~= nil then
-                    setsData[setId].name = setNames[clientLang]
-                    WL.setNames[setNames[clientLang]] = true
-                end
+                --if setNames[clientLang] ~= nil then
+                --    setsData[setId].name = setNames[clientLang]
+                --    WL.setNames[setNames[clientLang]] = true
+                --end
             end
             --Add the itemIds of the set
             if setItemIdsPreloaded[setId] ~= nil then
