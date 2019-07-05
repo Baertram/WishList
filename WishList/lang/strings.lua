@@ -166,6 +166,10 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT              = "Show a center screen announcement message in addition to the chat message",
     WISHLIST_LAM_ITEM_FOUND_TEXT                    = "Looted item message",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT                 = "Specify the message text which will appear in the chat and (if enabled) at the center screen announcement, if an item on your " .. GetString(WISHLIST_TITLE) .. " was looted.\nLeve the edit field empty to show a default loot message.\n\nYou can use the following placeholders in your message, which will be replaced with the looted item information:\n<<1>>    Name (link)\n<<2>>  Looted by\n<<3>>   Trait\n<<4>>  Quality\n<<5>>  Level\n<<6>>  Set name",
+
+    WISHLIST_LAM_FORMAT_OPTIONS                     = "Output format",
+    WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set name languages",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character)",
 }
 WL.stringsEN = strings
 

@@ -165,6 +165,10 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT = "Zeige die Loot Benachrichtigung, zusätzlich zum Chat Text, auch als Bildschirm Nachricht an.",
     WISHLIST_LAM_ITEM_FOUND_TEXT = "Nachrichtentext beim Looten",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT = "Spezifiziere den Nachrichtentext, welcher beim Looten eines Gegenstandes von deiner " .. GetString(WISHLIST_TITLE) .. " im Chat, und falls aktiviert auch in der Bildschirmnachricht, angezeigt werden soll.\nLasse das Editfeld leer um eine Standard Loot Nachricht anzuzeigen.\n\nDu kannst die folgenden Platzhalter in dem Text verwenden, welche dann mit den Daten aus dem gelooteten Gegenstand ersetzt werden:\n<<1>>    Name (Link)\n<<2>>  Gelooted von\n<<3>>   Eigenschaft\n<<4>>  Qualität\n<<5>>  Level\n<<6>>  Set Name",
+
+    WISHLIST_LAM_FORMAT_OPTIONS                     = "Ausgabe Format",
+    WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set Name Sprache",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Aktiviere die Set Name Sprachen welche in der " .. GetString(WISHLIST_TITLE) .. " (mit einem / Zeichen getrennt) angezeigt werden sollen",
 }
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 setmetatable(strings, {__index = WL.stringsEN})

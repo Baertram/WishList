@@ -75,6 +75,13 @@ WL.defaultSettings = {
     useItemFoundCharacterName            = true,
     useItemFoundCSA                      = true,
     itemFoundText                        = GetString(WISHLIST_LOOT_MSG_STANDARD),
+    useLanguageForSetNames               = {
+        ["de"] = false,
+        ["en"] = true,
+        ["fr"] = false,
+        ["ru"] = false,
+        ["jp"] = false,
+    },
 }
 --SavedVars
 WL.data = {}

@@ -455,6 +455,8 @@ function WishListWindow:SetupItemRow( control, data )
     local nameColumnValue = ""
     if data.names ~= nil then
         nameColumnValue = data.names[clientLang]
+        --For each enabled language in the WishList "LibSets" settings:
+        --Add the set name in this language
     elseif data.name ~= nil then
         nameColumnValue = data.name
     end
