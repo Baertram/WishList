@@ -455,14 +455,15 @@ function WishListWindow:SetupItemRow( control, data )
     local nameColumnValue = ""
     if data.names ~= nil then
         --Get the settings for the setName output
+        local langsAdded = 0
         local libSets = WL.LibSets
         local setNameOutputSettings = WL.data.useLanguageForSetNames
         if not libSets or setNameOutputSettings == nil then
             nameColumnValue = data.names[clientLang]
+            langsAdded = langsAdded +1
         else
             --First add the client language if supported
             local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
-            local langsAdded = 0
             local langsAlreadyAdded = {}
             local langToAddFirst = "en"
             if clientLangIsSupportedInLibSets then
@@ -487,8 +488,19 @@ function WishListWindow:SetupItemRow( control, data )
                 end
             end
         end
+        --Add all the setNames in the different languages to the data table as entry "name" so the search box can search all the languages
+        data.name = nameColumnValue
+        --Set the width of the label column depending on the languages added
+--WL._nameColumns = WL._nameColumns or {}
+--table.insert(WL._nameColumns, nameColumn)
+        local columnWidthAdd = 0
+        if langsAdded > 1 then
+            columnWidthAdd = langsAdded * 125
+        end
+        nameColumn:SetDimensions(200 + columnWidthAdd, 30)
     elseif data.name ~= nil then
         nameColumnValue = data.name
+        nameColumn:SetDimensions(200, 30)
     end
     nameColumn:SetText(nameColumnValue)
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
