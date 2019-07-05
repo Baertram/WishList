@@ -1,0 +1,53 @@
+; This Add-on is not created by, affiliated with or sponsored by ZeniMax Media
+; Inc. or its affiliates. The Elder Scrolls and related logos are registered
+; trademarks or trademarks of ZeniMax Media Inc. in the United States and/or
+; other countries. All rights reserved.
+; https://account.elderscrollsonline.com/add-on-terms
+
+## Title: Wish List
+## Description: Add armor sets you wish to farm to a list, get notified when it drops and who looted it
+## Author: Meai & Baertram
+## Version: 2.4
+## AddOnVersion: 240
+## APIVersion: 100027 100028
+## SavedVariables: WishList_Data
+## DependsOn: LibCustomMenu LibAddonMenu-2.0 LibMainMenu-2.0
+## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver
+
+##Libraries
+##Libraries are not included anymore. For further details please read the addon comments at http://www.esoui.com/downloads/info1641-WishList.html
+
+##Localization
+lang/strings.lua
+lang/$(language).lua
+
+##Constant values
+src/constants.lua
+
+##Data
+data/WishListDataTypes.lua
+
+##Functions
+src/functions.lua
+
+##Addon source
+src/settingsmenu.lua
+WishList.lua
+src/WishListWindow.lua
+
+##Dialogs
+src/dialog/dialogs.lua
+src/dialog/WishListAddItemDialog.xml
+src/dialog/WishListRemoveItemDialog.xml
+src/dialog/WishListRemoveAllItemsDialog.xml
+src/dialog/WishListReloadItemsDialog.xml
+src/dialog/WishListChooseCharDialog.xml
+src/dialog/WishListClearHistoryDialog.xml
+
+##XML
+src/xml/WishListWindow.xml
+
+
+## Keybindings
+bindings/Bindings.lua
+bindings/Bindings.xml
