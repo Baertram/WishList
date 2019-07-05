@@ -454,9 +454,39 @@ function WishListWindow:SetupItemRow( control, data )
     nameColumn.normalColor = ZO_DEFAULT_TEXT
     local nameColumnValue = ""
     if data.names ~= nil then
-        nameColumnValue = data.names[clientLang]
-        --For each enabled language in the WishList "LibSets" settings:
-        --Add the set name in this language
+        --Get the settings for the setName output
+        local libSets = WL.LibSets
+        local setNameOutputSettings = WL.data.useLanguageForSetNames
+        if not libSets or setNameOutputSettings == nil then
+            nameColumnValue = data.names[clientLang]
+        else
+            --First add the client language if supported
+            local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
+            local langsAdded = 0
+            local langsAlreadyAdded = {}
+            local langToAddFirst = "en"
+            if clientLangIsSupportedInLibSets then
+                langToAddFirst = clientLang
+            end
+            nameColumnValue = data.names[langToAddFirst]
+            langsAlreadyAdded[langToAddFirst] = true
+            langsAdded = langsAdded +1
+            --For each enabled language in the WishList "LibSets setName output" settings (which is not the already added
+            --client language or English)
+            for languageToAddToSetName, isEnabled in pairs(setNameOutputSettings) do
+                if isEnabled and not langsAlreadyAdded[languageToAddToSetName] then
+                    if langsAdded == 0 then
+                        --Add the set name in this language without a seperator character
+                        nameColumnValue = nameColumnValue .. data.names[languageToAddToSetName]
+                    else
+                        --Add the set name in this language with a seperator character /
+                        nameColumnValue = nameColumnValue .. " / " .. data.names[languageToAddToSetName]
+                    end
+                    --Increase the counter
+                    langsAdded = langsAdded +1
+                end
+            end
+        end
     elseif data.name ~= nil then
         nameColumnValue = data.name
     end

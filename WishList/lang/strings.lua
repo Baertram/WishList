@@ -169,7 +169,7 @@ local strings = {
 
     WISHLIST_LAM_FORMAT_OPTIONS                     = "Output format",
     WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set name languages",
-    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character)",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character). The current client language will be shown first (If supported. Else English is shown first).",
 }
 WL.stringsEN = strings
 

@@ -168,7 +168,7 @@ local strings = {
 
     WISHLIST_LAM_FORMAT_OPTIONS                     = "Ausgabe Format",
     WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set Name Sprache",
-    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Aktiviere die Set Name Sprachen welche in der " .. GetString(WISHLIST_TITLE) .. " (mit einem / Zeichen getrennt) angezeigt werden sollen",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Aktiviere die Set Name Sprachen welche in der " .. GetString(WISHLIST_TITLE) .. " (mit einem / Zeichen getrennt) angezeigt werden sollen. Die aktuelle Spiel Sprache wird zuerst angezeigt (Wenn unterstützt. Ansonsten wird English zuerst angezeigt).",
 }
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 setmetatable(strings, {__index = WL.stringsEN})
