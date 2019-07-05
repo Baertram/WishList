@@ -92,7 +92,7 @@ local strings = {
 
 
     WISHLIST_DIALOG_RELOAD_ITEMS = "Gegenstände neu laden",
-    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände neu einlesen!\nKann einige Minuten dauern + wir das Spiel auslasten. BIST DU SICHER?",
+    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände über die Bibliothek \"LibSets\" neu einlesen!\nDies sollte nicht länger als 10 Sekunden benötigen.",
     WISHLIST_LINK_ITEM_TO_CHAT = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER = "\"<<C:1>>\" anflüstern und nach <<2>> fragen",
     WISHLIST_WHISPER_RECEIVER_QUESTION = "Hallo <<C:1>>, du hast diesen Gegenstand gefunden: <<2>>. Ich suche danach und wollte dich fragen, ob du mir diesen gibst? Danke sehr.",

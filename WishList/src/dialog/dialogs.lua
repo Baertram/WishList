@@ -477,7 +477,9 @@ function WL.WishListWindowReloadItemsInitialize(control)
                 keybind = "DIALOG_PRIMARY",
                 callback = function(dialog)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
-                    WL.LoadSets()
+                    --Disabled with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
+                    --WL.LoadSets()
+                    WL.GetAllSetData()
                 end,
             },
             {

@@ -12,7 +12,7 @@ WL.comingFromSortScrollListSetupFunction = false
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.4
+WL.addonVars.addonRealVersion		= 2.5
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
@@ -26,6 +26,7 @@ WL.addonMenu = LibAddonMenu2
 if WL.addonMenu == nil and LibStub then LibStub:GetLibrary("LibAddonMenu-2.0") end
 WL.LMM2 = LibMainMenu2
 if WL.LMM2 == nil and LibStub then LibStub:GetLibrary("LibMainMenu-2.0") end
+WL.LibSets = LibSets
 
 WL.CurrentState = WISHLIST_TAB_STATE_NO_SETS 	    --1=NoSets, 2=Loading, 3=SetsLoaded
 WL.CurrentTab   = WISHLIST_TAB_SEARCH               --1=Search, 2=WishList
@@ -45,6 +46,7 @@ WL.defaultAccSettings = {
     itemCount = 0,
     use24hFormat = false,
     useCustomDateFormat = "",
+    setsLastScanned = 0,
 }
 --SavedVars defaults
 WL.defaultSettings = {
@@ -907,17 +909,17 @@ function WL.loadSettings()
         WL.defaultAccSettings.use24hFormat = true
     end
     --Load the acocunt wide settings (Sets, save mode of SavedVars, etc.)
-    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings)
-
+    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
+    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings, nil, nil)
     --Check, by help of basic version 999 settings, if the settings should be loaded for each character or account wide
     --Use the current addon version to read the settings now
     if (WL.accData.saveMode == 1) then
         --Load the character user settings
-        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings)
+        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil)
     --------------------------------------------------------------------------------------------------------------------
     else
         --Load the account wide user settings
-        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings)
+        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil, nil)
     end
 end
 

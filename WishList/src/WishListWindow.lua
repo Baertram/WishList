@@ -167,28 +167,29 @@ function WishListWindow:UpdateUI(state)
 
 --......................................................................................................................
         --Sets are not loaded yet -> Show load button
-		if WL.CurrentState == WISHLIST_TAB_STATE_NO_SETS then
+        if WL.CurrentState == WISHLIST_TAB_STATE_NO_SETS then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) ..  " - " .. zo_strformat(GetString(WISHLIST_SETS_LOADED), 0))
 
-			--No Sets Loaded
+            --No Sets Loaded
             self.setsLoading = false
             --Disable the Wishlist tab button
             WishListFrameTabList:SetEnabled(false)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(false)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(false)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(false)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(false)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(true)
+            --Sets Loaded UI
+            self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
+            self.frame:GetNamedChild("Reload"):SetHidden(true)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(true)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
+            self.frame:GetNamedChild("Search"):SetHidden(true)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
-			self.frame:GetNamedChild("List"):SetHidden(true)
-			self.searchBox:SetHidden(true)
+            self.frame:GetNamedChild("List"):SetHidden(true)
+            self.searchBox:SetHidden(true)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
@@ -201,32 +202,33 @@ function WishListWindow:UpdateUI(state)
             --Reset the sortGroupHeader
             resetSortGroupHeader(WL.CurrentTab)
 
-			--Sets Loading UI
-			self.labelLoadingSets:SetHidden(true)
+            --Sets Loading UI
+            self.labelLoadingSets:SetHidden(true)
 
---......................................................................................................................
-        --Sets are currently loading -> Update label with count of sets & items
-		elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADING then
+            --......................................................................................................................
+            --Sets are currently loading -> Update label with count of sets & items
+        elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADING then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_LOADING_SETS))
-			--Sets Loading
+            --Sets Loading
             self.setsLoading = true
             --Disable the Wishlist tab button
             WishListFrameTabList:SetEnabled(false)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(true)
+            --Sets Loaded UI
+            self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
+            self.frame:GetNamedChild("Reload"):SetHidden(true)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(true)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
+            self.frame:GetNamedChild("Search"):SetHidden(true)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
-			self.frame:GetNamedChild("List"):SetHidden(true)
-			self.searchBox:SetHidden(true)
+            self.frame:GetNamedChild("List"):SetHidden(true)
+            self.searchBox:SetHidden(true)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
@@ -237,31 +239,36 @@ function WishListWindow:UpdateUI(state)
             self.headerLocality:SetHidden(true)
 
             --Sets Loading UI
-			self.labelLoadingSets:SetHidden(false)
---......................................................................................................................
-        --Sets are loaded -> Show them in list
+            self.labelLoadingSets:SetHidden(false)
+            --......................................................................................................................
+            --Sets are loaded -> Show them in list
         elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADED then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE))
 
-			--Sets Loaded
+            --Sets Loaded
             self.setsLoading = false
             --Enable the Wishlist tab button again
             WishListFrameTabList:SetEnabled(true)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(false)
+            --Sets Loaded UI
+            if WL.accData.setsLastScanned ~= nil and WL.accData.setsLastScanned > 0 then
+                local setsLastScanned = WL.getDateTimeFormatted(WL.accData.setsLastScanned)
+                self.frame:GetNamedChild("SetsLastScanned"):SetText(setsLastScanned)
+                self.frame:GetNamedChild("SetsLastScanned"):SetHidden(false)
+            end
+            self.frame:GetNamedChild("Reload"):SetHidden(false)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(false)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(false)
+            self.frame:GetNamedChild("Search"):SetHidden(false)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(false)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
 
-			self.frame:GetNamedChild("Headers"):SetHidden(false)
+            self.frame:GetNamedChild("Headers"):SetHidden(false)
             self.headerDate:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
@@ -269,18 +276,18 @@ function WishListWindow:UpdateUI(state)
             self.headerUsername:SetHidden(true)
             self.headerLocality:SetHidden(true)
 
-			self.frame:GetNamedChild("List"):SetHidden(false)
+            self.frame:GetNamedChild("List"):SetHidden(false)
             WL.initializeSearchDropdown(self, WL.CurrentTab, "set")
-			self.searchBox:SetHidden(false)
+            self.searchBox:SetHidden(false)
 
-			--Sets Loading UI
-			self.labelLoadingSets:SetHidden(true)
+            --Sets Loading UI
+            self.labelLoadingSets:SetHidden(true)
 
             --Reset the sortGroupHeader
             resetSortGroupHeader(WL.CurrentTab)
 
-			self:RefreshData()
-		end
+            self:RefreshData()
+        end
 
 ------------------------------------------------------------------------------------------------------------------------
     --WISHLIST tab
@@ -299,6 +306,7 @@ function WishListWindow:UpdateUI(state)
 		self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
 		--Sets Loaded UI
+        self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
 		self.frame:GetNamedChild("Reload"):SetHidden(true)
         self.frame:GetNamedChild("RemoveAll"):SetHidden(false)
         self.frame:GetNamedChild("CopyWishList"):SetHidden(false)
@@ -346,6 +354,7 @@ function WishListWindow:UpdateUI(state)
         self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
         --Sets Loaded UI
+        self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
         self.frame:GetNamedChild("Reload"):SetHidden(true)
         --WL.updateRemoveAllButon(self.frame:GetNamedChild("RemoveAll"), self.frame:GetNamedChild("CopyWishList"))
         self.frame:GetNamedChild("RemoveAll"):SetHidden(true)

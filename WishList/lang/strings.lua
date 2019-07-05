@@ -101,7 +101,7 @@ local strings = {
     WISHLIST_NO_ITEMS_COPIED                    = "No items copied, maybe all items are already on the target's " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_DIALOG_RELOAD_ITEMS             = "Reload items",
-    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "THIS WILL RELOAD ALL SET ITEMS!\nCan take some minutes and will lag your client. ARE YOU SURE?",
+    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "THIS WILL RELOAD ALL SET ITEMS using library \'LibSets\'!\nShouldn't take longer than 10 seconds.",
     WISHLIST_LINK_ITEM_TO_CHAT               = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER                = "Whisper \"<<C:1>>\" and ask for <<2>>",
     WISHLIST_WHISPER_RECEIVER_QUESTION       = "Hey <<C:1>>, you have found this item: <<2>>. I'm searching for it and would like to ask if you will trade it to me? Thank you.",

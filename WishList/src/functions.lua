@@ -453,7 +453,8 @@ end
 ------------------------------------------------
 function WL.buildItemLink(itemId)
     if itemId == nil then return nil end
-    return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, 364, ITEMSTYLE_NONE, 0, 10000)
+    --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, 364, ITEMSTYLE_NONE, 0, 10000)
+    return WL.LibSets.buildItemLink(itemId)
 end
 
 function WL.parseLink(inputstr, sep)
@@ -1043,11 +1044,12 @@ function WL.GetSetBonuses( itemLink, numBonuses )
     return(bonuses)
 end
 
+--Returns the first found itemId from a setId
 function WL.GetFirstSetItem(setId)
     if setId == nil then return nil end
     local setData = WL.accData.sets[setId]
-    for itemId, _ in pairs(setData) do
-        if type(itemId) == "number" then
+    for itemId, value in pairs(setData) do
+        if value == true and type(itemId) == "number" then
             return itemId
         end
     end
@@ -1260,11 +1262,12 @@ local function showTotalItemsLoaded()
     WL.CurrentTab = WISHLIST_TAB_SEARCH
     WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADED) -- Update UI, sets currently loading
     d("[" .. GetString(WISHLIST_TITLE) .."]")
-    d("-> "..GetString(WISHLIST_TOTAL_SETS)..WL.accData.setCount)
-    d("-> "..GetString(WISHLIST_TOTAL_SETS_ITEMS)..WL.accData.itemCount)
+    d("-> "..GetString(WISHLIST_TOTAL_SETS)..tostring(WL.accData.setCount))
+    d("-> "..GetString(WISHLIST_TOTAL_SETS_ITEMS)..tostring(WL.accData.itemCount))
     d("<<=============================================<<")
 end
 
+--[[
 function WL.LoadSets()
     --Hide Controls
     WL.window.labelNoSets:SetHidden(true)
@@ -1372,6 +1375,79 @@ function WL.UpdateSetCount()
     d(">" .. setsFoundText)
     WL.window.labelLoadingSets:SetText(setsFoundText)
 end
+]]
+
+--New with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
+function WL.GetAllSetData()
+    --Hide Controls
+    WL.window.labelNoSets:SetHidden(true)
+    WL.window.buttonLoadSets:SetHidden(true)
+
+    --Show Loading controls
+    WL.window.labelLoadingSets:SetHidden(false)
+    d(">>=============================================>>")
+    d("[" .. GetString(WISHLIST_TITLE) .."]")
+    d(GetString(WISHLIST_LOADING_SETS))
+
+    --Update UI, no sets loaded yet -> Beginning to load sets
+    WL.CurrentTab = WISHLIST_TAB_SEARCH
+    WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADING)
+
+    --Clear all set data
+    WL.accData.sets = {}
+    WL.accData.setCount = 0
+    WL.accData.itemCount = 0
+
+    --Clear the setCount variables
+    WL.setNames = {}
+
+    --Get all sets using LibSets
+    if WL.LibSets == nil then WL.LibSets = LibSets end
+    if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
+    local libSets = WL.LibSets
+    local setsDataPreloaded = {}
+    setsDataPreloaded = libSets.setDataPreloaded
+    local setItemIdsPreloaded   = setsDataPreloaded["setItemIds"]
+    local setNamesPreloaded     = setsDataPreloaded["setNames"]
+    local allSetIds             = libSets.GetAllSetIds()
+    local setCount = 0
+    if allSetIds and setItemIdsPreloaded and setNamesPreloaded then
+        local clientLang = GetCVar("language.2")
+        local setsData = WL.accData.sets
+        --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
+        for setId, _ in pairs(allSetIds) do
+            local setNamesAdded = false
+            local setItemIdsAdded = false
+            setsData[setId] = {}
+            --Add set names and client language name
+            if setNamesPreloaded[setId] ~= nil then
+                setNamesAdded = true
+                local setNames = setNamesPreloaded[setId]
+                setsData[setId].names = setNames
+                if setNames[clientLang] ~= nil then
+                    setsData[setId].name = setNames[clientLang]
+                    WL.setNames[setNames[clientLang]] = true
+                end
+            end
+            --Add the itemIds of the set
+            if setItemIdsPreloaded[setId] ~= nil then
+                for setItemId, _ in pairs(setItemIdsPreloaded[setId]) do
+                    setsData[setId][setItemId] = true
+                    WL.accData.itemCount = WL.accData.itemCount + 1
+                    setItemIdsAdded = true
+                end
+            end
+            if setNamesAdded or setItemIdsAdded then
+                setCount = setCount + 1
+            end
+        end
+        --Update the sets count
+        WL.accData.setCount = setCount
+        WL.accData.setsLastScanned = GetTimeStamp()
+    end
+    showTotalItemsLoaded()
+end
+
 
 ------------------------------------------------
 --- Wishlist keybinding functions
