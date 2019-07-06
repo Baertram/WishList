@@ -1202,6 +1202,7 @@ function WL.showContextMenu(control, button, upInside)
                     username = control.data.username
                 end
             end
+            itemLink = data.itemLink
             if button == MOUSE_BUTTON_INDEX_LEFT then
                 if username ~= nil and username ~= "" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
                     StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER_QUESTION), username, itemLink))
@@ -1211,7 +1212,6 @@ function WL.showContextMenu(control, button, upInside)
                     ClearMenu()
                     data = control.data
                     setName = data.name
-                    itemLink = data.itemLink
                     local dateAndTime = WL.getDateTimeFormatted(data.timestamp)
                     local armorOrWeaponType = ""
                     if data.itemType == ITEMTYPE_WEAPON then
