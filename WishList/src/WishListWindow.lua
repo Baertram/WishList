@@ -447,62 +447,15 @@ end
 function WishListWindow:SetupItemRow( control, data )
     if WL.comingFromSortScrollListSetupFunction then return end
     local clientLang = WL.clientLang
---d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
+    --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
 
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
     local nameColumnValue = ""
-    if data.names ~= nil then
-        --Get the settings for the setName output
-        local langsAdded = 0
-        local libSets = WL.LibSets
-        local setNameOutputSettings = WL.data.useLanguageForSetNames
-        if not libSets or setNameOutputSettings == nil then
-            nameColumnValue = data.names[clientLang]
-            langsAdded = langsAdded +1
-        else
-            --First add the client language if supported
-            local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
-            local langsAlreadyAdded = {}
-            local langToAddFirst = "en"
-            if clientLangIsSupportedInLibSets then
-                langToAddFirst = clientLang
-            end
-            nameColumnValue = data.names[langToAddFirst]
-            langsAlreadyAdded[langToAddFirst] = true
-            langsAdded = langsAdded +1
-            --For each enabled language in the WishList "LibSets setName output" settings (which is not the already added
-            --client language or English)
-            for languageToAddToSetName, isEnabled in pairs(setNameOutputSettings) do
-                if isEnabled and not langsAlreadyAdded[languageToAddToSetName] then
-                    if langsAdded == 0 then
-                        --Add the set name in this language without a seperator character
-                        nameColumnValue = nameColumnValue .. data.names[languageToAddToSetName]
-                    else
-                        --Add the set name in this language with a seperator character /
-                        nameColumnValue = nameColumnValue .. " / " .. data.names[languageToAddToSetName]
-                    end
-                    --Increase the counter
-                    langsAdded = langsAdded +1
-                end
-            end
-        end
-        --Add all the setNames in the different languages to the data table as entry "name" so the search box can search all the languages
-        data.name = nameColumnValue
-        --Set the width of the label column depending on the languages added
---WL._nameColumns = WL._nameColumns or {}
---table.insert(WL._nameColumns, nameColumn)
-        local columnWidthAdd = 0
-        if langsAdded > 1 then
-            columnWidthAdd = langsAdded * 125
-        end
-        nameColumn:SetDimensions(200 + columnWidthAdd, 30)
-    elseif data.name ~= nil then
-        nameColumnValue = data.name
-        nameColumn:SetDimensions(200, 30)
-    end
-    nameColumn:SetText(nameColumnValue)
+    if not data.columnWidth then data.columnWidth = 200 end
+    nameColumn:SetDimensions(data.columnWidth, 30)
+    nameColumn:SetText(data.name)
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
     local slotColumn = control:GetNamedChild("Slot")
     local traitColumn = control:GetNamedChild("Trait")

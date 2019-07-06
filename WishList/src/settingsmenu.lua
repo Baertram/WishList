@@ -100,8 +100,7 @@ function WL.buildAddonMenu()
                 local defaultSettingsCB
                 getFunc = function() return settings.useLanguageForSetNames[langStrVarSorted] end
                 setFunc = function(value) WL.data.useLanguageForSetNames[langStrVarSorted] = value
-                    if value == true then
-                    end
+                    WL.preventerVars.runSetNameLanguageChecks = true
                 end
                 defaultSettingsCB     = function()
                     local defValue

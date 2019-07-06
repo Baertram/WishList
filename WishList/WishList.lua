@@ -96,6 +96,7 @@ WL.otherAddons.LazyWritCreatorActive = false
 WL.preventerVars = {}
 WL.preventerVars.addonMenuBuild = false
 WL.preventerVars.writCreatorAutoLootBoxesActive = false
+WL.preventerVars.runSetNameLanguageChecks = false
 
 ------------------------------------------------
 --- Event Handlers
@@ -325,6 +326,67 @@ end
 ------------------------------------------------
 --- Wishlist - ZO_SortFilterList entry creation
 ------------------------------------------------
+
+--Check which language should be added first to the set name column (client language or standard language EN)
+-->This function should only be run once after reloadui, and once after the settings were changed (See variable WL.preventerVars.runSetNameLanguageChecks)
+local function checkLanguageToAddFirst()
+    --d("[WishList]checkLanguageToAddFirst, WL.langToAddFirst: " ..tostring(WL.langToAddFirst))
+    if not WL.preventerVars.runSetNameLanguageChecks then return WL.langToAddFirst end
+    --Checks which language should be added first to the setName output
+    local clientLang = WL.clientLang
+    local setNameOutputSettings = WL.data.useLanguageForSetNames
+    local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
+    local langToAddFirst = "en"
+    --Check if the client language is disabled in the settings for the setName
+    local clientLangIsEnabledInSetNameSettings = setNameOutputSettings[clientLang] or false
+    --Check if all languages are disabled in the settings for the setNames
+    local fallbackLangEnabledInSetNameSettings = false
+    local otherNonFallbackLangEnabledInSetNameSettings = false
+    local allLanguagesDisabledInSetNameSettings = true
+    local doNotAddFirstLanguage = false
+    for langToCheck, isEnabledCheck in pairs(setNameOutputSettings) do
+        --Language is enabled?
+        if isEnabledCheck then
+            allLanguagesDisabledInSetNameSettings = false
+            --English language is enabled in the settings?
+            if langToCheck == langToAddFirst then
+                fallbackLangEnabledInSetNameSettings = true
+            elseif langToCheck ~= clientLang then
+                otherNonFallbackLangEnabledInSetNameSettings = true
+            end
+        end
+    end
+    --All languages are disabled in the settings of the setName
+    if allLanguagesDisabledInSetNameSettings then
+        --Client language is not supported within LibSets. Then use the default language "en"
+        --Client language is supported within LibSets? Then add it as first language
+        if clientLangIsSupportedInLibSets then
+            langToAddFirst = clientLang
+        --else --Client language is not supported, so use the fallback language
+        end
+    --Not all languages are disabled in the settings of the setName
+    else
+        --The client language is supported within LibSets and the client language is enabled in the settings for the setName output:
+        --Then add it as first language
+        if clientLangIsSupportedInLibSets and clientLangIsEnabledInSetNameSettings then
+            langToAddFirst = clientLang
+        --The client language is not supported within LibSets or the client language is not enabled in the settings for the setName output,
+        --and the fallback language is not enabled in the settings of the setName, but another language is enabled
+        --Then add it as first language
+        elseif (not clientLangIsSupportedInLibSets or not clientLangIsEnabledInSetNameSettings) and
+                (not fallbackLangEnabledInSetNameSettings and otherNonFallbackLangEnabledInSetNameSettings) then
+            --Check if the fallback language "en" is not enabled in the settings of the setName, but another language is enabled.
+            --Then do not add the fallback language "en" but only the enabled language
+            doNotAddFirstLanguage = true
+        end
+    end
+    --d(">doNotAddFirstLanguage: " .. tostring(doNotAddFirstLanguage) .. ", langToAddFirst: " .. tostring(langToAddFirst) .. "-> clientLang: " ..tostring(clientLang)..", supported: " ..tostring(clientLangIsSupportedInLibSets)..", enabled: " ..tostring(clientLangIsEnabledInSetNameSettings) .. ", allDisabled: " ..tostring(allLanguagesDisabledInSetNameSettings))
+    if doNotAddFirstLanguage then langToAddFirst = nil end
+    WL.preventerVars.runSetNameLanguageChecks = false
+    WL.langToAddFirst = langToAddFirst
+    return langToAddFirst
+end
+
 --ZO_SortScrollList - Item for the sets tab's list
 function WL.CreateEntryForSet( setId, setData )
 	--Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
@@ -336,13 +398,52 @@ function WL.CreateEntryForSet( setId, setData )
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     --Remove the gender stuff from the setname
     local clientLang = WL.clientLang
-    local setName = setData.names[clientLang]
+    local nameColumnValue = ""
+    --Get the settings for the setName output
+    local clientLangSetName = setData.names[clientLang]
+    local langsAdded = 0
+    local setNameOutputSettings = WL.data.useLanguageForSetNames
+    if not libSets or setNameOutputSettings == nil then
+        nameColumnValue = clientLangSetName
+        langsAdded = langsAdded +1
+    else
+        local langsAlreadyAdded = {}
+        --Which language should be added first to the setName column?
+        local langToAddFirst = checkLanguageToAddFirst()
+        if langToAddFirst ~= nil then
+            nameColumnValue = setData.names[langToAddFirst]
+            langsAlreadyAdded[langToAddFirst] = true
+            langsAdded = langsAdded +1
+        end
+        --For each enabled language in the WishList "LibSets setName output" settings (which is not the already added
+        --client language or English)
+        for languageToAddToSetName, isEnabled in pairs(setNameOutputSettings) do
+            if isEnabled and not langsAlreadyAdded[languageToAddToSetName] then
+                if langsAdded == 0 then
+                    --Add the set name in this language without a seperator character
+                    nameColumnValue = nameColumnValue .. setData.names[languageToAddToSetName]
+                else
+                    --Add the set name in this language with a seperator character /
+                    nameColumnValue = nameColumnValue .. " / " .. setData.names[languageToAddToSetName]
+                end
+                --Increase the counter
+                langsAdded = langsAdded +1
+            end
+        end
+    end
+    --Set the width of the label column depending on the languages added
+    local columnWidthAdd = 0
+    if langsAdded > 1 then
+        columnWidthAdd = langsAdded * 125
+    end
+
 --Table entry for the ZO_ScrollList data
 	return({
         type        = WL.sortType,
 		setId       = setId,
-		--name        = setName,
+		name        = nameColumnValue,
         names       = setData.names,
+        columnWidth = 200 + columnWidthAdd,
 		itemLink    = itemLink,
 		bonuses     = numBonuses
 	})
@@ -997,6 +1098,7 @@ function WL.init(_, addonName)
 
     --The client language
     WL.clientLang = GetCVar("language.2")
+    WL.preventerVars.runSetNameLanguageChecks = true
 
     --Load the settings
     WL.loadSettings()
