@@ -717,7 +717,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     local isAlreadyOnWishList = false
     if itemLink == nil and itemId == nil then return false, nil, nil end
     if itemLink == nil then
-        itemLink = WL.buildItemLink(itemId)
+        itemLink = WL.buildItemLink(itemId, qualityWL)
     end
     if itemId == nil then
         itemId = WL.GetItemIDFromLink(itemLink)
@@ -914,7 +914,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
         local skipItem = false
         if type(setItemId) == "number" then
             --Build the itemlink
-            local itemLink = WL.buildItemLink(setItemId)
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) -- Always use the legendary item for the searches
             --d(">"..itemLink)
             --Get the itemtype of the item
             local itemType = GetItemLinkItemType(itemLink)
@@ -1018,7 +1018,7 @@ function WL.copyWishList(fromCharData, toCharId)
     local cnt = 0
     for i = 1, #wishList do
         local itm = wishList[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -1238,6 +1238,7 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                     elseif isItemAlreadyOnWishList then
                         customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_REMOVE)
                     end
+                    local qualityWL = GetItemLinkQuality(link) + WL.ESOquality2WLqualityAdd
                     AddCustomMenuItem(customMenuEntryAddOrRemoveWishList, function()
                         --Show the dialog to choose the character where the item should be added now
                         --WL.addItemFromLinkHandlerToWishList(link, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
@@ -1249,7 +1250,9 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                         data.setName    = setNameStr
                         data.numBonuses = numBonuses
                         data.setId      = setId
+                        data.quality    = qualityWL
                         if isShiftKeyPressed or not isItemAlreadyOnWishList then
+                            --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
                             WL.ShowChooseChar(false, data, false)
                         else
                             WL.showRemoveItem(data, false, false)

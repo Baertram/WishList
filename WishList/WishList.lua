@@ -399,7 +399,7 @@ function WL.CreateEntryForSet( setId, setData )
 	local itemId = WL.GetFirstSetItem(setId)
     if itemId == nil then return nil end
 	--local bonuses = setsData[setId][1].bonuses
-    local itemLink = WL.buildItemLink(itemId)
+    local itemLink = WL.buildItemLink(itemId, WISHLIST_QUALITY_LEGENDARY) -- Always use the legendary quality for the sets list
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     --Remove the gender stuff from the setname
     local clientLang = WL.clientLang
@@ -456,7 +456,7 @@ end
 
 --ZO_SortFilterList - Item for the WishList tab's list (called within BuildMasterList)
 function WL.CreateEntryForItem(item)
-    local itemLink = WL.buildItemLink(item.id)
+    local itemLink = WL.buildItemLink(item.id, item.quality)
 --d("[WL.CreateEntryForItem] " .. itemLink)
 
 	local setId = item.setId
@@ -493,7 +493,7 @@ end
 
 --ZO_SortFilterList - Item for the History tab's list (called within BuildMasterList)
 function WL.CreateHistoryEntryForItem(item)
-    local itemLink = WL.buildItemLink(item.id)
+    local itemLink = WL.buildItemLink(item.id, item.quality)
 --d("[WL.CreateHistoryEntryForItem] " .. itemLink .. ", timestamp: " .. tostring(item.timestamp))
     local setId = item.setId
     local setName = item.setName
@@ -654,7 +654,7 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
 --d(">item added to history: " .. itemLink)
         if item.timestamp == nil then
@@ -705,7 +705,7 @@ function WishList:RemoveItem(item, charData)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local traitId = item.trait
         local itemTraitText = WL.TraitTypes[traitId]
@@ -737,7 +737,7 @@ function WishList:RemoveHistoryItem(item, charData)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local traitId = item.trait
         local itemTraitText = WL.TraitTypes[traitId]
@@ -808,7 +808,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
             if itm.itemLink ~= nil then
                 itemLink = itm.itemLink
             else
-                itemLink = WL.buildItemLink(itm.id)
+                itemLink = WL.buildItemLink(itm.id, itm.quality)
             end
             local traitId = itm.trait
             local itemTraitText = WL.TraitTypes[traitId]
@@ -837,7 +837,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
         if itm.setId == setId then
-            local itemLink = WL.buildItemLink(itm.id)
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
             if setName == "" then
                 local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
                 --Remove the gender stuff from the setname
@@ -918,7 +918,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             if itm.itemLink ~= nil then
                 itemLink = itm.itemLink
             else
-                itemLink = WL.buildItemLink(itm.id)
+                itemLink = WL.buildItemLink(itm.id, itm.quality)
             end
             local traitId = itm.trait
             local itemTraitText = WL.TraitTypes[traitId]
@@ -946,7 +946,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
     for i = #history, 1, -1 do
         local itm = history[i]
         if itm.setId == setId then
-            local itemLink = WL.buildItemLink(itm.id)
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
             if setName == "" then
                 local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
                 --Remove the gender stuff from the setname
@@ -976,7 +976,7 @@ function WishList:RemoveAllItems(charData)
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -1004,7 +1004,7 @@ function WishList:ClearHistory(charData)
 --d("[WishList:ClearHistory]char: " .. tostring(charNameChat))
     for i = #history, 1, -1 do
         local itm = history[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)

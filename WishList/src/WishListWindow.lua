@@ -503,7 +503,6 @@ function WishListWindow:SetupItemRow( control, data )
         end
         traitColumn:SetText(traitText)
         local qualityText = ""
-d("[WL]SetupItemRow-found quality: " ..tostring(data.quality))
         if data.quality then
             qualityText = WL.quality[data.quality]
         end
@@ -748,7 +747,7 @@ function WishListWindow:FilterScrollList()
                 local wlDataOfCharId = wishListOfCharId[i]
                 local data = {}
                 local itemId = wlDataOfCharId["id"]
-                local itemLink = WL.buildItemLink(itemId)
+                local itemLink = WL.buildItemLink(itemId, wlDataOfCharId["quality"])
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
                 local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(wlDataOfCharId["itemType"], wlDataOfCharId["armorOrWeaponType"], wlDataOfCharId["slot"], wlDataOfCharId["trait"], wlDataOfCharId["quality"])
@@ -808,7 +807,7 @@ function WishListWindow:FilterScrollList()
                 local histDataOfCharId = historyOfCharId[i]
                 local data = {}
                 local itemId = histDataOfCharId["id"]
-                local itemLink = WL.buildItemLink(itemId)
+                local itemLink = WL.buildItemLink(itemId, histDataOfCharId["quality"])
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
                 local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(histDataOfCharId["itemType"], histDataOfCharId["armorOrWeaponType"], histDataOfCharId["slot"], histDataOfCharId["trait"], histDataOfCharId["quality"])

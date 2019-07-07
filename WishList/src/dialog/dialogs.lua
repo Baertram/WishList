@@ -119,7 +119,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 local setsData = WL.accData.sets[WL.currentSetId]
                 for setItemId, _ in pairs(setsData) do
                     if type(setItemId) == "number" then
-                        local itemLink = WL.buildItemLink(setItemId)
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                         local itemType = GetItemLinkItemType(itemLink)
                         local armorOrWeaponType
                         if itemType == ITEMTYPE_ARMOR then
@@ -156,7 +156,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 local setsData = WL.accData.sets[WL.currentSetId]
                 for setItemId, _ in pairs(setsData) do
                     if type(setItemId) == "number" then
-                        local itemLink = WL.buildItemLink(setItemId)
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                         local itemType = GetItemLinkItemType(itemLink)
                         local armorOrWeaponType
                         if itemType == ITEMTYPE_ARMOR then
@@ -194,7 +194,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
                     for setItemId, _ in pairs(setsData) do
                         if type(setItemId) == "number" then
-                            local itemLink = WL.buildItemLink(setItemId)
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                             local itemType = GetItemLinkItemType(itemLink)
                             if itemType == ITEMTYPE_ARMOR then --Armor
                                 local armorOrWeaponType = GetItemLinkArmorType(itemLink)
@@ -213,7 +213,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
                     for setItemId, _ in pairs(setsData) do
                         if type(setItemId) == "number" then
-                            local itemLink = WL.buildItemLink(setItemId)
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                             local itemType = GetItemLinkItemType(itemLink)
                             if itemType == ITEMTYPE_WEAPON then --Weapon
                                 local armorOrWeaponType = GetItemLinkWeaponType(itemLink)
@@ -240,7 +240,7 @@ function WL.WishListWindowAddItemInitialize(control)
             local setsData = WL.accData.sets[WL.currentSetId]
             for setItemId, _ in pairs(setsData) do
                 if type(setItemId) == "number" then
-                    local itemLink = WL.buildItemLink(setItemId)
+                    local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                     local itemType = GetItemLinkItemType(itemLink)
                     if itemTypes[itemType] == nil then
                         itemTypes[itemType] = WL.ItemTypes[itemType]
@@ -330,7 +330,7 @@ function WL.WishListWindowRemoveItemInitialize(control)
                     traitId = GetItemLinkTraitInfo(itemLink)
                 else
                     --Coming from WishList window
-                    itemLink = WL.buildItemLink(WL.CurrentItem.id)
+                    itemLink = WL.buildItemLink(WL.CurrentItem.id, WL.CurrentItem.quality)
                     timeStamp = data.itemData.timestamp
                     dateAndTime = WL.getDateTimeFormatted(timeStamp)
                     itemType = data.itemData.itemType
@@ -648,6 +648,8 @@ function WL.WishListWindowChooseCharInitialize(control)
                 end
             end
 
+            comboQuality:SetHidden(true)
+
             comboChars:SetSortsItems(true)
             comboChars:ClearItems()
             WL.checkCharsData()
@@ -683,13 +685,14 @@ function WL.WishListWindowChooseCharInitialize(control)
             comboChars:SelectItemByIndex(currentChar, true)
 
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
-            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
             if isCopyingWishList then
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
                 charNameText = WL.addCharBrackets(charNameText)
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
             else
+                labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
+                comboQuality:SetHidden(false)
                 if data ~= nil and data.dataForChar ~= nil then
                     local itemLink = data.dataForChar.itemLink
                     descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM), itemLink))
@@ -775,7 +778,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     local allTraitsTraitId = #WL.TraitTypes
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
-            local itemLink = WL.buildItemLink(setItemId, nil) --itemQualityItemLink) --nil: Always use legendary quality -> WISHLIST_QUALITY_LEGENDARY
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
             local itemType = GetItemLinkItemType(itemLink)
             local armorOrWeaponType
             if itemType == ITEMTYPE_ARMOR then

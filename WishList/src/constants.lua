@@ -1,3 +1,6 @@
+WishList = WishList or {}
+local WL = WishList
+
 --Constants
 WISHLIST_SCENE_NAME = "WishListScene"
 --For the ZO_SortList row, the datatpye
@@ -44,6 +47,7 @@ WISHLIST_REMOVE_ITEM_TYPE_TRAIT                         = 6
 WISHLIST_SEARCHDROP_PREFIX= "WISHLIST_SEARCHDROP"
 WISHLIST_CHARSDROP_PREFIX = "WISHLIST_CHARSDROP"
 --Qualities
+WL.ESOquality2WLqualityAdd = 2 --Add this number to the ESO quality retuened by GetItemLinkQuality to get the appropriate WishList quality constant
 WISHLIST_QUALITY_ALL = 1
 WISHLIST_QUALITY_TRASH = 2
 WISHLIST_QUALITY_NORMAL = 3
