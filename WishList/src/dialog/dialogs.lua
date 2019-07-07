@@ -265,7 +265,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 callback = function(dialog)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
                     WL.hideItemLinkTooltip()
-                    local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+                    local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
                     if items ~= nil and #items > 0 then
                         WishList:AddItem(items, selectedCharData)
                     end
