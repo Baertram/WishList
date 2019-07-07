@@ -605,7 +605,8 @@ function WL.WishListWindowChooseCharInitialize(control)
     local labelChars = GetControl(content, "CharsText")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
     local labelQuality = GetControl(content, "QualityText")
-    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
+    local comboQualityControl = content:GetNamedChild("QualityCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(comboQualityControl) --GetControl(content, "QualityCombo")
 
     --Quality Callback
     local callbackQuality = function( comboBox, entryText, entry, selectionChanged ) end
@@ -620,6 +621,7 @@ function WL.WishListWindowChooseCharInitialize(control)
         comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
     end
     comboQuality:SelectItemByIndex(1, true)
+    comboQualityControl:SetHidden(true)
 
     --Chars Callback
     local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
@@ -647,8 +649,6 @@ function WL.WishListWindowChooseCharInitialize(control)
                     charNameToCompare = WL.CurrentCharData.nameClean
                 end
             end
-
-            comboQuality:SetHidden(true)
 
             comboChars:SetSortsItems(true)
             comboChars:ClearItems()
@@ -686,13 +686,14 @@ function WL.WishListWindowChooseCharInitialize(control)
 
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
             if isCopyingWishList then
+                comboQualityControl:SetHidden(true)
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
                 charNameText = WL.addCharBrackets(charNameText)
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
             else
                 labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
-                comboQuality:SetHidden(false)
+                comboQualityControl:SetHidden(false)
                 if data ~= nil and data.dataForChar ~= nil then
                     local itemLink = data.dataForChar.itemLink
                     descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM), itemLink))
