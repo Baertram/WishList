@@ -859,6 +859,72 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     WishList:ReloadItems()
 end
 
+function WishList:ChangeQualityOfItem(item, charData, newQuality)
+    local index = -1
+    local wishList = WL.getWishListSaveVars(charData, "WishList:ChangeQualityOfItem")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local charNameChat = charData.name
+    for i = 1, #wishList do
+        local itm = wishList[i]
+        if itm.id == item.id then
+            index = i
+            break
+        end
+    end
+    if index ~= -1 then
+        local currentWishListSVEntry = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][index]
+        if currentWishListSVEntry ~= nil then
+            currentWishListSVEntry["quality"] = newQuality
+        end
+        local itemLink
+        if item.itemLink ~= nil then
+            itemLink = item.itemLink
+        else
+            itemLink = WL.buildItemLink(item.id, item.quality)
+        end
+        local traitId = item.trait
+        local itemTraitText = WL.TraitTypes[traitId]
+        itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+        d(itemLink.. zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
+    end
+    WishList:ReloadItems()
+end
+
+function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
+    if setId == nil then return false end
+    local wishList = WL.getWishListSaveVars(charData, "WishList:ChangeQualityOfItemsOfSet")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local charNameChat = charData.name
+    local setName = ""
+    local cnt = 0
+    for i = #wishList, 1, -1 do
+        local itm = wishList[i]
+        if itm.setId == setId then
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
+            if setName == "" then
+                local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
+                --Remove the gender stuff from the setname
+                setName = zo_strformat("<<C:1>>", setLocName)
+            end
+            local traitId = itm.trait
+            local itemTraitText = WL.TraitTypes[traitId]
+            itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+            --Update the WishList entry of the current, or the selected char
+            local currentWishListEntryOfSetItem = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][i]
+            if currentWishListEntryOfSetItem ~= nil then
+                d(itemLink..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
+                cnt = cnt +1
+            end
+        end
+    end
+    d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
+    WishList:ReloadItems()
+end
+
 function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
     --d("[WL]RemoveAllItemsWithCriteria")
     if criteria == nil then return false end

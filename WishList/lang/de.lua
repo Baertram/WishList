@@ -56,8 +56,10 @@ local strings = {
 
     WISHLIST_ADDED = " zur " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_REMOVED = " von der " .. GetString(WISHLIST_TITLE) .. " entfernt",
+    WISHLIST_UPDATED = " <<1>> geändert in " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_ADDED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> hinzugefügt zur " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_REMOVED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> entfernt von der " .. GetString(WISHLIST_TITLE),
+    WISHLIST_ITEMS_UPDATED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> geändert in der " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_HISTORY_ADDED = " zur " .. GetString(WISHLIST_HISTORY_TITLE) .. " hinzugefügt",
     WISHLIST_HISTORY_REMOVED = " von der " .. GetString(WISHLIST_HISTORY_TITLE) .. " entfernt",
@@ -90,7 +92,10 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION = "Wirklich das gesamte Set \"<<1>>\" entfernen?",
     WISHLIST_BUTTON_CLEAR_HISTORY_TT = GetString(WISHLIST_BUTTON_REMOVE_HISTORY_TT) .. "?",
     WISHLIST_DIALOG_CLEAR_HISTORY_QUESTION = GetString(WISHLIST_HISTORY_TITLE) .. " für ausgewählten Charakter leeren?",
-
+    WISHLIST_DIALOG_CHANGE_QUALITY = GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .." ändern",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET = GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .." des gesamten Sets ändern",
+    WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION     = "<<1>> ändern?",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION   = "Wirklich alle Gegenstände vom Set <<1>> ändern?",
 
     WISHLIST_DIALOG_RELOAD_ITEMS = "Gegenstände neu laden",
     WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände über die Bibliothek \"LibSets\" neu einlesen!\nDies sollte nicht länger als 10 Sekunden benötigen.",

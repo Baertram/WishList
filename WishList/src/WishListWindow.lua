@@ -23,6 +23,7 @@ function WishListWindow:Setup( )
     WL.WishListWindowRemoveAllItemsInitialize(WishListRemoveAllItemsDialog)
     WL.WishListWindowChooseCharInitialize(WishListChooseCharDialog)
     WL.WishListWindowClearHistoryInitialize(WishListClearHistoryDialog)
+    WL.WishListWindowChangeQualityInitialize(WishListChangeQualityDialog)
 
 	--Scroll UI
 	ZO_ScrollList_AddDataType(self.list, WISHLIST_DATA, "WishListRow", 30, function(control, data)

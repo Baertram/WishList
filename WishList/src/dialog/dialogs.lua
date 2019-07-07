@@ -743,6 +743,155 @@ function WL.WishListWindowChooseCharInitialize(control)
     })
 end
 
+function WL.WishListWindowChangeQualityInitialize(control)
+    local title     = GetControl(control, "Title")
+    local content   = GetControl(control, "Content")
+    local acceptBtn = GetControl(control, "Accept")
+    local cancelBtn = GetControl(control, "Cancel")
+    local descLabel = GetControl(content, "Text")
+
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQualityControl = content:GetNamedChild("QualityCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(comboQualityControl) --GetControl(content, "QualityCombo")
+
+    --Quality Callback
+    local callbackQuality = function( comboBox, entryText, entry, selectionChanged ) end
+
+    ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_CHANGE_QUALITY_DIALOG", {
+        customControl = control,
+        title = { text = "???" },
+        mainText = { text = "???" },
+        setup = function(dialog, data)
+            local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
+            --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
+            local charNameText = WL.CurrentCharData.name
+            charNameText = WL.addCharBrackets(charNameText)
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
+
+            --Quality combobox
+            comboQuality:SetSortsItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            local counter = 0
+            local currentQualityIndex = 1
+            for quality, qualityDescription in ipairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                if not data.wholeSet then
+                    counter = counter + 1
+                    if quality == WL.currentItem.quality then
+                        currentQualityIndex = counter
+                    end
+                end
+            end
+            --Select the current quality of the item in the quality combobox
+            comboQuality:SelectItemByIndex(currentQualityIndex, true)
+
+            --Change quality of whole set or single item?
+            if data.wholeSet then
+                local setName = data.itemData.name
+                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " <<1>>", setName))
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+            else
+                local timeStamp
+                local dateAndTime
+                local itemType
+                local armorOrWeaponType
+                local slot
+                local itemLink
+                local traitId
+                --Coming from link handler??
+                if not wlWindow and data ~= nil and data.itemData ~= nil and data.itemData.itemLink ~= nil then
+                    itemLink = data.itemData.itemLink
+                    timeStamp = data.itemData.timestamp
+                    dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    itemType = data.itemData.itemType
+                    armorOrWeaponType = data.itemData.armorOrWeaponType
+                    slot = data.itemData.slot
+                    traitId = GetItemLinkTraitInfo(itemLink)
+                else
+                    --Coming from WishList window
+                    itemLink = WL.buildItemLink(WL.CurrentItem.id, WL.CurrentItem.quality)
+                    timeStamp = data.itemData.timestamp
+                    dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    itemType = data.itemData.itemType
+                    armorOrWeaponType = data.itemData.armorOrWeaponType
+                    slot = data.itemData.slot
+                    traitId = data.itemData.trait
+                end
+                local armorOrWeaponTypeText = ""
+                if itemType == ITEMTYPE_WEAPON then
+                    --Weapon
+                    armorOrWeaponTypeText = WL.WeaponTypes[armorOrWeaponType]
+                elseif itemType == ITEMTYPE_ARMOR then
+                    --Armor
+                    armorOrWeaponTypeText = WL.ArmorTypes[armorOrWeaponType]
+                end
+                local slotText = WL.SlotTypes[slot]
+                local itemTraitText = WL.TraitTypes[traitId]
+                itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+                --Description text of the dialog
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
+                --Title of the dialog
+                title:SetText(GetString(WISHLIST_DIALOG_CHANGE_QUALITY))
+
+                --Build the tooltip data, but only if a single item will be removed
+                local virtualListRowControl = {}
+                local style = ""
+                virtualListRowControl.data      = {}
+                virtualListRowControl.data.itemLink   = itemLink
+                virtualListRowControl.data.style      = style
+                WL.buildSetItemTooltipForDialog(WishListChangeQualityDialog, virtualListRowControl)
+            end
+        end,
+        noChoiceCallback = function(dialog)
+            WL.hideItemLinkTooltip()
+        end,
+        buttons =
+        {
+            {
+                control = acceptBtn,
+                text = SI_DIALOG_ACCEPT,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
+                    WL.hideItemLinkTooltip()
+                    --Remove a whole set
+                    if dialog.data then
+                        local newQuality = comboQuality:GetSelectedItemData().id
+                        if dialog.data.wholeSet then
+                            WishList:ChangeQualityOfItemsOfSet(dialog.data.itemData.setId, WL.CurrentCharData, newQuality)
+                        else
+                            local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
+                            if isLinkHandlerItem then
+                                --Coming from the link handler
+                                local linkHandlerItem = {}
+                                linkHandlerItem = dialog.data.itemData
+                                local itemLink = linkHandlerItem.itemLink
+                                linkHandlerItem.id = tonumber(WL.GetItemIDFromLink(itemLink))
+                                local traitId = GetItemLinkTraitInfo(itemLink)
+                                linkHandlerItem.trait = traitId
+                                WishList:ChangeQualityOfItem(linkHandlerItem, WL.LoggedInCharData, newQuality)
+                            else
+                                --Coming from the WishList window
+                                WishList:ChangeQualityOfItem(WL.CurrentItem, WL.CurrentCharData, newQuality)
+                            end
+                        end
+                    end
+                end,
+            },
+            {
+                control = cancelBtn,
+                text = SI_DIALOG_CANCEL,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    WL.hideItemLinkTooltip()
+                end,
+            },
+        },
+    })
+end
 
 ------------------------------------------------
 --- Dialog Functions
@@ -874,4 +1023,13 @@ function WL.ShowClearHistory(comingFromWishListWindow)
     --if not WL.IsEmpty(WL.CurrentCharData) then
         ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CLEAR_HISTORY_DIALOG", { wlWindow=comingFromWishListWindow })
     --end
+end
+
+function WL.showChangeQuality(item, changeWholeSet, comingFromWishListWindow)
+    changeWholeSet = changeWholeSet or false
+    comingFromWishListWindow = comingFromWishListWindow or false
+    WL.createWindow(false)
+    WL.CurrentItem = item
+    WL.checkCurrentCharData()
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CHANGE_QUALITY_DIALOG", {itemData=item, wholeSet=changeWholeSet, wlWindow=comingFromWishListWindow})
 end

@@ -1328,6 +1328,12 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName),
                         function() WL.showRemoveItem(data, true, true, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
                     end)  -- Remove whole set
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
+                        function() WL.showChangeQuality(data, false, true)
+                    end)  -- Change quality
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
+                        function() WL.showChangeQuality(data, true, true)
+                    end)  -- Change quality of whole set
                 end
                 ShowMenu()
             end

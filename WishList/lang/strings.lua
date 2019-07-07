@@ -59,8 +59,10 @@ local strings = {
 
     WISHLIST_ADDED                   = " added to " .. GetString(WISHLIST_TITLE),
     WISHLIST_REMOVED                 = " removed from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_UPDATED                 = " updated <<1>> in " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_ADDED             = "<<1[No item/1 item/$d items]>> added to " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_REMOVED           = "<<1[No item/1 item/$d items]>> removed from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_ITEMS_UPDATED           = "<<1[No item/1 item/$d items]>> changed in " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_HISTORY_ADDED                   = " added to " .. GetString(WISHLIST_HISTORY_TITLE),
     WISHLIST_HISTORY_REMOVED                 = " removed from " .. GetString(WISHLIST_HISTORY_TITLE),
@@ -93,6 +95,10 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ALL_ITEMS_QUESTION     = "Really remove all items?",
     WISHLIST_BUTTON_CLEAR_HISTORY_TT            = GetString(WISHLIST_BUTTON_REMOVE_HISTOTY_TT) .. "?",
     WISHLIST_DIALOG_CLEAR_HISTORY_QUESTION      = "Really clear " .. GetString(WISHLIST_HISTORY_TITLE) .. " for selected character?",
+    WISHLIST_DIALOG_CHANGE_QUALITY              = "Change " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5),
+    WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION     = "Change <<1>>?",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET    = "Change " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " of set",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION   = "Really change all items of set \"<<1>>\"?",
 
     WISHLIST_BUTTON_COPY_WISHLIST_TT            = "Copy " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_CHOOSE_CHARACTER_TT         = "Choose character",
