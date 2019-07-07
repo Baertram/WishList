@@ -552,7 +552,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local alreadyOnWishList = false
         if not alreadyOnWishlistCheckDone then

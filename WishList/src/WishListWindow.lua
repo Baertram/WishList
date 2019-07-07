@@ -502,6 +502,9 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
+        local qualityText = WL.quality[data.quality]
+        if qualityText == nil then qualityText = "" end
+        qualityColumn:SetText(qualityText)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")
@@ -553,6 +556,7 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
+        qualityColumn:SetText("")
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_SEARCH then
         --d(">WISHLIST_TAB_SEARCH")
@@ -562,10 +566,12 @@ function WishListWindow:SetupItemRow( control, data )
         armorOrWeaponTypeColumn:SetHidden(true)
         slotColumn:SetHidden(true)
         traitColumn:SetHidden(true)
+        qualityColumn:SetHidden(true)
         armorOrWeaponTypeColumn:SetText("")
         slotColumn:SetText("")
         traitColumn:SetText("")
         dateColumn:SetText("")
+        qualityColumn:SetText("")
     end
     --Set the row to the list now
     ZO_SortFilterList.SetupRow(self, control, data)
