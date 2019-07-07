@@ -399,7 +399,7 @@ end
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
     calledFromFilterFunction = calledFromFilterFunction or false
-d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
+--d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
     --Sets tab row creation from savedvars sets list
 ------------------------------------------------------------------------------------------------------------------------
 	if WL.CurrentTab == WISHLIST_TAB_SEARCH then
@@ -422,8 +422,8 @@ d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(called
 --d(">>Building master list entries, count: " .. tostring(#wishList))
         for i = 1, #wishList do
 			local item = wishList[i]
-            local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
-d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName).. ", quality: " .. tostring(itemQualityName))
+            --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
+--d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName).. ", quality: " .. tostring(itemQualityName))
 			table.insert(self.masterList, WL.CreateEntryForItem(item))
         end
 

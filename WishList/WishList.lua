@@ -565,7 +565,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
             end
             --Insert the item to the character dependent WishList SavedVars global table WishList_Data["Default"][GetDisplayName()][charId]["Data"]["wishList"]
             --table.insert(wishList, item)
-d("[WishList]AddItem, item quality: " ..tostring(item.quality))
+--d("[WishList]AddItem, item quality: " ..tostring(item.quality))
             table.insert(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], item)
             count = count + 1
             local traitId = item.trait
