@@ -487,6 +487,7 @@ function WL.CreateEntryForItem(item)
 		name                    = setName,
 		itemLink                = itemLink,
         timestamp               = item.timestamp,
+        quality                 = item.quality,
 	})
 end
 
@@ -526,6 +527,7 @@ function WL.CreateHistoryEntryForItem(item)
         username                = item.username,
         displayName             = function() if item.displayName ~= nil then return item.displayName else return "" end end,
         locality                = item.locality,
+        quality                 = item.quality,
     })
 end
 
