@@ -1331,7 +1331,7 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
                         function() WL.showChangeQuality(data, false, true)
                     end)  -- Change quality
-                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET),
                         function() WL.showChangeQuality(data, true, true)
                     end)  -- Change quality of whole set
                 end

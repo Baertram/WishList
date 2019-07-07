@@ -43,6 +43,7 @@ src/dialog/WishListRemoveAllItemsDialog.xml
 src/dialog/WishListReloadItemsDialog.xml
 src/dialog/WishListChooseCharDialog.xml
 src/dialog/WishListClearHistoryDialog.xml
+src/dialog/WishListChangeQualityDialog.xml
 
 ##XML
 src/xml/WishListWindow.xml
