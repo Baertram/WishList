@@ -19,6 +19,7 @@ local stringsBase = {
     WISHLIST_HEADER_CHARS               = GetString(SI_BINDING_NAME_TOGGLE_CHARACTER), -- Character / toon
     WISHLIST_HEADER_USERNAME            = "User",
     WISHLIST_HEADER_LOCALITY            = "Locality",
+    WISHLIST_HEADER_QUALITY             = GetString(SI_TRADINGHOUSEFEATURECATEGORY5), --Quality
 
     WISHLIST_CONST_ID                   = "id",
     WISHLIST_CONST_SET                  = "set",
@@ -113,6 +114,8 @@ local strings = {
     WISHLIST_TOTAL_SETS                      = "Total sets: ",
     WISHLIST_TOTAL_SETS_ITEMS                = "Total items: ",
     WISHLIST_SETS_FOUND                      = "Sets found: <<1>> with <<2>> total items",
+
+    WISHLIST_ITEM_QUALITY_ALL                = "All qualities",
 
     --Tooltips
     WISHLIST_BUTTON_RELOAD_TT                = "Reload all set data",

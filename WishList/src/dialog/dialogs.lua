@@ -17,6 +17,8 @@ function WL.WishListWindowAddItemInitialize(control)
     local comboSlot = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("SlotCombo")) --GetControl(content, "SlotCombo")
     local labelTrait = GetControl(content, "TraitText")
     local comboTrait = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("TraitCombo")) --GetControl(content, "TraitCombo")
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
     local labelChars = GetControl(content, "CharsText")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
 
@@ -30,6 +32,7 @@ function WL.WishListWindowAddItemInitialize(control)
             labelItemType:SetText(GetString(WISHLIST_HEADER_TYPE))
             --labelArmorOrWeaponType:SetText("Armor/Weapon Type")
             labelTrait:SetText(GetString(WISHLIST_HEADER_TRAIT))
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
             labelSlot:SetText(GetString(WISHLIST_HEADER_SLOT))
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
 
@@ -233,6 +236,18 @@ function WL.WishListWindowAddItemInitialize(control)
             end
             comboItemType:SelectItemByIndex(1, true)
             callbackItemTypes()
+
+            --Quality
+            local qualities = {}
+            comboQuality:SetSortItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            for quality, qualityDescription in pairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, function() return false end)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            end
+            comboQuality:SelectItemByIndex(1, true)
         end,
         noChoiceCallback = function(dialog)
             WL.hideItemLinkTooltip()

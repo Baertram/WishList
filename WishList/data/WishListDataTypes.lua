@@ -103,7 +103,6 @@ WL.SlotTypes = {
 }
 
 WL.traitTextures = {
-
     --belebend: esoui/art/icons/crafting_jewelry_base_garnet_r3.dds
     --Verstärkt: esoui/art/icons/crafting_enchantment_base_sardonyx_r2.dds
     --Armor
@@ -143,4 +142,14 @@ WL.traitTextures = {
     [ITEM_TRAIT_TYPE_WEAPON_PRECISE]		= "esoui/art/icons/crafting_jewelry_base_ruby_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]		= "esoui/art/icons/crafting_enchantment_base_fire_opal_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_TRAINING] 		= "esoui/art/icons/crafting_runecrafter_armor_component_004.dds",
+}
+
+WL.quality = {
+	[-1] 					= GetString(WISHLIST_ITEM_QUALITY_ALL),	--All qualities
+	[ITEM_QUALITY_TRASH] 	= GetString(SI_ITEMQUALITY0), 	--Trash
+	[ITEM_QUALITY_NORMAL] 	= GetString(SI_ITEMQUALITY1), 	--Normal (white)
+	[ITEM_QUALITY_MAGIC] 	= GetString(SI_ITEMQUALITY2), 	--Magic (green)
+	[ITEM_QUALITY_ARCANE] 	= GetString(SI_ITEMQUALITY3), 	--Arcane (blue)
+	[ITEM_QUALITY_ARTIFACT]	= GetString(SI_ITEMQUALITY4), 	--Artifact (purple)
+	[ITEM_QUALITY_LEGENDARY]= GetString(SI_ITEMQUALITY5), 	--Legendary (golden)
 }
