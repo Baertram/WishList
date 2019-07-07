@@ -916,12 +916,13 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
             --Update the WishList entry of the current, or the selected char
             local currentWishListEntryOfSetItem = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][i]
             if currentWishListEntryOfSetItem ~= nil then
+                currentWishListEntryOfSetItem["quality"] = newQuality
                 d(itemLink..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
                 cnt = cnt +1
             end
         end
     end
-    d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
+    d(zo_strformat(GetString(WISHLIST_ITEMS_UPDATED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) updated in Wish List"
     WishList:ReloadItems()
 end
 
