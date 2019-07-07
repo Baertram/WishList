@@ -780,7 +780,7 @@ function WL.WishListWindowChangeQualityInitialize(control)
                 comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
                 if not data.wholeSet then
                     counter = counter + 1
-                    if quality == WL.currentItem.quality then
+                    if WL.CurrentItem and WL.CurrentItem.quality and quality == WL.CurrentItem.quality then
                         currentQualityIndex = counter
                     end
                 end
@@ -792,7 +792,7 @@ function WL.WishListWindowChangeQualityInitialize(control)
             if data.wholeSet then
                 local setName = data.itemData.name
                 title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " <<1>>", setName))
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
             else
                 local timeStamp
                 local dateAndTime
