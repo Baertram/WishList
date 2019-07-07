@@ -686,12 +686,14 @@ function WL.WishListWindowChooseCharInitialize(control)
 
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
             if isCopyingWishList then
+                labelQuality:SetHidden(true)
                 comboQualityControl:SetHidden(true)
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
                 charNameText = WL.addCharBrackets(charNameText)
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
             else
+                labelQuality:SetHidden(false)
                 labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
                 comboQualityControl:SetHidden(false)
                 if data ~= nil and data.dataForChar ~= nil then

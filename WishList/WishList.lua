@@ -271,7 +271,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         charData = WL.LoggedInCharData
         if charData == nil or charData.id == nil then return false end
         --Check if the item is on the wishlist
-        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType)
+        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
         if debug then
             d(">>isOnWishList: " .. tostring(isOnWishList))
         end

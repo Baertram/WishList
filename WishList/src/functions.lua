@@ -495,6 +495,7 @@ end
 
 --Map the WishList qualityId to a a table of itemQuality types
 function WL.mapWLQualityToItemQualityTypes(qualityIdWishList)
+--d("[WishList]mapWLQualityToItemQualityTypes-qualityIdWishList: " ..tostring(qualityIdWishList))
     local mapQualities = {
         [WISHLIST_QUALITY_ALL]		= {         --Any quality
             [ITEM_QUALITY_TRASH]    = true,
@@ -707,10 +708,10 @@ function WL.IsHistoryEmpty(charData)
     return true, 0
 end
 
-function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, qualityWL)
+function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
-    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or qualityWL == nil) then return false, nil, nil end
+    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or itemQuality == nil) then return false, nil, nil end
     if charData == nil then return false, nil, nil end
     local wishList = WL.getWishListSaveVars(charData, "WL.isItemAlreadyOnWishlist")
     if wishList == nil then return false, nil, nil end
@@ -734,15 +735,15 @@ d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char
                             if item.slot == slotType then
                                 if item.trait == traitType then
                                     --Quality checks
-                                    if qualityWL ~= nil and item.quality ~= nil then
-                                        --Get the itemQuality
-                                        local itemQuality = GetItemLinkQuality(itemLink)
-d(">itemQuality: " .. tostring(itemQuality) .. ", item.quality: " ..tostring(item.quality))
+                                    --Get the itemQuality
+                                    itemQuality = itemQuality or GetItemLinkQuality(itemLink)
+                                    if itemQuality ~= nil and item.quality ~= nil then
+--d(">itemQuality new item: " .. tostring(itemQuality) .. ", itemQuality WishList item (WL quality): " ..tostring(item.quality))
                                         --Get the qualities to check
-                                        local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(qualityWL)
+                                        local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
                                         if qualitiesToCheck ~= nil then
                                             local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
-d(">>isQualityToCheckOnItem: " ..tostring(isQualityToCheckOnItem))
+--d(">>isQualityToCheckOnItem: " ..tostring(isQualityToCheckOnItem))
                                             return isQualityToCheckOnItem, itemId, item
                                         else
                                             isAlreadyOnWishList = false
