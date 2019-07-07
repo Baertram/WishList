@@ -1005,6 +1005,7 @@ function WL.buildItemlinkTooltipData(control)
     local comboItemType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ItemTypeCombo")) --GetControl(content, "ItemTypeCombo")
     local comboArmorOrWeaponType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ArmorOrWeaponTypeCombo")) --GetControl(content, "ArmorOrWeaponTypeCombo")
     local comboSlot = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("SlotCombo")) --GetControl(content, "SlotCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
 
     --Get the data from the add dialog dropdowns and build an item and chardata from it
@@ -1018,7 +1019,8 @@ function WL.buildItemlinkTooltipData(control)
     if itemId == nil then WL.hideItemLinkTooltip() return nil end
 
     --Build the itemlink from that data to create a tooltip
-    local itemLink = WL.buildItemLink(itemId)
+    local wlQualityForTooltip = comboQuality:GetSelectedItemData().id
+    local itemLink = WL.buildItemLink(itemId, wlQualityForTooltip)
     if itemLink == nil or itemLink == "" then WL.hideItemLinkTooltip() return nil end
 
     local style = ""

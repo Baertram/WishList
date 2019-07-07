@@ -38,29 +38,24 @@ function WL.WishListWindowAddItemInitialize(control)
 
             --Quality Callback
             local callbackQuality = function( comboBox, entryText, entry, selectionChanged )
+                --Rebuild the itemLink to update the quality in the itemLink
+                WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
             end
 
             --Quality combobox
-            if comboQuality then
-                d("[WishList]ComboQuality found")
-                comboQuality:SetSortsItems(false)
-                comboQuality:ClearItems()
-                local qualityData = WL.quality
-                for quality, qualityDescription in ipairs(qualityData) do
-d(">Added quality: " ..tostring(qualityDescription) .. ", id: " ..tostring(quality))
-                    local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
-                    entry.id = quality
-                    comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-                end
-                comboQuality:SelectItemByIndex(1, true)
-            else
-                d("[WishList]Error: ComboQuality not found!")
+            comboQuality:SetSortsItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            for quality, qualityDescription in ipairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
             end
+            comboQuality:SelectItemByIndex(1, true)
 
 
             --Chars Callback
-            local callbackChars = function( comboBox, entryText, entry, selectionChanged )
-            end
+            local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
 
             --Characters dropdown box
             --The name to compare for the pre-selection in the char dropdownbox (currently logged in, or currently chosen at WhishList tab?)
@@ -144,7 +139,6 @@ d(">Added quality: " ..tostring(qualityDescription) .. ", id: " ..tostring(quali
                         end
                     end
                 end
-
                 comboTrait:SelectItemByIndex(1, true)
                 callbackTraitsTypes()
             end
@@ -730,6 +724,7 @@ end
 ------------------------------------------------
 --- Dialog Functions
 ------------------------------------------------
+--Build the itemLink and create the item tooltip to show next to the dialog
 function WL.buildSetItemTooltipForDialog(dialogCtrl, tooltipData)
     --Build the set data from the comboboxes of the dialog control
     local control = {}
