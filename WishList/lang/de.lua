@@ -114,7 +114,12 @@ local strings = {
     WISHLIST_TOTAL_SETS_ITEMS = "Set Gegenstände: ",
     WISHLIST_SETS_FOUND = "<<1>> Sets gefunden, mit <<2>> Gegenständen",
 
-    WISHLIST_ITEM_QUALITY_ALL                = "Alle Qualitäten",
+    WISHLIST_ITEM_QUALITY_ALL   = "- Jede " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " -",
+    WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE           = GetString(SI_ITEMQUALITY2) .. ", " .. GetString(SI_ITEMQUALITY3), 		--Magic or arcane
+    WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT        = GetString(SI_ITEMQUALITY3) .. ", " .. GetString(SI_ITEMQUALITY4), 		--Arcane or artifact
+    WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY     = GetString(SI_ITEMQUALITY4) .. ", " .. GetString(SI_ITEMQUALITY5), 	    --Artifact or legendary
+    WISHLIST_ITEM_QUALITY_MAGIC_TO_LEGENDARY        = GetString(SI_ITEMQUALITY2) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Magic to legendary
+    WISHLIST_ITEM_QUALITY_ARCANE_TO_LEGENDARY       = GetString(SI_ITEMQUALITY3) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Arcane to legendary
 
     --Tooltips
     WISHLIST_BUTTON_RELOAD_TT = "Alle Sets neu einlesen",

@@ -451,11 +451,56 @@ end
 ------------------------------------------------
 --- Itemlink functions
 ------------------------------------------------
-function WL.buildItemLink(itemId)
+function WL.buildItemLink(itemId, qualityIdWishList)
     if itemId == nil then return nil end
-    --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, 364, ITEMSTYLE_NONE, 0, 10000)
-    return WL.LibSets.buildItemLink(itemId)
+    qualityIdWishList = qualityIdWishList or 1 -- All qualities
+    --Using WishList's own itemlink function
+    --The qualityId is the chosen quality from the "Add set item dialog". See file WishListDataTypes.lua, table WL.quality. So it can be 1 to 12
+    --and must be mapped to the real qualityIds for the itemlink.
+    local qualityIdItemLink = WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
+    --Using LibSets to get the itemLink
+    return WL.LibSets.buildItemLink(itemId, qualityIdItemLink)
+    --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, qualityIdItemLink, ITEMSTYLE_NONE, 0, 10000)
 end
+
+--Map the WishList internal quality (See file WishListDataTypes.lua, table WL.quality) to the itemLink qualities:
+--357:  Trash
+--366:  Normal
+--367:  Magic
+--368:  Arcane
+--369:  Artifact
+--370:  Legendary
+function WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
+    local qualityIdItemLink = 370 -- preset with Legendary quality
+    --Map the quality from WishList#s add item dialog to the itemLink quality now
+    local mapQualities = {
+        [1]		= 357,      --Any quality
+        [2] 	= 357, 		--Trash
+        [3] 	= 366, 		--Normal (white)
+        [4] 	= 367, 		--Magic (green)
+        [5] 	= 368, 		--Arcane (blue)
+        [6] 	= 369, 		--Artifact (purple)
+        [7]		= 370, 		--Legendary (golden)
+        [8] 	= 367, 		--Magic or arcane
+        [9]		= 368, 		--Arcane or artifact
+        [10]	= 369, 	    --Artifact or legendary
+        [11]	= 367, 		--Magic to legendary
+        [12]	= 368, 		--Arcane to legendary
+    }
+    if mapQualities[qualityIdWishList] ~= nil then
+        qualityIdItemLink =  mapQualities[qualityIdWishList]
+    end
+    return qualityIdItemLink
+end
+
+--[[
+function WL.ilTest()
+    d("[WishList]Quality test:")
+    for qualityId=350, 370, 1 do
+        d(">quality " ..tostring(qualityId) .. ": "  .. WL.buildItemLink(109568, qualityId))
+    end
+end
+]]
 
 function WL.parseLink(inputstr, sep)
 	if sep == nil then

@@ -36,6 +36,28 @@ function WL.WishListWindowAddItemInitialize(control)
             labelSlot:SetText(GetString(WISHLIST_HEADER_SLOT))
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
 
+            --Quality Callback
+            local callbackQuality = function( comboBox, entryText, entry, selectionChanged )
+            end
+
+            --Quality combobox
+            if comboQuality then
+                d("[WishList]ComboQuality found")
+                comboQuality:SetSortsItems(false)
+                comboQuality:ClearItems()
+                local qualityData = WL.quality
+                for quality, qualityDescription in ipairs(qualityData) do
+d(">Added quality: " ..tostring(qualityDescription) .. ", id: " ..tostring(quality))
+                    local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                    entry.id = quality
+                    comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                end
+                comboQuality:SelectItemByIndex(1, true)
+            else
+                d("[WishList]Error: ComboQuality not found!")
+            end
+
+
             --Chars Callback
             local callbackChars = function( comboBox, entryText, entry, selectionChanged )
             end
@@ -236,18 +258,6 @@ function WL.WishListWindowAddItemInitialize(control)
             end
             comboItemType:SelectItemByIndex(1, true)
             callbackItemTypes()
-
-            --Quality
-            local qualities = {}
-            comboQuality:SetSortItems(false)
-            comboQuality:ClearItems()
-            local qualityData = WL.quality
-            for quality, qualityDescription in pairs(qualityData) do
-                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, function() return false end)
-                entry.id = quality
-                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-            end
-            comboQuality:SelectItemByIndex(1, true)
         end,
         noChoiceCallback = function(dialog)
             WL.hideItemLinkTooltip()

@@ -143,13 +143,17 @@ WL.traitTextures = {
     [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]		= "esoui/art/icons/crafting_enchantment_base_fire_opal_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_TRAINING] 		= "esoui/art/icons/crafting_runecrafter_armor_component_004.dds",
 }
-
 WL.quality = {
-	[-1] 					= GetString(WISHLIST_ITEM_QUALITY_ALL),	--All qualities
-	[ITEM_QUALITY_TRASH] 	= GetString(SI_ITEMQUALITY0), 	--Trash
-	[ITEM_QUALITY_NORMAL] 	= GetString(SI_ITEMQUALITY1), 	--Normal (white)
-	[ITEM_QUALITY_MAGIC] 	= GetString(SI_ITEMQUALITY2), 	--Magic (green)
-	[ITEM_QUALITY_ARCANE] 	= GetString(SI_ITEMQUALITY3), 	--Arcane (blue)
-	[ITEM_QUALITY_ARTIFACT]	= GetString(SI_ITEMQUALITY4), 	--Artifact (purple)
-	[ITEM_QUALITY_LEGENDARY]= GetString(SI_ITEMQUALITY5), 	--Legendary (golden)
+	[1]		= GetString(WISHLIST_ITEM_QUALITY_ALL), 					--Any quality
+	[2] 	= GetString(SI_ITEMQUALITY0), 								--Trash
+	[3] 	= GetString(SI_ITEMQUALITY1), 								--Normal (white)
+	[4] 	= GetString(SI_ITEMQUALITY2), 								--Magic (green)
+	[5] 	= GetString(SI_ITEMQUALITY3), 								--Arcane (blue)
+	[6] 	= GetString(SI_ITEMQUALITY4), 								--Artifact (purple)
+	[7]		= GetString(SI_ITEMQUALITY5), 								--Legendary (golden)
+	[8] 	= GetString(WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE), 		--Magic or arcane
+	[9]		= GetString(WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT), 		--Arcane or artifact
+	[10]	= GetString(WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY), 	--Artifact or legendary
+	[11]	= GetString(WISHLIST_ITEM_QUALITY_MAGIC_TO_LEGENDARY), 		--Magic to legendary
+	[12]	= GetString(WISHLIST_ITEM_QUALITY_ARCANE_TO_LEGENDARY), 		--Arcane to legendary
 }
