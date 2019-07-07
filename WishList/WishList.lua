@@ -505,7 +505,7 @@ function WL.CreateHistoryEntryForItem(item)
         setId = setLocId
     end
     --Get the names of the types (for search and order functions)
-    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
+    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     return({
@@ -528,6 +528,7 @@ function WL.CreateHistoryEntryForItem(item)
         displayName             = function() if item.displayName ~= nil then return item.displayName else return "" end end,
         locality                = item.locality,
         quality                 = item.quality,
+        qualityName             = itemQualityName,
     })
 end
 

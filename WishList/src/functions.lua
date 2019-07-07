@@ -673,10 +673,12 @@ function WL.AddLootToHistory(item, itemId, itemLink, setName, isLootedByPlayer, 
     data.armorOrWeaponType      = item.armorOrWeaponType
     data.slot                   = item.slot
     data.trait                  = item.trait
+    data.quality                = item.quality
     data.timestamp              = item.timestamp
     data.username               = receivedBy.charName
     data.displayName            = receivedBy.accountName
     data.locality               = localityStr
+    --data.itemLink               = itemLink
     table.insert(items, data)
     --Item was added to internal list?
     if items ~= nil and #items > 0 then
@@ -724,7 +726,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
         itemId = WL.GetItemIDFromLink(itemLink)
     end
     local item = {}
-d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType))
+--d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType))
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
