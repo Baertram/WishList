@@ -468,6 +468,10 @@ function WL.CreateEntryForItem(item)
         setName = zo_strformat("<<C:1>>", setLocName)
         setId = setLocId
     end
+    --If the quality is not set, set it with no matter which quality now
+    if item.quality == nil then
+        item.quality = WISHLIST_QUALITY_ALL
+    end
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
@@ -503,6 +507,10 @@ function WL.CreateHistoryEntryForItem(item)
         --Remove the gender stuff from the setname
         setName = zo_strformat("<<C:1>>", setLocName)
         setId = setLocId
+    end
+    --If the quality is not set, set it with no matter which quality now
+    if item.quality == nil then
+        item.quality = WISHLIST_QUALITY_ALL
     end
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
