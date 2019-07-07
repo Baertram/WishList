@@ -604,10 +604,25 @@ function WL.WishListWindowChooseCharInitialize(control)
     local descLabel = GetControl(content, "Text")
     local labelChars = GetControl(content, "CharsText")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
+
+    --Quality Callback
+    local callbackQuality = function( comboBox, entryText, entry, selectionChanged ) end
+
+    --Quality combobox
+    comboQuality:SetSortsItems(false)
+    comboQuality:ClearItems()
+    local qualityData = WL.quality
+    for quality, qualityDescription in ipairs(qualityData) do
+        local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+        entry.id = quality
+        comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+    end
+    comboQuality:SelectItemByIndex(1, true)
 
     --Chars Callback
-    local callbackChars = function( comboBox, entryText, entry, selectionChanged )
-    end
+    local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
 
     ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_CHOOSE_CHAR_DIALOG", {
         customControl = control,
@@ -668,6 +683,7 @@ function WL.WishListWindowChooseCharInitialize(control)
             comboChars:SelectItemByIndex(currentChar, true)
 
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
             if isCopyingWishList then
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
@@ -692,6 +708,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
                     local comboCharsSelectedData = comboChars:GetSelectedItemData()
                     local toCharId = comboCharsSelectedData.id
+                    local qualityWL = comboQuality:GetSelectedItemData().id
                     if toCharId == nil then return false end
                     local isCopyingWishList = (dialog.data and dialog.data.copyWishList and dialog.data.copyWishList == true) or false
                     if isCopyingWishList then
@@ -703,7 +720,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                             local dataForChar = dialog.data.dataForChar
                             --Get the character data of the selected char
                             local toCharData = WL.getCharDataById(toCharId)
-                            WL.addItemFromLinkHandlerToWishList(dataForChar.itemLink, dataForChar.id, dataForChar.itemType, dataForChar.isSet, dataForChar.setName, dataForChar.numBonuses, dataForChar.setId, toCharData)
+                            WL.addItemFromLinkHandlerToWishList(dataForChar.itemLink, dataForChar.id, dataForChar.itemType, dataForChar.isSet, dataForChar.setName, dataForChar.numBonuses, dataForChar.setId, toCharData, qualityWL)
                         end
                     end
                 end,
@@ -738,11 +755,14 @@ function WL.buildSetItemTooltipForDialog(dialogCtrl, tooltipData)
     WL.showItemLinkTooltip(control, dialogCtrl, TOPRIGHT, -50, -100, TOPLEFT)
 end
 
-function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+--Get items which would be added to the WishList via the Add item dialog
+function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
     local itemTypeId = comboItemType:GetSelectedItemData().id
     local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
     local traitId = comboTrait:GetSelectedItemData().id
     local slotId = comboSlot:GetSelectedItemData().id
+    local qualityId = comboQuality:GetSelectedItemData().id
+
     --Selected character ID and name for the SavedVars
     local comboCharsSelectedData = comboChars:GetSelectedItemData()
     local charId = comboCharsSelectedData.id
@@ -755,7 +775,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     local allTraitsTraitId = #WL.TraitTypes
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
-            local itemLink = WL.buildItemLink(setItemId)
+            local itemLink = WL.buildItemLink(setItemId, nil) --itemQualityItemLink) --nil: Always use legendary quality -> WISHLIST_QUALITY_LEGENDARY
             local itemType = GetItemLinkItemType(itemLink)
             local armorOrWeaponType
             if itemType == ITEMTYPE_ARMOR then
@@ -781,6 +801,8 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
                 data.armorOrWeaponType      = armorOrWeaponType
                 data.slot                   = equipType
                 data.trait                  = traitType
+                --Add the quality so we can check this data later on as an item was looted
+                data.quality                = qualityId
                 table.insert(items, data)
             end
         end

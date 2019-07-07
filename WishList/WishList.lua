@@ -217,6 +217,11 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     if debug then
         d(">traitType: " ..tostring(traitType))
     end
+    --Get the quality
+    local quality = GetItemLinkQuality(itemLink)
+    if debug then
+        d(">quality: " ..tostring(quality))
+    end
     --Get the settings
     local settings = WL.data
     local isOnWishList, item, itemIdOfSetPart
@@ -237,7 +242,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             charData.class = charInfo.class
             if charData ~= nil and charData.id ~= nil then
                 --Check if the item is on the wishlist
-                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType)
+                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
                 if debug then
                     d(">>isOnWishList: " .. tostring(isOnWishList))
                 end
@@ -558,6 +563,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
             end
             --Insert the item to the character dependent WishList SavedVars global table WishList_Data["Default"][GetDisplayName()][charId]["Data"]["wishList"]
             --table.insert(wishList, item)
+d("[WishList]AddItem, item quality: " ..tostring(item.quality))
             table.insert(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], item)
             count = count + 1
             local traitId = item.trait
@@ -581,7 +587,7 @@ end
 
 function WL.AddSetItems(addType)
     --d("[WL.AddSetItems] addType: " .. tostring(addType))
-    --Close the add itme dialog at first!
+    --Close the add item dialog at first!
     WishListAddItemDialogCancel:callback()
     local addType2ChatMsg = {
         [WISHLIST_ADD_TYPE_WHOLE_SET]                         = WL.buildTooltip(WISHLIST_DIALOG_ADD_WHOLE_SET_TT),
@@ -611,12 +617,15 @@ function WL.AddSetItems(addType)
     --get the selected item trait
     local selectedItemTraitData = WishListAddItemDialogContentTraitCombo.m_comboBox.m_selectedItemData
     if selectedItemTraitData == nil or selectedItemTraitData.id == nil then return false end
+    --get the selected quality
+    local selectedItemQualityData = WishListAddItemDialogContentQualityCombo.m_comboBox.m_selectedItemData
+    if selectedItemQualityData == nil or selectedItemQualityData.id == nil then return false end
 
     --d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id))
     --The items to add table
     local items = {}
     --Get the set parts to add
-    items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, addType)
+    items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --Add the items now, if some were found
     if #items > 0 then
         --Add the found set items to the WishList of the selected user now

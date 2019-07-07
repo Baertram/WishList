@@ -453,7 +453,7 @@ end
 ------------------------------------------------
 function WL.buildItemLink(itemId, qualityIdWishList)
     if itemId == nil then return nil end
-    qualityIdWishList = qualityIdWishList or 1 -- All qualities
+    qualityIdWishList = qualityIdWishList or WISHLIST_QUALITY_LEGENDARY -- Legendary
     --Using WishList's own itemlink function
     --The qualityId is the chosen quality from the "Add set item dialog". See file WishListDataTypes.lua, table WL.quality. So it can be 1 to 12
     --and must be mapped to the real qualityIds for the itemlink.
@@ -474,23 +474,91 @@ function WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
     local qualityIdItemLink = 370 -- preset with Legendary quality
     --Map the quality from WishList#s add item dialog to the itemLink quality now
     local mapQualities = {
-        [1]		= 357,      --Any quality
-        [2] 	= 357, 		--Trash
-        [3] 	= 366, 		--Normal (white)
-        [4] 	= 367, 		--Magic (green)
-        [5] 	= 368, 		--Arcane (blue)
-        [6] 	= 369, 		--Artifact (purple)
-        [7]		= 370, 		--Legendary (golden)
-        [8] 	= 367, 		--Magic or arcane
-        [9]		= 368, 		--Arcane or artifact
-        [10]	= 369, 	    --Artifact or legendary
-        [11]	= 367, 		--Magic to legendary
-        [12]	= 368, 		--Arcane to legendary
+        [WISHLIST_QUALITY_ALL]		= 357,      --Any quality
+        [WISHLIST_QUALITY_TRASH] 	= 357, 		--Trash
+        [WISHLIST_QUALITY_NORMAL] 	= 366, 		--Normal (white)
+        [WISHLIST_QUALITY_MAGIC] 	= 367, 		--Magic (green)
+        [WISHLIST_QUALITY_ARCANE] 	= 368, 		--Arcane (blue)
+        [WISHLIST_QUALITY_ARTIFACT] 	= 369, 		--Artifact (purple)
+        [WISHLIST_QUALITY_LEGENDARY]		= 370, 		--Legendary (golden)
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	= 367, 		--Magic or arcane
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= 368, 		--Arcane or artifact
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= 369, 	    --Artifact or legendary
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	= 367, 		--Magic to legendary
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	= 368, 		--Arcane to legendary
     }
     if mapQualities[qualityIdWishList] ~= nil then
         qualityIdItemLink =  mapQualities[qualityIdWishList]
     end
     return qualityIdItemLink
+end
+
+--Map the WishList qualityId to a a table of itemQuality types
+function WL.mapWLQualityToItemQualityTypes(qualityIdWishList)
+    local mapQualities = {
+        [WISHLIST_QUALITY_ALL]		= {         --Any quality
+            [ITEM_QUALITY_TRASH]    = true,
+            [ITEM_QUALITY_NORMAL]   = true,
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+        },
+        [WISHLIST_QUALITY_TRASH] 	= {         --Trash
+            [ITEM_QUALITY_TRASH]    = true,
+        },
+        [WISHLIST_QUALITY_NORMAL] 	= {         --Normal (white)
+            [ITEM_QUALITY_NORMAL]   = true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC] 	= {         --Magic (green)
+            [ITEM_QUALITY_MAGIC]    = true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE] 	= {         --Arcane (blue)
+            [ITEM_QUALITY_ARCANE]   = true,
+
+        },
+        [WISHLIST_QUALITY_ARTIFACT] 	= {      --Artifact (purple)
+            [ITEM_QUALITY_ARTIFACT] = true,
+
+        },
+        [WISHLIST_QUALITY_LEGENDARY]		= {   --Legendary (golden)
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	= {         --Magic or arcane
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= { --Arcane or artifact
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+
+        },
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= { --Artifact or legendary
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	= {    --Magic to legendary
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	= {    --Arcane to legendary
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+        },
+    }
+    if mapQualities[qualityIdWishList] then
+        return mapQualities[qualityIdWishList]
+    end
+    return mapQualities[WISHLIST_QUALITY_ALL] --If not found: Return any quality
 end
 
 --[[
@@ -639,10 +707,10 @@ function WL.IsHistoryEmpty(charData)
     return true, 0
 end
 
-function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType)
+function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, qualityWL)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
-    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil) then return false, nil, nil end
+    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or qualityWL == nil) then return false, nil, nil end
     if charData == nil then return false, nil, nil end
     local wishList = WL.getWishListSaveVars(charData, "WL.isItemAlreadyOnWishlist")
     if wishList == nil then return false, nil, nil end
@@ -655,7 +723,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
         itemId = WL.GetItemIDFromLink(itemLink)
     end
     local item = {}
---d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType))
+d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType))
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
@@ -665,7 +733,23 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                         if item.armorOrWeaponType == armorOrWeaponType then
                             if item.slot == slotType then
                                 if item.trait == traitType then
-                                    isAlreadyOnWishList = true
+                                    --Quality checks
+                                    if qualityWL ~= nil and item.quality ~= nil then
+                                        --Get the itemQuality
+                                        local itemQuality = GetItemLinkQuality(itemLink)
+d(">itemQuality: " .. tostring(itemQuality) .. ", item.quality: " ..tostring(item.quality))
+                                        --Get the qualities to check
+                                        local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(qualityWL)
+                                        if qualitiesToCheck ~= nil then
+                                            local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
+d(">>isQualityToCheckOnItem: " ..tostring(isQualityToCheckOnItem))
+                                            return isQualityToCheckOnItem, itemId, item
+                                        else
+                                            isAlreadyOnWishList = false
+                                        end
+                                    else
+                                        isAlreadyOnWishList = true
+                                    end
                                     return isAlreadyOnWishList, itemId, item
                                 end
                             end
@@ -807,7 +891,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     end
 end
 
-function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, addType)
+function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --addType:
     --1=whole set items with selected traits
     --2=only chosen set item type (weapon or armor) with selected traits
@@ -902,6 +986,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
                             --data.slotName               = itemSlotName
                             data.trait                  = traitType
                             --data.traitName              = itemTraitName
+                            data.quality                = selectedItemQualityData
                             table.insert(items, data)
                         end
                     end
@@ -1011,7 +1096,8 @@ function WL.buildItemlinkTooltipData(control)
     --Get the data from the add dialog dropdowns and build an item and chardata from it
     local items = {}
     local selectedCharData = {}
-    items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+    --Get items which would be added to teh WishList
+    items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
     --Get the itemLink of the created item
     if items == nil and #items > 1 then WL.hideItemLinkTooltip() return nil end
     local item = items[1]
@@ -1105,7 +1191,7 @@ end
 -----------------------------------------------------------
 --- Context menus (WishList, Sets, Inventory, LinkHandler
 -----------------------------------------------------------
-function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
+function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData, qualityWL)
     if charData == nil or charData.id == nil then return false end
     if itemLink == nil then return false end
     local items = {}
@@ -1123,7 +1209,7 @@ function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, 
     --Strip gender stuff from the set name
     setNameStr = zo_strformat("<<C:1>>", setNameStr)
     --Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
-    table.insert(items, {setName=setNameStr, id=itemId, itemType=itemType, trait=traitType, armorOrWeaponType=armorOrWeaponType, slot=equipType, bonuses=numBonuses, setId=setId})
+    table.insert(items, {setName=setNameStr, id=itemId, itemType=itemType, trait=traitType, armorOrWeaponType=armorOrWeaponType, slot=equipType, bonuses=numBonuses, setId=setId, quality=qualityWL})
     if #items > 0 then
         --Add to the selected char's savedvars data
         local alreadyOnWishListCheckDone = false

@@ -48,8 +48,12 @@
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Slot" />
 					<Dimensions x="130" y="30" />
 				</Label>
+				<Label name="$(parent)Quality" inherits="WishListRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Trait" />
+					<Dimensions x="80" y="30" />
+				</Label>
                 <Label name="$(parent)UserName" inherits="WishListRowLabel">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Trait" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Quality" />
                     <Dimensions x="80" y="30" />
                 </Label>
                 <Label name="$(parent)Locality" inherits="WishListRowLabel">
@@ -299,11 +303,18 @@
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Slot" />
 							<Dimensions x="130" y="32" />
 						</Control>
+						<Control name="$(parent)Quality" inherits="WhisListSortHeader">
+							<OnInitialized>
+								ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_QUALITY), "quality", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+							</OnInitialized>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Trait" />
+							<Dimensions x="80" y="32" />
+						</Control>
                         <Control name="$(parent)UserName" inherits="WhisListSortHeader">
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_USERNAME), "username", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Trait" />
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Quality" />
                             <Dimensions x="80" y="32" />
                         </Control>
                         <Control name="$(parent)Locality" inherits="WhisListSortHeader">
