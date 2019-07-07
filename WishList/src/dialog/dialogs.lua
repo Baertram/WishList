@@ -791,7 +791,7 @@ function WL.WishListWindowChangeQualityInitialize(control)
             --Change quality of whole set or single item?
             if data.wholeSet then
                 local setName = data.itemData.name
-                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " <<1>>", setName))
+                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " \'<<1>>\'", setName))
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
             else
                 local timeStamp
@@ -832,7 +832,7 @@ function WL.WishListWindowChangeQualityInitialize(control)
                 local itemTraitText = WL.TraitTypes[traitId]
                 itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
                 --Description text of the dialog
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
                 --Title of the dialog
                 title:SetText(GetString(WISHLIST_DIALOG_CHANGE_QUALITY))
 
