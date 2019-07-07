@@ -469,8 +469,7 @@ function WL.CreateEntryForItem(item)
         setId = setLocId
     end
     --Get the names of the types (for search and order functions)
-    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
---d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
+    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
 	return({
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
@@ -488,6 +487,7 @@ function WL.CreateEntryForItem(item)
 		itemLink                = itemLink,
         timestamp               = item.timestamp,
         quality                 = item.quality,
+        qualityName             = itemQualityName,
 	})
 end
 

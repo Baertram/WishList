@@ -399,7 +399,7 @@ end
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
     calledFromFilterFunction = calledFromFilterFunction or false
---d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
+d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
     --Sets tab row creation from savedvars sets list
 ------------------------------------------------------------------------------------------------------------------------
 	if WL.CurrentTab == WISHLIST_TAB_SEARCH then
@@ -422,8 +422,8 @@ function WishListWindow:BuildMasterList(calledFromFilterFunction)
 --d(">>Building master list entries, count: " .. tostring(#wishList))
         for i = 1, #wishList do
 			local item = wishList[i]
-            --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
---d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
+            local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
+d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName).. ", quality: " .. tostring(itemQualityName))
 			table.insert(self.masterList, WL.CreateEntryForItem(item))
         end
 
@@ -502,8 +502,11 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
-        local qualityText = WL.quality[data.quality]
-        if qualityText == nil then qualityText = "" end
+        local qualityText = ""
+d("[WL]SetupItemRow-found quality: " ..tostring(data.quality))
+        if data.quality then
+            qualityText = WL.quality[data.quality]
+        end
         qualityColumn:SetText(qualityText)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
@@ -664,10 +667,11 @@ end
 ------------------------------------------------
 --- WishList Window -> Filter & Sorting
 ------------------------------------------------
-function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, trait)
+function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, trait, quality)
     local itemTypes = WL.ItemTypes
     local traitTypes = WL.TraitTypes
     local slotNames = WL.SlotTypes
+    local qualityNames = WL.quality
     local armorOrWeaponTypeName = ""
     if itemType == ITEMTYPE_WEAPON then
         armorOrWeaponTypeName = WL.WeaponTypes[armorOrWeaponType] or "HALLO"
@@ -677,7 +681,8 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
     local itemTypeName = itemTypes[itemType] or ""
     local slotTypeName = slotNames[slot] or ""
     local traitTypeName = traitTypes[trait] or ""
-    return itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName
+    local qualityName = qualityNames[quality] or ""
+    return itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName
 end
 
 function WishListWindow:FilterScrollList()
@@ -746,7 +751,7 @@ function WishListWindow:FilterScrollList()
                 local itemLink = WL.buildItemLink(itemId)
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
-                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName = WL.getItemTypeNamesForSortListEntry(wlDataOfCharId["itemType"], wlDataOfCharId["armorOrWeaponType"], wlDataOfCharId["slot"], wlDataOfCharId["trait"])
+                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(wlDataOfCharId["itemType"], wlDataOfCharId["armorOrWeaponType"], wlDataOfCharId["slot"], wlDataOfCharId["trait"], wlDataOfCharId["quality"])
                 data["type"]                    = 1 -- for the search method to work -> Find the processor in zo_stringsearch:Process()
                 data["id"]                      = itemId
                 data["setId"]                   = wlDataOfCharId["setId"]
@@ -758,6 +763,8 @@ function WishListWindow:FilterScrollList()
                 data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
                 data["slot"]                    = wlDataOfCharId["slot"]
                 data["slotName"]                = slotTypeName
+                data["quality"]                 = wlDataOfCharId["quality"]
+                data["qualityName"]             = qualityName
                 data["name"]                    = wlDataOfCharId["setName"]
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
@@ -804,7 +811,7 @@ function WishListWindow:FilterScrollList()
                 local itemLink = WL.buildItemLink(itemId)
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
-                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName = WL.getItemTypeNamesForSortListEntry(histDataOfCharId["itemType"], histDataOfCharId["armorOrWeaponType"], histDataOfCharId["slot"], histDataOfCharId["trait"])
+                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(histDataOfCharId["itemType"], histDataOfCharId["armorOrWeaponType"], histDataOfCharId["slot"], histDataOfCharId["trait"], histDataOfCharId["quality"])
                 data["type"]                    = 1 -- for the search method to work -> Find the processor in zo_stringsearch:Process()
                 data["id"]                      = itemId
                 data["setId"]                   = histDataOfCharId["setId"]
@@ -816,6 +823,8 @@ function WishListWindow:FilterScrollList()
                 data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
                 data["slot"]                    = histDataOfCharId["slot"]
                 data["slotName"]                = slotTypeName
+                data["quality"]                 = histDataOfCharId["quality"]
+                data["qualityName"]             = qualityName
                 data["name"]                    = histDataOfCharId["setName"]
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
@@ -858,6 +867,7 @@ function WishListWindow:BuildSortKeys()
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["traitName"]               = { caseInsensitive = true, tiebreaker = "name" },
+            ["quality"]                 = { caseInsensitive = true, tiebreaker = "name" },
             ["username"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["locality"]                = { caseInsensitive = true, tiebreaker = "name" },
         }
@@ -868,6 +878,7 @@ function WishListWindow:BuildSortKeys()
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
             ["slotName"]                = { caseInsensitive = true },
             ["traitName"]               = { caseInsensitive = true },
+            ["quality"]                 = { caseInsensitive = true },
             ["username"]                = { caseInsensitive = true },
             ["locality"]                = { caseInsensitive = true },
         }
@@ -951,6 +962,8 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
     data["slot"]                    = histDataOfCharId["slot"]
     data["slotName"]                = slotTypeName
+    data["quality"]                 = histDataOfCharId["quality"]
+    data["qualityName"]             = qualityName
     data["name"]                    = histDataOfCharId["setName"]
     data["itemLink"]                = itemLink
     data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
