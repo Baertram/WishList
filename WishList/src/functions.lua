@@ -710,6 +710,7 @@ function WL.IsHistoryEmpty(charData)
     return true, 0
 end
 
+--Checksi fi the item is already on trhe WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
 function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
@@ -720,7 +721,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     local isAlreadyOnWishList = false
     if itemLink == nil and itemId == nil then return false, nil, nil end
     if itemLink == nil then
-        itemLink = WL.buildItemLink(itemId, qualityWL)
+        itemLink = WL.buildItemLink(itemId, nil)
     end
     if itemId == nil then
         itemId = WL.GetItemIDFromLink(itemLink)
@@ -1557,7 +1558,7 @@ function WL.GetAllSetData()
     local allSetIds             = libSets.GetAllSetIds()
     local setCount = 0
     if allSetIds and setItemIdsPreloaded and setNamesPreloaded then
-        --local clientLang = WL.clientLang
+        --local clientLang = WL.clientLang or WL.fallbackSetLang
         local setsData = WL.accData.sets
         --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
         for setId, _ in pairs(allSetIds) do
@@ -1631,42 +1632,42 @@ function WL.GetBagAndSlotFromControlUnderMouse()
     --if it's a backpack row or child of one -> PRE API 1000015
     if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --if it's a backpack row or child of one -> Since API 1000015
     elseif moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --CRAFTBAG: if it's a backpack row or child of one -> Since API 1000015
     elseif moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --Character
     elseif moctrl:GetName():find("^ZO_CharacterEquipmentSlots.+$") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
         --Quickslot
     elseif moctrl:GetName():find("^ZO_QuickSlotList%dRow%d%d*") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
         --Vendor rebuy
     elseif moctrl:GetName():find("^ZO_RepairWindowList%dRow%d%d*") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
     end
     if bagId ~= nil and slotIndex ~= nil then
         return bagId, slotIndex

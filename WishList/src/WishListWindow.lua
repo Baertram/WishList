@@ -451,7 +451,7 @@ end
 --Setup the data of each row which gets added to the ZO_SortFilterList
 function WishListWindow:SetupItemRow( control, data )
     if WL.comingFromSortScrollListSetupFunction then return end
-    local clientLang = WL.clientLang
+    --local clientLang = WL.clientLang or WL.fallbackSetLang
     --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
 
@@ -1158,7 +1158,7 @@ function WishListRow_OnMouseEnter( rowControlEnter )
     if showAdditionalTextTooltip then
         local data = rowControlEnter.data
         if data ~= nil then
-            local clientLang = WL.clientLang
+            local clientLang = WL.clientLang or WL.fallbackSetLang
             local tooltipText = ""
             local nameVar = ""
             if data.names then

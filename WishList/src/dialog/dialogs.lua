@@ -946,7 +946,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
                     and armorOrWeaponType == typeId
                     and equipType == slotId
                     and (allTraitsTraitId == traitId or traitType == traitId) then
-                local clientLang = WL.clientLang
+                local clientLang = WL.clientLang or WL.fallbackSetLang
 --d(">[WL.buildSetItemDataFromAddItemDialog]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
                 local data = {}
                 data.setId                  = WL.currentSetId
@@ -974,7 +974,7 @@ end
 function WL.showAddItem(setData, comingFromWishListWindow)
     comingFromWishListWindow = comingFromWishListWindow or false
     WL.createWindow(false)
-    local clientLang = WL.clientLang
+    local clientLang = WL.clientLang or WL.fallbackSetLang
     WL.currentSetId = setData.setId
     WL.currentSetName = setData.names[clientLang]
     WL.checkCurrentCharData()

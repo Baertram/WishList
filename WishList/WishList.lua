@@ -41,6 +41,8 @@ WL.LoggedInCharData = {}
 WL.sortType = 1
 WL.firstWishListCall = false
 
+WL.fallbackSetLang = "en" -- the fallback language for the setNames if the clientLanguage is not supported within LibSets
+
 WL.invSingleSlotUpdateData = {}
 WL.debug = false
 
@@ -338,7 +340,7 @@ local function checkLanguageToAddFirst()
     --d("[WishList]checkLanguageToAddFirst, WL.langToAddFirst: " ..tostring(WL.langToAddFirst))
     if not WL.preventerVars.runSetNameLanguageChecks then return WL.langToAddFirst end
     --Checks which language should be added first to the setName output
-    local clientLang = WL.clientLang
+    local clientLang = WL.clientLang or WL.fallbackSetLang
     local setNameOutputSettings = WL.data.useLanguageForSetNames
     local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
     local langToAddFirst = "en"
@@ -402,10 +404,10 @@ function WL.CreateEntryForSet( setId, setData )
     local itemLink = WL.buildItemLink(itemId, WISHLIST_QUALITY_LEGENDARY) -- Always use the legendary quality for the sets list
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     --Remove the gender stuff from the setname
-    local clientLang = WL.clientLang
+    local clientLang = WL.clientLang or WL.fallbackSetLang
     local nameColumnValue = ""
     --Get the settings for the setName output
-    local clientLangSetName = setData.names[clientLang]
+    local clientLangSetName = setData.names[clientLang] or setData.names[WL.fallbackSetLang]
     local langsAdded = 0
     local setNameOutputSettings = WL.data.useLanguageForSetNames
     if not libSets or setNameOutputSettings == nil then
