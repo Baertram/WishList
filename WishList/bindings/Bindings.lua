@@ -52,7 +52,8 @@ function WishList:AddOrRemoveFromWishList()
             data.trait      = traitType
             data.quality    = qualityWL
             table.insert(items, data)
-            WishList:AddItem(items)
+            --WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedChatOutput)
+            WishList:AddItem(items, charData, true)
         else
             --Already on WishList, so ask to remove it
             local item = {}
