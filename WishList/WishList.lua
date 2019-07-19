@@ -396,6 +396,7 @@ end
 
 --ZO_SortScrollList - Item for the sets tab's list
 function WL.CreateEntryForSet( setId, setData )
+WL._setDataCreateEntryForSet = setData
 	--Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
     --local setsData = WL.accData.sets
 	local itemId = WL.GetFirstSetItem(setId)
@@ -1191,6 +1192,18 @@ function WL.init(_, addonName)
 
     --Load the settings
     WL.loadSettings()
+    --Check if the sets are updated with LibSets v0.06 data
+    --Does the "setsLastScanned" entry exist or does the "names" subtable exist?
+    --If not we did not scan the sets new and got old setData. Therefore we need to update it now once via LibSets, but silently
+    local setsData = WL.accData.sets
+    if setsData then
+        for _, setData in pairs(setsData) do
+            if WL.accData.setsLastScanned == nil or setData.names == nil then
+                WL.GetAllSetData(true)
+                break -- Get out of the lop now
+            end
+        end
+    end
 
     --Get the characters of the currently logged in account and list all available ones in a list (for the char selection dropdown at the WishList tab e.g.)
     WL.getCharsOfAccount()

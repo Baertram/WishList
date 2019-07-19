@@ -1524,20 +1524,23 @@ end
 ]]
 
 --New with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
-function WL.GetAllSetData()
-    --Hide Controls
-    WL.window.labelNoSets:SetHidden(true)
-    WL.window.buttonLoadSets:SetHidden(true)
+function WL.GetAllSetData(silent)
+    silent = silent or false
+    if not silent then
+        --Hide Controls
+        WL.window.labelNoSets:SetHidden(true)
+        WL.window.buttonLoadSets:SetHidden(true)
 
-    --Show Loading controls
-    WL.window.labelLoadingSets:SetHidden(false)
-    d(">>=============================================>>")
-    d("[" .. GetString(WISHLIST_TITLE) .."]")
-    d(GetString(WISHLIST_LOADING_SETS))
+        --Show Loading controls
+        WL.window.labelLoadingSets:SetHidden(false)
+        d(">>=============================================>>")
+        d("[" .. GetString(WISHLIST_TITLE) .."]")
+        d(GetString(WISHLIST_LOADING_SETS))
 
-    --Update UI, no sets loaded yet -> Beginning to load sets
-    WL.CurrentTab = WISHLIST_TAB_SEARCH
-    WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADING)
+        --Update UI, no sets loaded yet -> Beginning to load sets
+        WL.CurrentTab = WISHLIST_TAB_SEARCH
+        WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADING)
+    end
 
     --Clear all set data
     WL.accData.sets = {}
@@ -1591,7 +1594,9 @@ function WL.GetAllSetData()
         WL.accData.setCount = setCount
         WL.accData.setsLastScanned = GetTimeStamp()
     end
-    showTotalItemsLoaded()
+    if not silent then
+        showTotalItemsLoaded()
+    end
 end
 
 
