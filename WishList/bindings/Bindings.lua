@@ -12,29 +12,34 @@ function WishList:AddOrRemoveFromWishList()
     if bagId ~= nil and slotIndex ~= nil then
         --d(">bag: " .. tostring(bagId) .. ", slot: " .. tostring(slotIndex))
         local itemLink = GetItemLink(bagId, slotIndex)
+        local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+        if not isSet then return end
+        --d(">isSet: " ..tostring(isSet) .. ", setName: " ..tostring(setName) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType))
         local itemType = GetItemLinkItemType(itemLink)
-        --d(">ItemType: " ..tostring(itemType))
         local armorOrWeaponType = 0
         if itemType == ITEMTYPE_ARMOR then
             armorOrWeaponType = GetItemLinkArmorType(itemLink)
         elseif itemType == ITEMTYPE_WEAPON then
             armorOrWeaponType = GetItemLinkWeaponType(itemLink)
         end
-        local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-        --d(">isSet: " ..tostring(isSet) .. ", setName: " ..tostring(setName) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType))
-        if not isSet then return end
+        local slotType = GetItemLinkEquipType(itemLink)
+        local traitType = GetItemLinkTraitInfo(itemLink)
+        local itemQuality = GetItemLinkQuality(itemLink)
         --d(">Checking if item " .. itemLink .. " is on WishList...")
-        --Get the item's id from the link
+        --Get the currently logged in charData
+        WL.checkCurrentCharData(true)
+        local charData = WL.LoggedInCharData
         --Check if already on Wishlist
-        local isAlreadyOnWL, setItemId = WL.isItemAlreayOnWishlist(itemLink)
+        local isAlreadyOnWL, setItemId = WL.isItemAlreadyOnWishlist(itemLink, nil, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
         --If not: add the item
         if setItemId == nil then
             --d("<< ABORTED!")
             return
         end
         if not isAlreadyOnWL then
-            local traitType = GetItemLinkTraitInfo(itemLink)
             local equipType = GetItemLinkEquipType(itemLink)
+            local qualityWL = itemQuality + WL.ESOquality2WLqualityAdd
+
             setName = zo_strformat("<<C:1>>", setName)
             local items = {}
             local data = {}
@@ -45,8 +50,10 @@ function WishList:AddOrRemoveFromWishList()
             data.armorOrWeaponType       = armorOrWeaponType
             data.slot       = equipType
             data.trait      = traitType
+            data.quality    = qualityWL
             table.insert(items, data)
-            WishList:AddItem(items)
+            --WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedChatOutput)
+            WishList:AddItem(items, charData, true)
         else
             --Already on WishList, so ask to remove it
             local item = {}

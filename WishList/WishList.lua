@@ -12,7 +12,7 @@ WL.comingFromSortScrollListSetupFunction = false
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.4
+WL.addonVars.addonRealVersion		= 2.5
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
@@ -26,6 +26,13 @@ WL.addonMenu = LibAddonMenu2
 if WL.addonMenu == nil and LibStub then LibStub:GetLibrary("LibAddonMenu-2.0") end
 WL.LMM2 = LibMainMenu2
 if WL.LMM2 == nil and LibStub then LibStub:GetLibrary("LibMainMenu-2.0") end
+WL.LibSets = LibSets
+--Check if the version is found and >= 0.06
+local libSets = WL.LibSets
+local libSetsVersionExists = libSets.version ~= nil
+local libSetsVersionIsGreaterEqualNeededValue = libSets.version >= 0.06
+local libSetsHTTPLinkEsoui = "https://www.esoui.com/downloads/info2241-LibSets.html"
+assert(libSetsVersionExists and libSetsVersionIsGreaterEqualNeededValue, "[WishList] ERROR - Needed library \'LibSets\' is not found or not loaded with the needed version 0.06 or higher!\nPlease download the newest version: " .. libSetsHTTPLinkEsoui)
 
 WL.CurrentState = WISHLIST_TAB_STATE_NO_SETS 	    --1=NoSets, 2=Loading, 3=SetsLoaded
 WL.CurrentTab   = WISHLIST_TAB_SEARCH               --1=Search, 2=WishList
@@ -33,6 +40,8 @@ WL.CurrentCharData = {}
 WL.LoggedInCharData = {}
 WL.sortType = 1
 WL.firstWishListCall = false
+
+WL.fallbackSetLang = "en" -- the fallback language for the setNames if the clientLanguage is not supported within LibSets
 
 WL.invSingleSlotUpdateData = {}
 WL.debug = false
@@ -45,6 +54,7 @@ WL.defaultAccSettings = {
     itemCount = 0,
     use24hFormat = false,
     useCustomDateFormat = "",
+    setsLastScanned = 0,
 }
 --SavedVars defaults
 WL.defaultSettings = {
@@ -67,6 +77,13 @@ WL.defaultSettings = {
     useItemFoundCharacterName            = true,
     useItemFoundCSA                      = true,
     itemFoundText                        = GetString(WISHLIST_LOOT_MSG_STANDARD),
+    useLanguageForSetNames               = {
+        ["de"] = false,
+        ["en"] = true,
+        ["fr"] = false,
+        ["ru"] = false,
+        ["jp"] = false,
+    },
 }
 --SavedVars
 WL.data = {}
@@ -81,6 +98,7 @@ WL.otherAddons.LazyWritCreatorActive = false
 WL.preventerVars = {}
 WL.preventerVars.addonMenuBuild = false
 WL.preventerVars.writCreatorAutoLootBoxesActive = false
+WL.preventerVars.runSetNameLanguageChecks = false
 
 ------------------------------------------------
 --- Event Handlers
@@ -201,6 +219,11 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     if debug then
         d(">traitType: " ..tostring(traitType))
     end
+    --Get the quality
+    local quality = GetItemLinkQuality(itemLink)
+    if debug then
+        d(">quality: " ..tostring(quality))
+    end
     --Get the settings
     local settings = WL.data
     local isOnWishList, item, itemIdOfSetPart
@@ -221,7 +244,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             charData.class = charInfo.class
             if charData ~= nil and charData.id ~= nil then
                 --Check if the item is on the wishlist
-                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType)
+                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
                 if debug then
                     d(">>isOnWishList: " .. tostring(isOnWishList))
                 end
@@ -250,7 +273,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         charData = WL.LoggedInCharData
         if charData == nil or charData.id == nil then return false end
         --Check if the item is on the wishlist
-        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType)
+        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
         if debug then
             d(">>isOnWishList: " .. tostring(isOnWishList))
         end
@@ -310,22 +333,125 @@ end
 ------------------------------------------------
 --- Wishlist - ZO_SortFilterList entry creation
 ------------------------------------------------
+
+--Check which language should be added first to the set name column (client language or standard language EN)
+-->This function should only be run once after reloadui, and once after the settings were changed (See variable WL.preventerVars.runSetNameLanguageChecks)
+local function checkLanguageToAddFirst()
+    --d("[WishList]checkLanguageToAddFirst, WL.langToAddFirst: " ..tostring(WL.langToAddFirst))
+    if not WL.preventerVars.runSetNameLanguageChecks then return WL.langToAddFirst end
+    --Checks which language should be added first to the setName output
+    local clientLang = WL.clientLang or WL.fallbackSetLang
+    local setNameOutputSettings = WL.data.useLanguageForSetNames
+    local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
+    local langToAddFirst = "en"
+    --Check if the client language is disabled in the settings for the setName
+    local clientLangIsEnabledInSetNameSettings = setNameOutputSettings[clientLang] or false
+    --Check if all languages are disabled in the settings for the setNames
+    local fallbackLangEnabledInSetNameSettings = false
+    local otherNonFallbackLangEnabledInSetNameSettings = false
+    local allLanguagesDisabledInSetNameSettings = true
+    local doNotAddFirstLanguage = false
+    for langToCheck, isEnabledCheck in pairs(setNameOutputSettings) do
+        --Language is enabled?
+        if isEnabledCheck then
+            allLanguagesDisabledInSetNameSettings = false
+            --English language is enabled in the settings?
+            if langToCheck == langToAddFirst then
+                fallbackLangEnabledInSetNameSettings = true
+            elseif langToCheck ~= clientLang then
+                otherNonFallbackLangEnabledInSetNameSettings = true
+            end
+        end
+    end
+    --All languages are disabled in the settings of the setName
+    if allLanguagesDisabledInSetNameSettings then
+        --Client language is not supported within LibSets. Then use the default language "en"
+        --Client language is supported within LibSets? Then add it as first language
+        if clientLangIsSupportedInLibSets then
+            langToAddFirst = clientLang
+        --else --Client language is not supported, so use the fallback language
+        end
+    --Not all languages are disabled in the settings of the setName
+    else
+        --The client language is supported within LibSets and the client language is enabled in the settings for the setName output:
+        --Then add it as first language
+        if clientLangIsSupportedInLibSets and clientLangIsEnabledInSetNameSettings then
+            langToAddFirst = clientLang
+        --The client language is not supported within LibSets or the client language is not enabled in the settings for the setName output,
+        --and the fallback language is not enabled in the settings of the setName, but another language is enabled
+        --Then add it as first language
+        elseif (not clientLangIsSupportedInLibSets or not clientLangIsEnabledInSetNameSettings) and
+                (not fallbackLangEnabledInSetNameSettings and otherNonFallbackLangEnabledInSetNameSettings) then
+            --Check if the fallback language "en" is not enabled in the settings of the setName, but another language is enabled.
+            --Then do not add the fallback language "en" but only the enabled language
+            doNotAddFirstLanguage = true
+        end
+    end
+    --d(">doNotAddFirstLanguage: " .. tostring(doNotAddFirstLanguage) .. ", langToAddFirst: " .. tostring(langToAddFirst) .. "-> clientLang: " ..tostring(clientLang)..", supported: " ..tostring(clientLangIsSupportedInLibSets)..", enabled: " ..tostring(clientLangIsEnabledInSetNameSettings) .. ", allDisabled: " ..tostring(allLanguagesDisabledInSetNameSettings))
+    if doNotAddFirstLanguage then langToAddFirst = nil end
+    WL.preventerVars.runSetNameLanguageChecks = false
+    WL.langToAddFirst = langToAddFirst
+    return langToAddFirst
+end
+
 --ZO_SortScrollList - Item for the sets tab's list
 function WL.CreateEntryForSet( setId, setData )
+WL._setDataCreateEntryForSet = setData
 	--Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
     --local setsData = WL.accData.sets
 	local itemId = WL.GetFirstSetItem(setId)
     if itemId == nil then return nil end
 	--local bonuses = setsData[setId][1].bonuses
-    local itemLink = WL.buildItemLink(itemId)
+    local itemLink = WL.buildItemLink(itemId, WISHLIST_QUALITY_LEGENDARY) -- Always use the legendary quality for the sets list
     local _, _, numBonuses = GetItemLinkSetInfo(itemLink, false)
     --Remove the gender stuff from the setname
-    local setName = zo_strformat("<<C:1>>", setData.name)
+    local clientLang = WL.clientLang or WL.fallbackSetLang
+    local nameColumnValue = ""
+    --Get the settings for the setName output
+    local clientLangSetName = setData.names[clientLang] or setData.names[WL.fallbackSetLang]
+    local langsAdded = 0
+    local setNameOutputSettings = WL.data.useLanguageForSetNames
+    if not libSets or setNameOutputSettings == nil then
+        nameColumnValue = clientLangSetName
+        langsAdded = langsAdded +1
+    else
+        local langsAlreadyAdded = {}
+        --Which language should be added first to the setName column?
+        local langToAddFirst = checkLanguageToAddFirst()
+        if langToAddFirst ~= nil then
+            nameColumnValue = setData.names[langToAddFirst]
+            langsAlreadyAdded[langToAddFirst] = true
+            langsAdded = langsAdded +1
+        end
+        --For each enabled language in the WishList "LibSets setName output" settings (which is not the already added
+        --client language or English)
+        for languageToAddToSetName, isEnabled in pairs(setNameOutputSettings) do
+            if isEnabled and not langsAlreadyAdded[languageToAddToSetName] then
+                if langsAdded == 0 then
+                    --Add the set name in this language without a seperator character
+                    nameColumnValue = nameColumnValue .. setData.names[languageToAddToSetName]
+                else
+                    --Add the set name in this language with a seperator character /
+                    nameColumnValue = nameColumnValue .. " / " .. setData.names[languageToAddToSetName]
+                end
+                --Increase the counter
+                langsAdded = langsAdded +1
+            end
+        end
+    end
+    --Set the width of the label column depending on the languages added
+    local columnWidthAdd = 0
+    if langsAdded > 1 then
+        columnWidthAdd = langsAdded * 125
+    end
+
 --Table entry for the ZO_ScrollList data
 	return({
         type        = WL.sortType,
 		setId       = setId,
-		name        = setName,
+		name        = nameColumnValue,
+        names       = setData.names,
+        columnWidth = 200 + columnWidthAdd,
 		itemLink    = itemLink,
 		bonuses     = numBonuses
 	})
@@ -333,7 +459,7 @@ end
 
 --ZO_SortFilterList - Item for the WishList tab's list (called within BuildMasterList)
 function WL.CreateEntryForItem(item)
-    local itemLink = WL.buildItemLink(item.id)
+    local itemLink = WL.buildItemLink(item.id, item.quality)
 --d("[WL.CreateEntryForItem] " .. itemLink)
 
 	local setId = item.setId
@@ -345,9 +471,12 @@ function WL.CreateEntryForItem(item)
         setName = zo_strformat("<<C:1>>", setLocName)
         setId = setLocId
     end
+    --If the quality is not set, set it with no matter which quality now
+    if item.quality == nil then
+        item.quality = WISHLIST_QUALITY_ALL
+    end
     --Get the names of the types (for search and order functions)
-    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
---d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
+    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
 	return({
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
@@ -364,12 +493,14 @@ function WL.CreateEntryForItem(item)
 		name                    = setName,
 		itemLink                = itemLink,
         timestamp               = item.timestamp,
+        quality                 = item.quality,
+        qualityName             = itemQualityName,
 	})
 end
 
 --ZO_SortFilterList - Item for the History tab's list (called within BuildMasterList)
 function WL.CreateHistoryEntryForItem(item)
-    local itemLink = WL.buildItemLink(item.id)
+    local itemLink = WL.buildItemLink(item.id, item.quality)
 --d("[WL.CreateHistoryEntryForItem] " .. itemLink .. ", timestamp: " .. tostring(item.timestamp))
     local setId = item.setId
     local setName = item.setName
@@ -380,8 +511,12 @@ function WL.CreateHistoryEntryForItem(item)
         setName = zo_strformat("<<C:1>>", setLocName)
         setId = setLocId
     end
+    --If the quality is not set, set it with no matter which quality now
+    if item.quality == nil then
+        item.quality = WISHLIST_QUALITY_ALL
+    end
     --Get the names of the types (for search and order functions)
-    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
+    local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     return({
@@ -403,6 +538,8 @@ function WL.CreateHistoryEntryForItem(item)
         username                = item.username,
         displayName             = function() if item.displayName ~= nil then return item.displayName else return "" end end,
         locality                = item.locality,
+        quality                 = item.quality,
+        qualityName             = itemQualityName,
     })
 end
 
@@ -427,7 +564,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local alreadyOnWishList = false
         if not alreadyOnWishlistCheckDone then
@@ -440,6 +577,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
             end
             --Insert the item to the character dependent WishList SavedVars global table WishList_Data["Default"][GetDisplayName()][charId]["Data"]["wishList"]
             --table.insert(wishList, item)
+--d("[WishList]AddItem, item quality: " ..tostring(item.quality))
             table.insert(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], item)
             count = count + 1
             local traitId = item.trait
@@ -463,7 +601,7 @@ end
 
 function WL.AddSetItems(addType)
     --d("[WL.AddSetItems] addType: " .. tostring(addType))
-    --Close the add itme dialog at first!
+    --Close the add item dialog at first!
     WishListAddItemDialogCancel:callback()
     local addType2ChatMsg = {
         [WISHLIST_ADD_TYPE_WHOLE_SET]                         = WL.buildTooltip(WISHLIST_DIALOG_ADD_WHOLE_SET_TT),
@@ -493,12 +631,15 @@ function WL.AddSetItems(addType)
     --get the selected item trait
     local selectedItemTraitData = WishListAddItemDialogContentTraitCombo.m_comboBox.m_selectedItemData
     if selectedItemTraitData == nil or selectedItemTraitData.id == nil then return false end
+    --get the selected quality
+    local selectedItemQualityData = WishListAddItemDialogContentQualityCombo.m_comboBox.m_selectedItemData
+    if selectedItemQualityData == nil or selectedItemQualityData.id == nil then return false end
 
     --d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id))
     --The items to add table
     local items = {}
     --Get the set parts to add
-    items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, addType)
+    items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --Add the items now, if some were found
     if #items > 0 then
         --Add the found set items to the WishList of the selected user now
@@ -525,7 +666,7 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
 --d(">item added to history: " .. itemLink)
         if item.timestamp == nil then
@@ -576,7 +717,7 @@ function WishList:RemoveItem(item, charData)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local traitId = item.trait
         local itemTraitText = WL.TraitTypes[traitId]
@@ -608,7 +749,7 @@ function WishList:RemoveHistoryItem(item, charData)
         if item.itemLink ~= nil then
             itemLink = item.itemLink
         else
-            itemLink = WL.buildItemLink(item.id)
+            itemLink = WL.buildItemLink(item.id, item.quality)
         end
         local traitId = item.trait
         local itemTraitText = WL.TraitTypes[traitId]
@@ -679,7 +820,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
             if itm.itemLink ~= nil then
                 itemLink = itm.itemLink
             else
-                itemLink = WL.buildItemLink(itm.id)
+                itemLink = WL.buildItemLink(itm.id, itm.quality)
             end
             local traitId = itm.trait
             local itemTraitText = WL.TraitTypes[traitId]
@@ -708,7 +849,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
         if itm.setId == setId then
-            local itemLink = WL.buildItemLink(itm.id)
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
             if setName == "" then
                 local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
                 --Remove the gender stuff from the setname
@@ -726,6 +867,73 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     end
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
     WL.updateRemoveAllButon()
+    WishList:ReloadItems()
+end
+
+function WishList:ChangeQualityOfItem(item, charData, newQuality)
+    local index = -1
+    local wishList = WL.getWishListSaveVars(charData, "WishList:ChangeQualityOfItem")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local charNameChat = charData.name
+    for i = 1, #wishList do
+        local itm = wishList[i]
+        if itm.id == item.id then
+            index = i
+            break
+        end
+    end
+    if index ~= -1 then
+        local currentWishListSVEntry = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][index]
+        if currentWishListSVEntry ~= nil then
+            currentWishListSVEntry["quality"] = newQuality
+        end
+        local itemLink
+        if item.itemLink ~= nil then
+            itemLink = item.itemLink
+        else
+            itemLink = WL.buildItemLink(item.id, item.quality)
+        end
+        local traitId = item.trait
+        local itemTraitText = WL.TraitTypes[traitId]
+        itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+        d(itemLink.. zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
+    end
+    WishList:ReloadItems()
+end
+
+function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
+    if setId == nil then return false end
+    local wishList = WL.getWishListSaveVars(charData, "WishList:ChangeQualityOfItemsOfSet")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local charNameChat = charData.name
+    local setName = ""
+    local cnt = 0
+    for i = #wishList, 1, -1 do
+        local itm = wishList[i]
+        if itm.setId == setId then
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
+            if setName == "" then
+                local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
+                --Remove the gender stuff from the setname
+                setName = zo_strformat("<<C:1>>", setLocName)
+            end
+            local traitId = itm.trait
+            local itemTraitText = WL.TraitTypes[traitId]
+            itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+            --Update the WishList entry of the current, or the selected char
+            local currentWishListEntryOfSetItem = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][i]
+            if currentWishListEntryOfSetItem ~= nil then
+                currentWishListEntryOfSetItem["quality"] = newQuality
+                d(itemLink..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
+                cnt = cnt +1
+            end
+        end
+    end
+    d(zo_strformat(GetString(WISHLIST_ITEMS_UPDATED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) updated in Wish List"
     WishList:ReloadItems()
 end
 
@@ -789,7 +997,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             if itm.itemLink ~= nil then
                 itemLink = itm.itemLink
             else
-                itemLink = WL.buildItemLink(itm.id)
+                itemLink = WL.buildItemLink(itm.id, itm.quality)
             end
             local traitId = itm.trait
             local itemTraitText = WL.TraitTypes[traitId]
@@ -817,7 +1025,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
     for i = #history, 1, -1 do
         local itm = history[i]
         if itm.setId == setId then
-            local itemLink = WL.buildItemLink(itm.id)
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
             if setName == "" then
                 local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
                 --Remove the gender stuff from the setname
@@ -847,7 +1055,7 @@ function WishList:RemoveAllItems(charData)
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -875,7 +1083,7 @@ function WishList:ClearHistory(charData)
 --d("[WishList:ClearHistory]char: " .. tostring(charNameChat))
     for i = #history, 1, -1 do
         local itm = history[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -907,17 +1115,17 @@ function WL.loadSettings()
         WL.defaultAccSettings.use24hFormat = true
     end
     --Load the acocunt wide settings (Sets, save mode of SavedVars, etc.)
-    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings)
-
+    --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
+    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings, nil, nil)
     --Check, by help of basic version 999 settings, if the settings should be loaded for each character or account wide
     --Use the current addon version to read the settings now
     if (WL.accData.saveMode == 1) then
         --Load the character user settings
-        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings)
+        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil)
     --------------------------------------------------------------------------------------------------------------------
     else
         --Load the account wide user settings
-        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings)
+        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil, nil)
     end
 end
 
@@ -978,8 +1186,24 @@ function WL.init(_, addonName)
     --Unregister for on loaded event
     EVENT_MANAGER:UnregisterForEvent(addonVars.addonName, EVENT_ADD_ON_LOADED)
 
+    --The client language
+    WL.clientLang = GetCVar("language.2")
+    WL.preventerVars.runSetNameLanguageChecks = true
+
     --Load the settings
     WL.loadSettings()
+    --Check if the sets are updated with LibSets v0.06 data
+    --Does the "setsLastScanned" entry exist or does the "names" subtable exist?
+    --If not we did not scan the sets new and got old setData. Therefore we need to update it now once via LibSets, but silently
+    local setsData = WL.accData.sets
+    if setsData then
+        for _, setData in pairs(setsData) do
+            if WL.accData.setsLastScanned == nil or setData.names == nil then
+                WL.GetAllSetData(true)
+                break -- Get out of the lop now
+            end
+        end
+    end
 
     --Get the characters of the currently logged in account and list all available ones in a list (for the char selection dropdown at the WishList tab e.g.)
     WL.getCharsOfAccount()

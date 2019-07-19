@@ -4,6 +4,39 @@ local WL = WishList
 ------------------------------------------------------------------------------------------------------------
 -- LibAddonMenu (LAM) Settings panel
 ------------------------------------------------------------------------------------------------------------
+
+--Function to create a LAM control
+local function CreateControl(ref, name, tooltip, data, disabledChecks, getFunc, setFunc, defaultSettings, warning, scrollable)
+    scrollable = scrollable or false
+    if ref ~= nil then
+        if string.find(ref, GetString(WISHLIST_TITLE) .. "_LAM_", 1)  ~= 1 then
+            data.reference = GetString(WISHLIST_TITLE) .. "_LAM_" .. ref
+        else
+            data.reference = ref
+        end
+    end
+    if data.type ~= "description" then
+        data.name = name
+        if data.type ~= "header" and data.type ~= "submenu" then
+            data.tooltip = tooltip
+            if data.type ~= "button" then
+                data.getFunc = getFunc
+                data.setFunc = setFunc
+                data.default = defaultSettings
+            else
+                data.func = setFunc
+            end
+            if disabledChecks ~= nil then
+                data.disabled = disabledChecks
+            end
+            data.scrollable = scrollable
+            data.warning = warning
+        end
+    end
+    return data
+end
+
+
 function WL.buildAddonMenu()
     if WL.addonMenu == nil then return nil end
     --Local "speed up arrays/tables" variables
@@ -39,6 +72,68 @@ function WL.buildAddonMenu()
         [2] = GetString(WISHLIST_LAM_SV_ACCOUNT_WIDE),
     }
 
+    --Build the submenu controls (checkboxes) for each LibSets supported language
+    local function buildLibSetsSetNameLanguagesCheckboxes()
+        local retTable = {}
+        local libSets = WL.LibSets
+        if libSets and libSets.supportedLanguages then
+            local langVars = {}
+            for langStr, isEnabled in pairs(libSets.supportedLanguages) do
+                if isEnabled then
+                    table.insert(langVars, langStr)
+                end
+            end
+            table.sort(langVars)
+            --Get the client language
+            local clientLang = WL.clientLang
+            local clientLangIsSupportedInLibSets = libSets.supportedLanguages[clientLang]
+            --If the client language is not supported within LibSets use EN (English) as default
+            --Add all other languages now
+            for _, langStrVarSorted in ipairs(langVars) do
+                --Add the checkbox now
+                local name = langStrVarSorted
+                local tooltip = tostring(langStrVarSorted)
+                local data = { type = "checkbox", width = "half" }
+                local disabledFunc = function() return false end
+                local getFunc
+                local setFunc
+                local defaultSettingsCB
+                getFunc = function() return settings.useLanguageForSetNames[langStrVarSorted] end
+                setFunc = function(value) WL.data.useLanguageForSetNames[langStrVarSorted] = value
+                    WL.preventerVars.runSetNameLanguageChecks = true
+                end
+                defaultSettingsCB     = function()
+                    local defValue
+                    if defaultSettings.useLanguageForSetNames[langStrVarSorted] then
+                        defValue = defaultSettings.useLanguageForSetNames[langStrVarSorted]
+                    end
+                    --No default value found for the actual language
+                    if defValue == nil then
+                        --Is the current language the client language?
+                        if langStrVarSorted == clientLang then
+                            --Is the current language supported within LibSets?
+                            if clientLangIsSupportedInLibSets then
+                                defValue = true
+                            else
+                                defValue = false
+                            end
+                        else
+                            defValue = false
+                        end
+                    end
+                    return defValue
+                end
+                --Create the checkbox now
+                local createdTraitCB = CreateControl(nil, name, tooltip, data, disabledFunc, getFunc, setFunc, defaultSettingsCB, nil)
+                if createdTraitCB then
+                    table.insert(retTable, createdTraitCB)
+                end
+            end
+        end
+        return retTable
+    end
+    local libSetsSetNameLanguages = buildLibSetsSetNameLanguagesCheckboxes()
+
     --The options panel data for the LAM settings of this addon
     local optionsData  = {
         {
@@ -70,6 +165,21 @@ function WL.buildAddonMenu()
         },
         {
             type = "checkbox",
+            name = GetString(WISHLIST_LAM_ADD_MAIN_MENU_BUTTON),
+            tooltip = GetString(WISHLIST_LAM_ADD_MAIN_MENU_BUTTON_TT),
+            getFunc = function() return settings.showMainMenuButton end,
+            setFunc = function(value)
+                settings.showMainMenuButton = value
+            end,
+            default = defaults.showMainMenuButton,
+        },
+        --==============================================================================
+        {
+            type = 'header',
+            name = GetString(WISHLIST_LAM_FORMAT_OPTIONS),
+        },
+        {
+            type = "checkbox",
             name = GetString(WISHLIST_LAM_USE_24h_FORMAT),
             tooltip = GetString(WISHLIST_LAM_USE_24h_FORMAT_TT),
             getFunc = function() return accSettings.use24hFormat end,
@@ -89,15 +199,12 @@ function WL.buildAddonMenu()
             end,
             default = defaultSettings.useCustomDateFormat,
         },
+
         {
-            type = "checkbox",
-            name = GetString(WISHLIST_LAM_ADD_MAIN_MENU_BUTTON),
-            tooltip = GetString(WISHLIST_LAM_ADD_MAIN_MENU_BUTTON_TT),
-            getFunc = function() return settings.showMainMenuButton end,
-            setFunc = function(value)
-                settings.showMainMenuButton = value
-            end,
-            default = defaults.showMainMenuButton,
+            type = "submenu",
+            name = GetString(WISHLIST_LAM_SETNAME_LANGUAGES),
+            tooltip = GetString(WISHLIST_LAM_SETNAME_LANGUAGES_TT),
+            controls = libSetsSetNameLanguages,
         },
 
         --==============================================================================

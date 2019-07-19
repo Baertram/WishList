@@ -19,6 +19,7 @@ local stringsBase = {
     WISHLIST_HEADER_CHARS               = GetString(SI_BINDING_NAME_TOGGLE_CHARACTER), -- Character / toon
     WISHLIST_HEADER_USERNAME            = "User",
     WISHLIST_HEADER_LOCALITY            = "Locality",
+    WISHLIST_HEADER_QUALITY             = GetString(SI_TRADINGHOUSEFEATURECATEGORY5), --Quality
 
     WISHLIST_CONST_ID                   = "id",
     WISHLIST_CONST_SET                  = "set",
@@ -58,8 +59,10 @@ local strings = {
 
     WISHLIST_ADDED                   = " added to " .. GetString(WISHLIST_TITLE),
     WISHLIST_REMOVED                 = " removed from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_UPDATED                 = " updated <<1>> in " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_ADDED             = "<<1[No item/1 item/$d items]>> added to " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_REMOVED           = "<<1[No item/1 item/$d items]>> removed from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_ITEMS_UPDATED           = "<<1[No item/1 item/$d items]>> changed in " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_HISTORY_ADDED                   = " added to " .. GetString(WISHLIST_HISTORY_TITLE),
     WISHLIST_HISTORY_REMOVED                 = " removed from " .. GetString(WISHLIST_HISTORY_TITLE),
@@ -92,6 +95,10 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ALL_ITEMS_QUESTION     = "Really remove all items?",
     WISHLIST_BUTTON_CLEAR_HISTORY_TT            = GetString(WISHLIST_BUTTON_REMOVE_HISTOTY_TT) .. "?",
     WISHLIST_DIALOG_CLEAR_HISTORY_QUESTION      = "Really clear " .. GetString(WISHLIST_HISTORY_TITLE) .. " for selected character?",
+    WISHLIST_DIALOG_CHANGE_QUALITY              = "Change " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5),
+    WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION     = "Change <<1>>?",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET    = "Change " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " of set",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION   = "Really change all items of set \"<<1>>\"?",
 
     WISHLIST_BUTTON_COPY_WISHLIST_TT            = "Copy " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_CHOOSE_CHARACTER_TT         = "Choose character",
@@ -101,7 +108,7 @@ local strings = {
     WISHLIST_NO_ITEMS_COPIED                    = "No items copied, maybe all items are already on the target's " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_DIALOG_RELOAD_ITEMS             = "Reload items",
-    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "THIS WILL RELOAD ALL SET ITEMS!\nCan take some minutes and will lag your client. ARE YOU SURE?",
+    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "THIS WILL RELOAD ALL SET ITEMS using library \'LibSets\'!\nShouldn't take longer than 10 seconds.",
     WISHLIST_LINK_ITEM_TO_CHAT               = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER                = "Whisper \"<<C:1>>\" and ask for <<2>>",
     WISHLIST_WHISPER_RECEIVER_QUESTION       = "Hey <<C:1>>, you have found this item: <<2>>. I'm searching for it and would like to ask if you will trade it to me? Thank you.",
@@ -113,6 +120,13 @@ local strings = {
     WISHLIST_TOTAL_SETS                      = "Total sets: ",
     WISHLIST_TOTAL_SETS_ITEMS                = "Total items: ",
     WISHLIST_SETS_FOUND                      = "Sets found: <<1>> with <<2>> total items",
+
+    WISHLIST_ITEM_QUALITY_ALL                       = "- Any " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " -",
+    WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE           = GetString(SI_ITEMQUALITY2) .. ", " .. GetString(SI_ITEMQUALITY3), 		--Magic or arcane
+    WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT        = GetString(SI_ITEMQUALITY3) .. ", " .. GetString(SI_ITEMQUALITY4), 		--Arcane or artifact
+    WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY     = GetString(SI_ITEMQUALITY4) .. ", " .. GetString(SI_ITEMQUALITY5), 	    --Artifact or legendary
+    WISHLIST_ITEM_QUALITY_MAGIC_TO_LEGENDARY        = GetString(SI_ITEMQUALITY2) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Magic to legendary
+    WISHLIST_ITEM_QUALITY_ARCANE_TO_LEGENDARY       = GetString(SI_ITEMQUALITY3) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Arcane to legendary
 
     --Tooltips
     WISHLIST_BUTTON_RELOAD_TT                = "Reload all set data",
@@ -166,6 +180,10 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT              = "Show a center screen announcement message in addition to the chat message",
     WISHLIST_LAM_ITEM_FOUND_TEXT                    = "Looted item message",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT                 = "Specify the message text which will appear in the chat and (if enabled) at the center screen announcement, if an item on your " .. GetString(WISHLIST_TITLE) .. " was looted.\nLeve the edit field empty to show a default loot message.\n\nYou can use the following placeholders in your message, which will be replaced with the looted item information:\n<<1>>    Name (link)\n<<2>>  Looted by\n<<3>>   Trait\n<<4>>  Quality\n<<5>>  Level\n<<6>>  Set name",
+
+    WISHLIST_LAM_FORMAT_OPTIONS                     = "Output format",
+    WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set name languages",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character). The current client language will be shown first (If supported. Else English is shown first).",
 }
 WL.stringsEN = strings
 

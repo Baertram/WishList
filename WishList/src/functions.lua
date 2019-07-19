@@ -451,10 +451,125 @@ end
 ------------------------------------------------
 --- Itemlink functions
 ------------------------------------------------
-function WL.buildItemLink(itemId)
+function WL.buildItemLink(itemId, qualityIdWishList)
     if itemId == nil then return nil end
-    return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, 364, ITEMSTYLE_NONE, 0, 10000)
+    qualityIdWishList = qualityIdWishList or WISHLIST_QUALITY_LEGENDARY -- Legendary
+    --Using WishList's own itemlink function
+    --The qualityId is the chosen quality from the "Add set item dialog". See file WishListDataTypes.lua, table WL.quality. So it can be 1 to 12
+    --and must be mapped to the real qualityIds for the itemlink.
+    local qualityIdItemLink = WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
+    --Using LibSets to get the itemLink
+    return WL.LibSets.buildItemLink(itemId, qualityIdItemLink)
+    --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, qualityIdItemLink, ITEMSTYLE_NONE, 0, 10000)
 end
+
+--Map the WishList internal quality (See file WishListDataTypes.lua, table WL.quality) to the itemLink qualities:
+--357:  Trash
+--366:  Normal
+--367:  Magic
+--368:  Arcane
+--369:  Artifact
+--370:  Legendary
+function WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
+    local qualityIdItemLink = 370 -- preset with Legendary quality
+    --Map the quality from WishList#s add item dialog to the itemLink quality now
+    local mapQualities = {
+        [WISHLIST_QUALITY_ALL]		= 357,      --Any quality
+        [WISHLIST_QUALITY_TRASH] 	= 357, 		--Trash
+        [WISHLIST_QUALITY_NORMAL] 	= 366, 		--Normal (white)
+        [WISHLIST_QUALITY_MAGIC] 	= 367, 		--Magic (green)
+        [WISHLIST_QUALITY_ARCANE] 	= 368, 		--Arcane (blue)
+        [WISHLIST_QUALITY_ARTIFACT] 	= 369, 		--Artifact (purple)
+        [WISHLIST_QUALITY_LEGENDARY]		= 370, 		--Legendary (golden)
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	= 367, 		--Magic or arcane
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= 368, 		--Arcane or artifact
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= 369, 	    --Artifact or legendary
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	= 367, 		--Magic to legendary
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	= 368, 		--Arcane to legendary
+    }
+    if mapQualities[qualityIdWishList] ~= nil then
+        qualityIdItemLink =  mapQualities[qualityIdWishList]
+    end
+    return qualityIdItemLink
+end
+
+--Map the WishList qualityId to a a table of itemQuality types
+function WL.mapWLQualityToItemQualityTypes(qualityIdWishList)
+--d("[WishList]mapWLQualityToItemQualityTypes-qualityIdWishList: " ..tostring(qualityIdWishList))
+    local mapQualities = {
+        [WISHLIST_QUALITY_ALL]		= {         --Any quality
+            [ITEM_QUALITY_TRASH]    = true,
+            [ITEM_QUALITY_NORMAL]   = true,
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+        },
+        [WISHLIST_QUALITY_TRASH] 	= {         --Trash
+            [ITEM_QUALITY_TRASH]    = true,
+        },
+        [WISHLIST_QUALITY_NORMAL] 	= {         --Normal (white)
+            [ITEM_QUALITY_NORMAL]   = true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC] 	= {         --Magic (green)
+            [ITEM_QUALITY_MAGIC]    = true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE] 	= {         --Arcane (blue)
+            [ITEM_QUALITY_ARCANE]   = true,
+
+        },
+        [WISHLIST_QUALITY_ARTIFACT] 	= {      --Artifact (purple)
+            [ITEM_QUALITY_ARTIFACT] = true,
+
+        },
+        [WISHLIST_QUALITY_LEGENDARY]		= {   --Legendary (golden)
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	= {         --Magic or arcane
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= { --Arcane or artifact
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+
+        },
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= { --Artifact or legendary
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	= {    --Magic to legendary
+            [ITEM_QUALITY_MAGIC]    = true,
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+
+        },
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	= {    --Arcane to legendary
+            [ITEM_QUALITY_ARCANE]   = true,
+            [ITEM_QUALITY_ARTIFACT] = true,
+            [ITEM_QUALITY_LEGENDARY]= true,
+        },
+    }
+    if mapQualities[qualityIdWishList] then
+        return mapQualities[qualityIdWishList]
+    end
+    return mapQualities[WISHLIST_QUALITY_ALL] --If not found: Return any quality
+end
+
+--[[
+function WL.ilTest()
+    d("[WishList]Quality test:")
+    for qualityId=350, 370, 1 do
+        d(">quality " ..tostring(qualityId) .. ": "  .. WL.buildItemLink(109568, qualityId))
+    end
+end
+]]
 
 function WL.parseLink(inputstr, sep)
 	if sep == nil then
@@ -558,10 +673,12 @@ function WL.AddLootToHistory(item, itemId, itemLink, setName, isLootedByPlayer, 
     data.armorOrWeaponType      = item.armorOrWeaponType
     data.slot                   = item.slot
     data.trait                  = item.trait
+    data.quality                = item.quality
     data.timestamp              = item.timestamp
     data.username               = receivedBy.charName
     data.displayName            = receivedBy.accountName
     data.locality               = localityStr
+    --data.itemLink               = itemLink
     table.insert(items, data)
     --Item was added to internal list?
     if items ~= nil and #items > 0 then
@@ -593,17 +710,18 @@ function WL.IsHistoryEmpty(charData)
     return true, 0
 end
 
-function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType)
+--Checksi fi the item is already on trhe WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
+function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
-    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil) then return false, nil, nil end
+    if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or itemQuality == nil) then return false, nil, nil end
     if charData == nil then return false, nil, nil end
     local wishList = WL.getWishListSaveVars(charData, "WL.isItemAlreadyOnWishlist")
     if wishList == nil then return false, nil, nil end
     local isAlreadyOnWishList = false
     if itemLink == nil and itemId == nil then return false, nil, nil end
     if itemLink == nil then
-        itemLink = WL.buildItemLink(itemId)
+        itemLink = WL.buildItemLink(itemId, nil)
     end
     if itemId == nil then
         itemId = WL.GetItemIDFromLink(itemLink)
@@ -619,7 +737,23 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                         if item.armorOrWeaponType == armorOrWeaponType then
                             if item.slot == slotType then
                                 if item.trait == traitType then
-                                    isAlreadyOnWishList = true
+                                    --Quality checks
+                                    --Get the itemQuality
+                                    itemQuality = itemQuality or GetItemLinkQuality(itemLink)
+                                    if itemQuality ~= nil and item.quality ~= nil then
+--d(">itemQuality new item: " .. tostring(itemQuality) .. ", itemQuality WishList item (WL quality): " ..tostring(item.quality))
+                                        --Get the qualities to check
+                                        local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
+                                        if qualitiesToCheck ~= nil then
+                                            local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
+--d(">>isQualityToCheckOnItem: " ..tostring(isQualityToCheckOnItem))
+                                            return isQualityToCheckOnItem, itemId, item
+                                        else
+                                            isAlreadyOnWishList = false
+                                        end
+                                    else
+                                        isAlreadyOnWishList = true
+                                    end
                                     return isAlreadyOnWishList, itemId, item
                                 end
                             end
@@ -761,7 +895,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     end
 end
 
-function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, addType)
+function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --addType:
     --1=whole set items with selected traits
     --2=only chosen set item type (weapon or armor) with selected traits
@@ -784,7 +918,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
         local skipItem = false
         if type(setItemId) == "number" then
             --Build the itemlink
-            local itemLink = WL.buildItemLink(setItemId)
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) -- Always use the legendary item for the searches
             --d(">"..itemLink)
             --Get the itemtype of the item
             local itemType = GetItemLinkItemType(itemLink)
@@ -856,6 +990,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
                             --data.slotName               = itemSlotName
                             data.trait                  = traitType
                             --data.traitName              = itemTraitName
+                            data.quality                = selectedItemQualityData
                             table.insert(items, data)
                         end
                     end
@@ -887,7 +1022,7 @@ function WL.copyWishList(fromCharData, toCharId)
     local cnt = 0
     for i = 1, #wishList do
         local itm = wishList[i]
-        local itemLink = WL.buildItemLink(itm.id)
+        local itemLink = WL.buildItemLink(itm.id, itm.quality)
         local traitId = itm.trait
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -959,12 +1094,14 @@ function WL.buildItemlinkTooltipData(control)
     local comboItemType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ItemTypeCombo")) --GetControl(content, "ItemTypeCombo")
     local comboArmorOrWeaponType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ArmorOrWeaponTypeCombo")) --GetControl(content, "ArmorOrWeaponTypeCombo")
     local comboSlot = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("SlotCombo")) --GetControl(content, "SlotCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
 
     --Get the data from the add dialog dropdowns and build an item and chardata from it
     local items = {}
     local selectedCharData = {}
-    items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+    --Get items which would be added to teh WishList
+    items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
     --Get the itemLink of the created item
     if items == nil and #items > 1 then WL.hideItemLinkTooltip() return nil end
     local item = items[1]
@@ -972,7 +1109,8 @@ function WL.buildItemlinkTooltipData(control)
     if itemId == nil then WL.hideItemLinkTooltip() return nil end
 
     --Build the itemlink from that data to create a tooltip
-    local itemLink = WL.buildItemLink(itemId)
+    local wlQualityForTooltip = comboQuality:GetSelectedItemData().id
+    local itemLink = WL.buildItemLink(itemId, wlQualityForTooltip)
     if itemLink == nil or itemLink == "" then WL.hideItemLinkTooltip() return nil end
 
     local style = ""
@@ -1043,11 +1181,12 @@ function WL.GetSetBonuses( itemLink, numBonuses )
     return(bonuses)
 end
 
+--Returns the first found itemId from a setId
 function WL.GetFirstSetItem(setId)
     if setId == nil then return nil end
     local setData = WL.accData.sets[setId]
-    for itemId, _ in pairs(setData) do
-        if type(itemId) == "number" then
+    for itemId, value in pairs(setData) do
+        if value == true and type(itemId) == "number" then
             return itemId
         end
     end
@@ -1056,7 +1195,7 @@ end
 -----------------------------------------------------------
 --- Context menus (WishList, Sets, Inventory, LinkHandler
 -----------------------------------------------------------
-function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
+function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData, qualityWL)
     if charData == nil or charData.id == nil then return false end
     if itemLink == nil then return false end
     local items = {}
@@ -1074,7 +1213,7 @@ function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, 
     --Strip gender stuff from the set name
     setNameStr = zo_strformat("<<C:1>>", setNameStr)
     --Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
-    table.insert(items, {setName=setNameStr, id=itemId, itemType=itemType, trait=traitType, armorOrWeaponType=armorOrWeaponType, slot=equipType, bonuses=numBonuses, setId=setId})
+    table.insert(items, {setName=setNameStr, id=itemId, itemType=itemType, trait=traitType, armorOrWeaponType=armorOrWeaponType, slot=equipType, bonuses=numBonuses, setId=setId, quality=qualityWL})
     if #items > 0 then
         --Add to the selected char's savedvars data
         local alreadyOnWishListCheckDone = false
@@ -1103,6 +1242,7 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                     elseif isItemAlreadyOnWishList then
                         customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_REMOVE)
                     end
+                    local qualityWL = GetItemLinkQuality(link) + WL.ESOquality2WLqualityAdd
                     AddCustomMenuItem(customMenuEntryAddOrRemoveWishList, function()
                         --Show the dialog to choose the character where the item should be added now
                         --WL.addItemFromLinkHandlerToWishList(link, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
@@ -1114,7 +1254,9 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                         data.setName    = setNameStr
                         data.numBonuses = numBonuses
                         data.setId      = setId
+                        data.quality    = qualityWL
                         if isShiftKeyPressed or not isItemAlreadyOnWishList then
+                            --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
                             WL.ShowChooseChar(false, data, false)
                         else
                             WL.showRemoveItem(data, false, false)
@@ -1187,6 +1329,12 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName),
                         function() WL.showRemoveItem(data, true, true, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
                     end)  -- Remove whole set
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
+                        function() WL.showChangeQuality(data, false, true)
+                    end)  -- Change quality
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET),
+                        function() WL.showChangeQuality(data, true, true)
+                    end)  -- Change quality of whole set
                 end
                 ShowMenu()
             end
@@ -1200,16 +1348,16 @@ function WL.showContextMenu(control, button, upInside)
                     username = control.data.username
                 end
             end
+            data = control.data
+            itemLink = data.itemLink
             if button == MOUSE_BUTTON_INDEX_LEFT then
-                if username ~= nil and username ~= "" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
+                if username ~= nil and username ~= "" and userName ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
                     StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER_QUESTION), username, itemLink))
                 end
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
                 if control and control.data then
                     ClearMenu()
-                    data = control.data
                     setName = data.name
-                    itemLink = data.itemLink
                     local dateAndTime = WL.getDateTimeFormatted(data.timestamp)
                     local armorOrWeaponType = ""
                     if data.itemType == ITEMTYPE_WEAPON then
@@ -1260,11 +1408,12 @@ local function showTotalItemsLoaded()
     WL.CurrentTab = WISHLIST_TAB_SEARCH
     WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADED) -- Update UI, sets currently loading
     d("[" .. GetString(WISHLIST_TITLE) .."]")
-    d("-> "..GetString(WISHLIST_TOTAL_SETS)..WL.accData.setCount)
-    d("-> "..GetString(WISHLIST_TOTAL_SETS_ITEMS)..WL.accData.itemCount)
+    d("-> "..GetString(WISHLIST_TOTAL_SETS)..tostring(WL.accData.setCount))
+    d("-> "..GetString(WISHLIST_TOTAL_SETS_ITEMS)..tostring(WL.accData.itemCount))
     d("<<=============================================<<")
 end
 
+--[[
 function WL.LoadSets()
     --Hide Controls
     WL.window.labelNoSets:SetHidden(true)
@@ -1372,6 +1521,84 @@ function WL.UpdateSetCount()
     d(">" .. setsFoundText)
     WL.window.labelLoadingSets:SetText(setsFoundText)
 end
+]]
+
+--New with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
+function WL.GetAllSetData(silent)
+    silent = silent or false
+    if not silent then
+        --Hide Controls
+        WL.window.labelNoSets:SetHidden(true)
+        WL.window.buttonLoadSets:SetHidden(true)
+
+        --Show Loading controls
+        WL.window.labelLoadingSets:SetHidden(false)
+        d(">>=============================================>>")
+        d("[" .. GetString(WISHLIST_TITLE) .."]")
+        d(GetString(WISHLIST_LOADING_SETS))
+
+        --Update UI, no sets loaded yet -> Beginning to load sets
+        WL.CurrentTab = WISHLIST_TAB_SEARCH
+        WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADING)
+    end
+
+    --Clear all set data
+    WL.accData.sets = {}
+    WL.accData.setCount = 0
+    WL.accData.itemCount = 0
+
+    --Clear the setCount variables
+    WL.setNames = {}
+
+    --Get all sets using LibSets
+    if WL.LibSets == nil then WL.LibSets = LibSets end
+    if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
+    local libSets = WL.LibSets
+    local setsDataPreloaded = {}
+    setsDataPreloaded = libSets.setDataPreloaded
+    local setItemIdsPreloaded   = setsDataPreloaded["setItemIds"]
+    local setNamesPreloaded     = setsDataPreloaded["setNames"]
+    local allSetIds             = libSets.GetAllSetIds()
+    local setCount = 0
+    if allSetIds and setItemIdsPreloaded and setNamesPreloaded then
+        --local clientLang = WL.clientLang or WL.fallbackSetLang
+        local setsData = WL.accData.sets
+        --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
+        for setId, _ in pairs(allSetIds) do
+            local setNamesAdded = false
+            local setItemIdsAdded = false
+            setsData[setId] = {}
+            --Add set names and client language name
+            if setNamesPreloaded[setId] ~= nil then
+                setNamesAdded = true
+                local setNames = setNamesPreloaded[setId]
+                setsData[setId].names = setNames
+                --if setNames[clientLang] ~= nil then
+                --    setsData[setId].name = setNames[clientLang]
+                --    WL.setNames[setNames[clientLang]] = true
+                --end
+            end
+            --Add the itemIds of the set
+            if setItemIdsPreloaded[setId] ~= nil then
+                for setItemId, _ in pairs(setItemIdsPreloaded[setId]) do
+                    setsData[setId][setItemId] = true
+                    WL.accData.itemCount = WL.accData.itemCount + 1
+                    setItemIdsAdded = true
+                end
+            end
+            if setNamesAdded or setItemIdsAdded then
+                setCount = setCount + 1
+            end
+        end
+        --Update the sets count
+        WL.accData.setCount = setCount
+        WL.accData.setsLastScanned = GetTimeStamp()
+    end
+    if not silent then
+        showTotalItemsLoaded()
+    end
+end
+
 
 ------------------------------------------------
 --- Wishlist keybinding functions
@@ -1410,42 +1637,42 @@ function WL.GetBagAndSlotFromControlUnderMouse()
     --if it's a backpack row or child of one -> PRE API 1000015
     if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_%a+Backpack%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --if it's a backpack row or child of one -> Since API 1000015
     elseif moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_%a+InventoryList%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --CRAFTBAG: if it's a backpack row or child of one -> Since API 1000015
     elseif moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*") then
         if moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*$") then
-            bagId, slotIndex = MyGetItemDetails(moc)
+            bagId, slotIndex = MyGetItemDetails(moctrl)
         else
-            moc = moctrl:GetParent()
+            moctrl = moctrl:GetParent()
             if moctrl:GetName():find("^ZO_CraftBagList%dRow%d%d*$") then
-                bagId, slotIndex = MyGetItemDetails(moc)
+                bagId, slotIndex = MyGetItemDetails(moctrl)
             end
         end
         --Character
     elseif moctrl:GetName():find("^ZO_CharacterEquipmentSlots.+$") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
         --Quickslot
     elseif moctrl:GetName():find("^ZO_QuickSlotList%dRow%d%d*") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
         --Vendor rebuy
     elseif moctrl:GetName():find("^ZO_RepairWindowList%dRow%d%d*") then
-        bagId, slotIndex = MyGetItemDetails(moc)
+        bagId, slotIndex = MyGetItemDetails(moctrl)
     end
     if bagId ~= nil and slotIndex ~= nil then
         return bagId, slotIndex

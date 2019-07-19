@@ -23,6 +23,7 @@ function WishListWindow:Setup( )
     WL.WishListWindowRemoveAllItemsInitialize(WishListRemoveAllItemsDialog)
     WL.WishListWindowChooseCharInitialize(WishListChooseCharDialog)
     WL.WishListWindowClearHistoryInitialize(WishListClearHistoryDialog)
+    WL.WishListWindowChangeQualityInitialize(WishListChangeQualityDialog)
 
 	--Scroll UI
 	ZO_ScrollList_AddDataType(self.list, WISHLIST_DATA, "WishListRow", 30, function(control, data)
@@ -68,6 +69,7 @@ function WishListWindow:Setup( )
 	self.headerArmorOrWeaponType = self.headers:GetNamedChild("ArmorOrWeaponType")
 	self.headerSlot = self.headers:GetNamedChild("Slot")
 	self.headerTrait = self.headers:GetNamedChild("Trait")
+    self.headerQuality = self.headers:GetNamedChild("Quality")
     self.headerUsername = self.headers:GetNamedChild("UserName")
     self.headerLocality = self.headers:GetNamedChild("Locality")
 
@@ -167,28 +169,29 @@ function WishListWindow:UpdateUI(state)
 
 --......................................................................................................................
         --Sets are not loaded yet -> Show load button
-		if WL.CurrentState == WISHLIST_TAB_STATE_NO_SETS then
+        if WL.CurrentState == WISHLIST_TAB_STATE_NO_SETS then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) ..  " - " .. zo_strformat(GetString(WISHLIST_SETS_LOADED), 0))
 
-			--No Sets Loaded
+            --No Sets Loaded
             self.setsLoading = false
             --Disable the Wishlist tab button
             WishListFrameTabList:SetEnabled(false)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(false)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(false)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(false)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(false)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(true)
+            --Sets Loaded UI
+            self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
+            self.frame:GetNamedChild("Reload"):SetHidden(true)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(true)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
+            self.frame:GetNamedChild("Search"):SetHidden(true)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
-			self.frame:GetNamedChild("List"):SetHidden(true)
-			self.searchBox:SetHidden(true)
+            self.frame:GetNamedChild("List"):SetHidden(true)
+            self.searchBox:SetHidden(true)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
@@ -201,32 +204,33 @@ function WishListWindow:UpdateUI(state)
             --Reset the sortGroupHeader
             resetSortGroupHeader(WL.CurrentTab)
 
-			--Sets Loading UI
-			self.labelLoadingSets:SetHidden(true)
+            --Sets Loading UI
+            self.labelLoadingSets:SetHidden(true)
 
---......................................................................................................................
-        --Sets are currently loading -> Update label with count of sets & items
-		elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADING then
+            --......................................................................................................................
+            --Sets are currently loading -> Update label with count of sets & items
+        elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADING then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_LOADING_SETS))
-			--Sets Loading
+            --Sets Loading
             self.setsLoading = true
             --Disable the Wishlist tab button
             WishListFrameTabList:SetEnabled(false)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(true)
+            --Sets Loaded UI
+            self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
+            self.frame:GetNamedChild("Reload"):SetHidden(true)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(true)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
+            self.frame:GetNamedChild("Search"):SetHidden(true)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(true)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
-			self.frame:GetNamedChild("List"):SetHidden(true)
-			self.searchBox:SetHidden(true)
+            self.frame:GetNamedChild("List"):SetHidden(true)
+            self.searchBox:SetHidden(true)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
@@ -237,50 +241,62 @@ function WishListWindow:UpdateUI(state)
             self.headerLocality:SetHidden(true)
 
             --Sets Loading UI
-			self.labelLoadingSets:SetHidden(false)
---......................................................................................................................
-        --Sets are loaded -> Show them in list
+            self.labelLoadingSets:SetHidden(false)
+            --......................................................................................................................
+            --Sets are loaded -> Show them in list
         elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADED then
             WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE))
 
-			--Sets Loaded
+            --Sets Loaded
             self.setsLoading = false
             --Enable the Wishlist tab button again
             WishListFrameTabList:SetEnabled(true)
 
-			--No Sets Loaded UI
-			self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
-			self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
+            --No Sets Loaded UI
+            self.frame:GetNamedChild("labelNoSets"):SetHidden(true)
+            self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
-			--Sets Loaded UI
-			self.frame:GetNamedChild("Reload"):SetHidden(false)
+            --Sets Loaded UI
+            if WL.accData.setsLastScanned ~= nil and WL.accData.setsLastScanned > 0 then
+                local setsLastScanned = WL.getDateTimeFormatted(WL.accData.setsLastScanned)
+                local libSetsVersionInfo = ""
+                local libSets = WL.LibSets
+                if libSets and libSets.name and libSets.version then
+                    libSetsVersionInfo = setsLastScanned .. "\n" .. libSets.name .. " v" .. tostring(libSets.version)
+                    setsLastScanned = libSetsVersionInfo
+                end
+                self.frame:GetNamedChild("SetsLastScanned"):SetText(setsLastScanned)
+                self.frame:GetNamedChild("SetsLastScanned"):SetHidden(false)
+            end
+            self.frame:GetNamedChild("Reload"):SetHidden(false)
             self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
             self.frame:GetNamedChild("CopyWishList"):SetHidden(true)
             self.frame:GetNamedChild("RemoveHistory"):SetHidden(true)
-			self.frame:GetNamedChild("Search"):SetHidden(false)
-			self.frame:GetNamedChild("SearchDrop"):SetHidden(false)
+            self.frame:GetNamedChild("Search"):SetHidden(false)
+            self.frame:GetNamedChild("SearchDrop"):SetHidden(false)
             self.frame:GetNamedChild("CharsDrop"):SetHidden(true)
 
-			self.frame:GetNamedChild("Headers"):SetHidden(false)
+            self.frame:GetNamedChild("Headers"):SetHidden(false)
             self.headerDate:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
+            self.headerQuality:SetHidden(true)
             self.headerUsername:SetHidden(true)
             self.headerLocality:SetHidden(true)
 
-			self.frame:GetNamedChild("List"):SetHidden(false)
+            self.frame:GetNamedChild("List"):SetHidden(false)
             WL.initializeSearchDropdown(self, WL.CurrentTab, "set")
-			self.searchBox:SetHidden(false)
+            self.searchBox:SetHidden(false)
 
-			--Sets Loading UI
-			self.labelLoadingSets:SetHidden(true)
+            --Sets Loading UI
+            self.labelLoadingSets:SetHidden(true)
 
             --Reset the sortGroupHeader
             resetSortGroupHeader(WL.CurrentTab)
 
-			self:RefreshData()
-		end
+            self:RefreshData()
+        end
 
 ------------------------------------------------------------------------------------------------------------------------
     --WISHLIST tab
@@ -299,6 +315,7 @@ function WishListWindow:UpdateUI(state)
 		self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
 		--Sets Loaded UI
+        self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
 		self.frame:GetNamedChild("Reload"):SetHidden(true)
         self.frame:GetNamedChild("RemoveAll"):SetHidden(false)
         self.frame:GetNamedChild("CopyWishList"):SetHidden(false)
@@ -313,6 +330,7 @@ function WishListWindow:UpdateUI(state)
 		self.headerArmorOrWeaponType:SetHidden(false)
 		self.headerSlot:SetHidden(false)
 		self.headerTrait:SetHidden(false)
+        self.headerQuality:SetHidden(false)
         self.headerUsername:SetHidden(true)
         self.headerLocality:SetHidden(true)
 
@@ -346,6 +364,7 @@ function WishListWindow:UpdateUI(state)
         self.frame:GetNamedChild("buttonLoadSets"):SetHidden(true)
 
         --Sets Loaded UI
+        self.frame:GetNamedChild("SetsLastScanned"):SetHidden(true)
         self.frame:GetNamedChild("Reload"):SetHidden(true)
         --WL.updateRemoveAllButon(self.frame:GetNamedChild("RemoveAll"), self.frame:GetNamedChild("CopyWishList"))
         self.frame:GetNamedChild("RemoveAll"):SetHidden(true)
@@ -360,6 +379,7 @@ function WishListWindow:UpdateUI(state)
         self.headerArmorOrWeaponType:SetHidden(false)
         self.headerSlot:SetHidden(false)
         self.headerTrait:SetHidden(false)
+        self.headerQuality:SetHidden(true)
         self.headerUsername:SetHidden(false)
         self.headerLocality:SetHidden(false)
 
@@ -403,8 +423,8 @@ function WishListWindow:BuildMasterList(calledFromFilterFunction)
 --d(">>Building master list entries, count: " .. tostring(#wishList))
         for i = 1, #wishList do
 			local item = wishList[i]
-            --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait)
---d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
+            --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
+--d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName).. ", quality: " .. tostring(itemQualityName))
 			table.insert(self.masterList, WL.CreateEntryForItem(item))
         end
 
@@ -431,16 +451,21 @@ end
 --Setup the data of each row which gets added to the ZO_SortFilterList
 function WishListWindow:SetupItemRow( control, data )
     if WL.comingFromSortScrollListSetupFunction then return end
---d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.name))
+    --local clientLang = WL.clientLang or WL.fallbackSetLang
+    --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
 
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
+    local nameColumnValue = ""
+    if not data.columnWidth then data.columnWidth = 200 end
+    nameColumn:SetDimensions(data.columnWidth, 30)
     nameColumn:SetText(data.name)
     local armorOrWeaponTypeColumn = control:GetNamedChild("ArmorOrWeaponType")
     local slotColumn = control:GetNamedChild("Slot")
     local traitColumn = control:GetNamedChild("Trait")
     local dateColumn = control:GetNamedChild("DateTime")
+    local qualityColumn = control:GetNamedChild("Quality")
     local userNameColumn = control:GetNamedChild("UserName")
     local localityColumn = control:GetNamedChild("Locality")
     localityColumn.localityName = nil
@@ -452,6 +477,7 @@ function WishListWindow:SetupItemRow( control, data )
         dateColumn:SetText(dateTimeStr)
         dateColumn:SetHidden(false)
         userNameColumn:SetHidden(true)
+        qualityColumn:SetHidden(false)
         localityColumn:SetHidden(true)
         armorOrWeaponTypeColumn:SetHidden(false)
         slotColumn:SetHidden(false)
@@ -477,6 +503,11 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
+        local qualityText = ""
+        if data.quality then
+            qualityText = WL.quality[data.quality]
+        end
+        qualityColumn:SetText(qualityText)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")
@@ -484,6 +515,7 @@ function WishListWindow:SetupItemRow( control, data )
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
         dateColumn:SetText(dateTimeStr)
         dateColumn:SetHidden(false)
+        qualityColumn:SetHidden(true)
         userNameColumn:SetHidden(false)
         local userNameText = ""
         if data.username ~= nil and data.username ~= "" then
@@ -527,6 +559,7 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
+        qualityColumn:SetText("")
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_SEARCH then
         --d(">WISHLIST_TAB_SEARCH")
@@ -536,10 +569,12 @@ function WishListWindow:SetupItemRow( control, data )
         armorOrWeaponTypeColumn:SetHidden(true)
         slotColumn:SetHidden(true)
         traitColumn:SetHidden(true)
+        qualityColumn:SetHidden(true)
         armorOrWeaponTypeColumn:SetText("")
         slotColumn:SetText("")
         traitColumn:SetText("")
         dateColumn:SetText("")
+        qualityColumn:SetText("")
     end
     --Set the row to the list now
     ZO_SortFilterList.SetupRow(self, control, data)
@@ -632,10 +667,11 @@ end
 ------------------------------------------------
 --- WishList Window -> Filter & Sorting
 ------------------------------------------------
-function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, trait)
+function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, trait, quality)
     local itemTypes = WL.ItemTypes
     local traitTypes = WL.TraitTypes
     local slotNames = WL.SlotTypes
+    local qualityNames = WL.quality
     local armorOrWeaponTypeName = ""
     if itemType == ITEMTYPE_WEAPON then
         armorOrWeaponTypeName = WL.WeaponTypes[armorOrWeaponType] or "HALLO"
@@ -645,7 +681,8 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
     local itemTypeName = itemTypes[itemType] or ""
     local slotTypeName = slotNames[slot] or ""
     local traitTypeName = traitTypes[trait] or ""
-    return itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName
+    local qualityName = qualityNames[quality] or ""
+    return itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName
 end
 
 function WishListWindow:FilterScrollList()
@@ -711,10 +748,10 @@ function WishListWindow:FilterScrollList()
                 local wlDataOfCharId = wishListOfCharId[i]
                 local data = {}
                 local itemId = wlDataOfCharId["id"]
-                local itemLink = WL.buildItemLink(itemId)
+                local itemLink = WL.buildItemLink(itemId, wlDataOfCharId["quality"])
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
-                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName = WL.getItemTypeNamesForSortListEntry(wlDataOfCharId["itemType"], wlDataOfCharId["armorOrWeaponType"], wlDataOfCharId["slot"], wlDataOfCharId["trait"])
+                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(wlDataOfCharId["itemType"], wlDataOfCharId["armorOrWeaponType"], wlDataOfCharId["slot"], wlDataOfCharId["trait"], wlDataOfCharId["quality"])
                 data["type"]                    = 1 -- for the search method to work -> Find the processor in zo_stringsearch:Process()
                 data["id"]                      = itemId
                 data["setId"]                   = wlDataOfCharId["setId"]
@@ -726,6 +763,8 @@ function WishListWindow:FilterScrollList()
                 data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
                 data["slot"]                    = wlDataOfCharId["slot"]
                 data["slotName"]                = slotTypeName
+                data["quality"]                 = wlDataOfCharId["quality"]
+                data["qualityName"]             = qualityName
                 data["name"]                    = wlDataOfCharId["setName"]
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
@@ -769,10 +808,10 @@ function WishListWindow:FilterScrollList()
                 local histDataOfCharId = historyOfCharId[i]
                 local data = {}
                 local itemId = histDataOfCharId["id"]
-                local itemLink = WL.buildItemLink(itemId)
+                local itemLink = WL.buildItemLink(itemId, histDataOfCharId["quality"])
                 local _, _, numBonuses, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Get the names for the sort & filter functions
-                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName = WL.getItemTypeNamesForSortListEntry(histDataOfCharId["itemType"], histDataOfCharId["armorOrWeaponType"], histDataOfCharId["slot"], histDataOfCharId["trait"])
+                local itemTypeName, armorOrWeaponTypeName, slotTypeName, traitTypeName, qualityName = WL.getItemTypeNamesForSortListEntry(histDataOfCharId["itemType"], histDataOfCharId["armorOrWeaponType"], histDataOfCharId["slot"], histDataOfCharId["trait"], histDataOfCharId["quality"])
                 data["type"]                    = 1 -- for the search method to work -> Find the processor in zo_stringsearch:Process()
                 data["id"]                      = itemId
                 data["setId"]                   = histDataOfCharId["setId"]
@@ -784,6 +823,8 @@ function WishListWindow:FilterScrollList()
                 data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
                 data["slot"]                    = histDataOfCharId["slot"]
                 data["slotName"]                = slotTypeName
+                data["quality"]                 = histDataOfCharId["quality"]
+                data["qualityName"]             = qualityName
                 data["name"]                    = histDataOfCharId["setName"]
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
@@ -826,6 +867,7 @@ function WishListWindow:BuildSortKeys()
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["traitName"]               = { caseInsensitive = true, tiebreaker = "name" },
+            ["quality"]                 = { caseInsensitive = true, tiebreaker = "name" },
             ["username"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["locality"]                = { caseInsensitive = true, tiebreaker = "name" },
         }
@@ -836,6 +878,7 @@ function WishListWindow:BuildSortKeys()
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
             ["slotName"]                = { caseInsensitive = true },
             ["traitName"]               = { caseInsensitive = true },
+            ["quality"]                 = { caseInsensitive = true },
             ["username"]                = { caseInsensitive = true },
             ["locality"]                = { caseInsensitive = true },
         }
@@ -919,6 +962,8 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["armorOrWeaponTypeName"]   = armorOrWeaponTypeName
     data["slot"]                    = histDataOfCharId["slot"]
     data["slotName"]                = slotTypeName
+    data["quality"]                 = histDataOfCharId["quality"]
+    data["qualityName"]             = qualityName
     data["name"]                    = histDataOfCharId["setName"]
     data["itemLink"]                = itemLink
     data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
@@ -1113,8 +1158,15 @@ function WishListRow_OnMouseEnter( rowControlEnter )
     if showAdditionalTextTooltip then
         local data = rowControlEnter.data
         if data ~= nil then
+            local clientLang = WL.clientLang or WL.fallbackSetLang
             local tooltipText = ""
-            tooltipText = GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_CONST_SET) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.name .. "|r (" .. GetString(WISHLIST_CONST_BONUS) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.bonuses .. "|r, " .. GetString(WISHLIST_CONST_ID) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.setId .. "|r)"
+            local nameVar = ""
+            if data.names then
+                nameVar = data.names[clientLang]
+            elseif data.name then
+                nameVar = data.name
+            end
+            tooltipText = GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_CONST_SET) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. nameVar .. "|r (" .. GetString(WISHLIST_CONST_BONUS) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.bonuses .. "|r, " .. GetString(WISHLIST_CONST_ID) .. ": " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.setId .. "|r)"
             tooltipText = tooltipText .. "\n" .. GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_HEADER_LOCALITY) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) .. data.locality .. "|r"
             tooltipText = tooltipText .. "\n" .. GetString(WISHLIST_TOOLTIP_COLOR_KEY) .. GetString(WISHLIST_HEADER_NAME) .. "|r: " .. GetString(WISHLIST_TOOLTIP_COLOR_VALUE) ..data.username .. "|r"
             if data.displayName ~= nil and data.displayName ~= "" then

@@ -17,6 +17,8 @@ function WL.WishListWindowAddItemInitialize(control)
     local comboSlot = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("SlotCombo")) --GetControl(content, "SlotCombo")
     local labelTrait = GetControl(content, "TraitText")
     local comboTrait = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("TraitCombo")) --GetControl(content, "TraitCombo")
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
     local labelChars = GetControl(content, "CharsText")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
 
@@ -30,12 +32,30 @@ function WL.WishListWindowAddItemInitialize(control)
             labelItemType:SetText(GetString(WISHLIST_HEADER_TYPE))
             --labelArmorOrWeaponType:SetText("Armor/Weapon Type")
             labelTrait:SetText(GetString(WISHLIST_HEADER_TRAIT))
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
             labelSlot:SetText(GetString(WISHLIST_HEADER_SLOT))
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
 
-            --Chars Callback
-            local callbackChars = function( comboBox, entryText, entry, selectionChanged )
+            --Quality Callback
+            local callbackQuality = function( comboBox, entryText, entry, selectionChanged )
+                --Rebuild the itemLink to update the quality in the itemLink
+                WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
             end
+
+            --Quality combobox
+            comboQuality:SetSortsItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            for quality, qualityDescription in ipairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            end
+            comboQuality:SelectItemByIndex(1, true)
+
+
+            --Chars Callback
+            local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
 
             --Characters dropdown box
             --The name to compare for the pre-selection in the char dropdownbox (currently logged in, or currently chosen at WhishList tab?)
@@ -99,7 +119,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 local setsData = WL.accData.sets[WL.currentSetId]
                 for setItemId, _ in pairs(setsData) do
                     if type(setItemId) == "number" then
-                        local itemLink = WL.buildItemLink(setItemId)
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                         local itemType = GetItemLinkItemType(itemLink)
                         local armorOrWeaponType
                         if itemType == ITEMTYPE_ARMOR then
@@ -119,7 +139,6 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                 end
-
                 comboTrait:SelectItemByIndex(1, true)
                 callbackTraitsTypes()
             end
@@ -137,7 +156,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 local setsData = WL.accData.sets[WL.currentSetId]
                 for setItemId, _ in pairs(setsData) do
                     if type(setItemId) == "number" then
-                        local itemLink = WL.buildItemLink(setItemId)
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                         local itemType = GetItemLinkItemType(itemLink)
                         local armorOrWeaponType
                         if itemType == ITEMTYPE_ARMOR then
@@ -175,7 +194,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
                     for setItemId, _ in pairs(setsData) do
                         if type(setItemId) == "number" then
-                            local itemLink = WL.buildItemLink(setItemId)
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                             local itemType = GetItemLinkItemType(itemLink)
                             if itemType == ITEMTYPE_ARMOR then --Armor
                                 local armorOrWeaponType = GetItemLinkArmorType(itemLink)
@@ -194,7 +213,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
                     for setItemId, _ in pairs(setsData) do
                         if type(setItemId) == "number" then
-                            local itemLink = WL.buildItemLink(setItemId)
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                             local itemType = GetItemLinkItemType(itemLink)
                             if itemType == ITEMTYPE_WEAPON then --Weapon
                                 local armorOrWeaponType = GetItemLinkWeaponType(itemLink)
@@ -221,7 +240,7 @@ function WL.WishListWindowAddItemInitialize(control)
             local setsData = WL.accData.sets[WL.currentSetId]
             for setItemId, _ in pairs(setsData) do
                 if type(setItemId) == "number" then
-                    local itemLink = WL.buildItemLink(setItemId)
+                    local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
                     local itemType = GetItemLinkItemType(itemLink)
                     if itemTypes[itemType] == nil then
                         itemTypes[itemType] = WL.ItemTypes[itemType]
@@ -246,7 +265,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 callback = function(dialog)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
                     WL.hideItemLinkTooltip()
-                    local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+                    local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
                     if items ~= nil and #items > 0 then
                         WishList:AddItem(items, selectedCharData)
                     end
@@ -311,7 +330,7 @@ function WL.WishListWindowRemoveItemInitialize(control)
                     traitId = GetItemLinkTraitInfo(itemLink)
                 else
                     --Coming from WishList window
-                    itemLink = WL.buildItemLink(WL.CurrentItem.id)
+                    itemLink = WL.buildItemLink(WL.CurrentItem.id, WL.CurrentItem.quality)
                     timeStamp = data.itemData.timestamp
                     dateAndTime = WL.getDateTimeFormatted(timeStamp)
                     itemType = data.itemData.itemType
@@ -477,7 +496,9 @@ function WL.WishListWindowReloadItemsInitialize(control)
                 keybind = "DIALOG_PRIMARY",
                 callback = function(dialog)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
-                    WL.LoadSets()
+                    --Disabled with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
+                    --WL.LoadSets()
+                    WL.GetAllSetData()
                 end,
             },
             {
@@ -583,10 +604,27 @@ function WL.WishListWindowChooseCharInitialize(control)
     local descLabel = GetControl(content, "Text")
     local labelChars = GetControl(content, "CharsText")
     local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQualityControl = content:GetNamedChild("QualityCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(comboQualityControl) --GetControl(content, "QualityCombo")
+
+    --Quality Callback
+    local callbackQuality = function( comboBox, entryText, entry, selectionChanged ) end
+
+    --Quality combobox
+    comboQuality:SetSortsItems(false)
+    comboQuality:ClearItems()
+    local qualityData = WL.quality
+    for quality, qualityDescription in ipairs(qualityData) do
+        local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+        entry.id = quality
+        comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+    end
+    comboQuality:SelectItemByIndex(1, true)
+    comboQualityControl:SetHidden(true)
 
     --Chars Callback
-    local callbackChars = function( comboBox, entryText, entry, selectionChanged )
-    end
+    local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
 
     ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_CHOOSE_CHAR_DIALOG", {
         customControl = control,
@@ -648,11 +686,16 @@ function WL.WishListWindowChooseCharInitialize(control)
 
             labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
             if isCopyingWishList then
+                labelQuality:SetHidden(true)
+                comboQualityControl:SetHidden(true)
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
                 charNameText = WL.addCharBrackets(charNameText)
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
             else
+                labelQuality:SetHidden(false)
+                labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
+                comboQualityControl:SetHidden(false)
                 if data ~= nil and data.dataForChar ~= nil then
                     local itemLink = data.dataForChar.itemLink
                     descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM), itemLink))
@@ -671,6 +714,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                     --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
                     local comboCharsSelectedData = comboChars:GetSelectedItemData()
                     local toCharId = comboCharsSelectedData.id
+                    local qualityWL = comboQuality:GetSelectedItemData().id
                     if toCharId == nil then return false end
                     local isCopyingWishList = (dialog.data and dialog.data.copyWishList and dialog.data.copyWishList == true) or false
                     if isCopyingWishList then
@@ -682,7 +726,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                             local dataForChar = dialog.data.dataForChar
                             --Get the character data of the selected char
                             local toCharData = WL.getCharDataById(toCharId)
-                            WL.addItemFromLinkHandlerToWishList(dataForChar.itemLink, dataForChar.id, dataForChar.itemType, dataForChar.isSet, dataForChar.setName, dataForChar.numBonuses, dataForChar.setId, toCharData)
+                            WL.addItemFromLinkHandlerToWishList(dataForChar.itemLink, dataForChar.id, dataForChar.itemType, dataForChar.isSet, dataForChar.setName, dataForChar.numBonuses, dataForChar.setId, toCharData, qualityWL)
                         end
                     end
                 end,
@@ -699,10 +743,160 @@ function WL.WishListWindowChooseCharInitialize(control)
     })
 end
 
+function WL.WishListWindowChangeQualityInitialize(control)
+    local title     = GetControl(control, "Title")
+    local content   = GetControl(control, "Content")
+    local acceptBtn = GetControl(control, "Accept")
+    local cancelBtn = GetControl(control, "Cancel")
+    local descLabel = GetControl(content, "Text")
+
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQualityControl = content:GetNamedChild("QualityCombo")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(comboQualityControl) --GetControl(content, "QualityCombo")
+
+    --Quality Callback
+    local callbackQuality = function( comboBox, entryText, entry, selectionChanged ) end
+
+    ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_CHANGE_QUALITY_DIALOG", {
+        customControl = control,
+        title = { text = "???" },
+        mainText = { text = "???" },
+        setup = function(dialog, data)
+            local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
+            --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
+            local charNameText = WL.CurrentCharData.name
+            charNameText = WL.addCharBrackets(charNameText)
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
+
+            --Quality combobox
+            comboQuality:SetSortsItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            local counter = 0
+            local currentQualityIndex = 1
+            for quality, qualityDescription in ipairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                if not data.wholeSet then
+                    counter = counter + 1
+                    if WL.CurrentItem and WL.CurrentItem.quality and quality == WL.CurrentItem.quality then
+                        currentQualityIndex = counter
+                    end
+                end
+            end
+            --Select the current quality of the item in the quality combobox
+            comboQuality:SelectItemByIndex(currentQualityIndex, true)
+
+            --Change quality of whole set or single item?
+            if data.wholeSet then
+                local setName = data.itemData.name
+                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " \'<<1>>\'", setName))
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+            else
+                local timeStamp
+                local dateAndTime
+                local itemType
+                local armorOrWeaponType
+                local slot
+                local itemLink
+                local traitId
+                --Coming from link handler??
+                if not wlWindow and data ~= nil and data.itemData ~= nil and data.itemData.itemLink ~= nil then
+                    itemLink = data.itemData.itemLink
+                    timeStamp = data.itemData.timestamp
+                    dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    itemType = data.itemData.itemType
+                    armorOrWeaponType = data.itemData.armorOrWeaponType
+                    slot = data.itemData.slot
+                    traitId = GetItemLinkTraitInfo(itemLink)
+                else
+                    --Coming from WishList window
+                    itemLink = WL.buildItemLink(WL.CurrentItem.id, WL.CurrentItem.quality)
+                    timeStamp = data.itemData.timestamp
+                    dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    itemType = data.itemData.itemType
+                    armorOrWeaponType = data.itemData.armorOrWeaponType
+                    slot = data.itemData.slot
+                    traitId = data.itemData.trait
+                end
+                local armorOrWeaponTypeText = ""
+                if itemType == ITEMTYPE_WEAPON then
+                    --Weapon
+                    armorOrWeaponTypeText = WL.WeaponTypes[armorOrWeaponType]
+                elseif itemType == ITEMTYPE_ARMOR then
+                    --Armor
+                    armorOrWeaponTypeText = WL.ArmorTypes[armorOrWeaponType]
+                end
+                local slotText = WL.SlotTypes[slot]
+                local itemTraitText = WL.TraitTypes[traitId]
+                itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+                --Description text of the dialog
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
+                --Title of the dialog
+                title:SetText(GetString(WISHLIST_DIALOG_CHANGE_QUALITY))
+
+                --Build the tooltip data, but only if a single item will be removed
+                local virtualListRowControl = {}
+                local style = ""
+                virtualListRowControl.data      = {}
+                virtualListRowControl.data.itemLink   = itemLink
+                virtualListRowControl.data.style      = style
+                WL.buildSetItemTooltipForDialog(WishListChangeQualityDialog, virtualListRowControl)
+            end
+        end,
+        noChoiceCallback = function(dialog)
+            WL.hideItemLinkTooltip()
+        end,
+        buttons =
+        {
+            {
+                control = acceptBtn,
+                text = SI_DIALOG_ACCEPT,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
+                    WL.hideItemLinkTooltip()
+                    --Remove a whole set
+                    if dialog.data then
+                        local newQuality = comboQuality:GetSelectedItemData().id
+                        if dialog.data.wholeSet then
+                            WishList:ChangeQualityOfItemsOfSet(dialog.data.itemData.setId, WL.CurrentCharData, newQuality)
+                        else
+                            local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
+                            if isLinkHandlerItem then
+                                --Coming from the link handler
+                                local linkHandlerItem = {}
+                                linkHandlerItem = dialog.data.itemData
+                                local itemLink = linkHandlerItem.itemLink
+                                linkHandlerItem.id = tonumber(WL.GetItemIDFromLink(itemLink))
+                                local traitId = GetItemLinkTraitInfo(itemLink)
+                                linkHandlerItem.trait = traitId
+                                WishList:ChangeQualityOfItem(linkHandlerItem, WL.LoggedInCharData, newQuality)
+                            else
+                                --Coming from the WishList window
+                                WishList:ChangeQualityOfItem(WL.CurrentItem, WL.CurrentCharData, newQuality)
+                            end
+                        end
+                    end
+                end,
+            },
+            {
+                control = cancelBtn,
+                text = SI_DIALOG_CANCEL,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    WL.hideItemLinkTooltip()
+                end,
+            },
+        },
+    })
+end
 
 ------------------------------------------------
 --- Dialog Functions
 ------------------------------------------------
+--Build the itemLink and create the item tooltip to show next to the dialog
 function WL.buildSetItemTooltipForDialog(dialogCtrl, tooltipData)
     --Build the set data from the comboboxes of the dialog control
     local control = {}
@@ -716,11 +910,14 @@ function WL.buildSetItemTooltipForDialog(dialogCtrl, tooltipData)
     WL.showItemLinkTooltip(control, dialogCtrl, TOPRIGHT, -50, -100, TOPLEFT)
 end
 
-function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars)
+--Get items which would be added to the WishList via the Add item dialog
+function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
     local itemTypeId = comboItemType:GetSelectedItemData().id
     local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
     local traitId = comboTrait:GetSelectedItemData().id
     local slotId = comboSlot:GetSelectedItemData().id
+    local qualityId = comboQuality:GetSelectedItemData().id
+
     --Selected character ID and name for the SavedVars
     local comboCharsSelectedData = comboChars:GetSelectedItemData()
     local charId = comboCharsSelectedData.id
@@ -733,7 +930,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     local allTraitsTraitId = #WL.TraitTypes
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
-            local itemLink = WL.buildItemLink(setItemId)
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
             local itemType = GetItemLinkItemType(itemLink)
             local armorOrWeaponType
             if itemType == ITEMTYPE_ARMOR then
@@ -749,15 +946,18 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
                     and armorOrWeaponType == typeId
                     and equipType == slotId
                     and (allTraitsTraitId == traitId or traitType == traitId) then
+                local clientLang = WL.clientLang or WL.fallbackSetLang
 --d(">[WL.buildSetItemDataFromAddItemDialog]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
                 local data = {}
                 data.setId                  = WL.currentSetId
-                data.setName                = setsData.name
+                data.setName                = setsData.names[clientLang]
                 data.id                     = setItemId
                 data.itemType               = itemType
                 data.armorOrWeaponType      = armorOrWeaponType
                 data.slot                   = equipType
                 data.trait                  = traitType
+                --Add the quality so we can check this data later on as an item was looted
+                data.quality                = qualityId
                 table.insert(items, data)
             end
         end
@@ -774,8 +974,9 @@ end
 function WL.showAddItem(setData, comingFromWishListWindow)
     comingFromWishListWindow = comingFromWishListWindow or false
     WL.createWindow(false)
+    local clientLang = WL.clientLang or WL.fallbackSetLang
     WL.currentSetId = setData.setId
-    WL.currentSetName = setData.name
+    WL.currentSetName = setData.names[clientLang]
     WL.checkCurrentCharData()
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_ITEM_DIALOG", {set=setData.setId, wlWindow=comingFromWishListWindow})
 end
@@ -822,4 +1023,13 @@ function WL.ShowClearHistory(comingFromWishListWindow)
     --if not WL.IsEmpty(WL.CurrentCharData) then
         ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CLEAR_HISTORY_DIALOG", { wlWindow=comingFromWishListWindow })
     --end
+end
+
+function WL.showChangeQuality(item, changeWholeSet, comingFromWishListWindow)
+    changeWholeSet = changeWholeSet or false
+    comingFromWishListWindow = comingFromWishListWindow or false
+    WL.createWindow(false)
+    WL.CurrentItem = item
+    WL.checkCurrentCharData()
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CHANGE_QUALITY_DIALOG", {itemData=item, wholeSet=changeWholeSet, wlWindow=comingFromWishListWindow})
 end

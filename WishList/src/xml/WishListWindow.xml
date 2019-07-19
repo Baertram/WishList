@@ -54,9 +54,13 @@
                 </Label>
                 <Label name="$(parent)Locality" inherits="WishListRowLabel">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)UserName" />
-                    <Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-16" />
                     <Dimensions y="30" />
                 </Label>
+				<Label name="$(parent)Quality" inherits="WishListRowLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Locality" />
+					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-16" />
+					<Dimensions x="80" y="30" />
+				</Label>
 			</Controls>
 		</Control>
 		<!-- Virtual Buttons -->
@@ -186,6 +190,7 @@
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT"
 							offsetX="20" offsetY="14" />
 				</Button>
+
                 <Button name="$(parent)RemoveAll" inherits="WishListButtonRemoveAll">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT"
                             offsetX="20" offsetY="14" />
@@ -310,9 +315,16 @@
                                 ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_LOCALITY), "locality", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)UserName" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-16" />
                             <Dimensions y="32" />
                         </Control>
+						<Control name="$(parent)Quality" inherits="WhisListSortHeader">
+							<OnInitialized>
+								ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_QUALITY), "quality", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+							</OnInitialized>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Locality" />
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-16" />
+							<Dimensions x="80" y="32" />
+						</Control>
 					</Controls>
 				</Control>
 
@@ -333,13 +345,18 @@
 					<Anchor point="CENTER" relativeTo="$(parent)List" relativePoint="TOP" offsetY="90" />
 					<Dimensions x="120" y="40" />
 					<OnClicked>
-						WishList.LoadSets()
+						WishList.GetAllSetData()
 					</OnClicked>
 				</Button>
 
 				<!-- Loading Sets -->
 				<Label name="$(parent)labelLoadingSets" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
 					<Anchor point="CENTER" relativeTo="$(parent)List" relativePoint="CENTER" />
+				</Label>
+
+				<!-- Last scanned set -->
+				<Label name="$(parent)SetsLastScanned" font="ZoFontGameSmall" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+					<Anchor point="BOTTOM" relativeTo="$(parent)Reload" relativePoint="BOTTOM" offsetY="40" offsetX="0" />
 				</Label>
 
 				<!-- Tab Buttons -->

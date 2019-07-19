@@ -15,6 +15,7 @@ local stringsBase = {
     WISHLIST_HEADER_CHARS               = GetString(SI_BINDING_NAME_TOGGLE_CHARACTER), -- Character / toon
     WISHLIST_HEADER_USERNAME            = "Benutzer",
     WISHLIST_HEADER_LOCALITY            = "Fundort",
+    WISHLIST_HEADER_QUALITY             = GetString(SI_TRADINGHOUSEFEATURECATEGORY5), --Quality
 
     WISHLIST_CONST_ID                   = "Id",
     WISHLIST_CONST_SET                  = "Set",
@@ -55,8 +56,10 @@ local strings = {
 
     WISHLIST_ADDED = " zur " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_REMOVED = " von der " .. GetString(WISHLIST_TITLE) .. " entfernt",
+    WISHLIST_UPDATED = " <<1>> geändert in " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_ADDED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> hinzugefügt zur " .. GetString(WISHLIST_TITLE),
     WISHLIST_ITEMS_REMOVED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> entfernt von der " .. GetString(WISHLIST_TITLE),
+    WISHLIST_ITEMS_UPDATED = "<<1[Kein Gegenstand/1 Gegenstand/$d Gegenstände]>> geändert in der " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_HISTORY_ADDED = " zur " .. GetString(WISHLIST_HISTORY_TITLE) .. " hinzugefügt",
     WISHLIST_HISTORY_REMOVED = " von der " .. GetString(WISHLIST_HISTORY_TITLE) .. " entfernt",
@@ -89,10 +92,13 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION = "Wirklich das gesamte Set \"<<1>>\" entfernen?",
     WISHLIST_BUTTON_CLEAR_HISTORY_TT = GetString(WISHLIST_BUTTON_REMOVE_HISTORY_TT) .. "?",
     WISHLIST_DIALOG_CLEAR_HISTORY_QUESTION = GetString(WISHLIST_HISTORY_TITLE) .. " für ausgewählten Charakter leeren?",
-
+    WISHLIST_DIALOG_CHANGE_QUALITY = GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .." ändern",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET = GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .." des gesamten Sets ändern",
+    WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION     = "<<1>> ändern?",
+    WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION   = "Wirklich alle Gegenstände vom Set <<1>> ändern?",
 
     WISHLIST_DIALOG_RELOAD_ITEMS = "Gegenstände neu laden",
-    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände neu einlesen!\nKann einige Minuten dauern + wir das Spiel auslasten. BIST DU SICHER?",
+    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände über die Bibliothek \"LibSets\" neu einlesen!\nDies sollte nicht länger als 10 Sekunden benötigen.",
     WISHLIST_LINK_ITEM_TO_CHAT = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER = "\"<<C:1>>\" anflüstern und nach <<2>> fragen",
     WISHLIST_WHISPER_RECEIVER_QUESTION = "Hallo <<C:1>>, du hast diesen Gegenstand gefunden: <<2>>. Ich suche danach und wollte dich fragen, ob du mir diesen gibst? Danke sehr.",
@@ -112,6 +118,13 @@ local strings = {
     WISHLIST_TOTAL_SETS = "Sets insgesamt: ",
     WISHLIST_TOTAL_SETS_ITEMS = "Set Gegenstände: ",
     WISHLIST_SETS_FOUND = "<<1>> Sets gefunden, mit <<2>> Gegenständen",
+
+    WISHLIST_ITEM_QUALITY_ALL   = "- Jede " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " -",
+    WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE           = GetString(SI_ITEMQUALITY2) .. ", " .. GetString(SI_ITEMQUALITY3), 		--Magic or arcane
+    WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT        = GetString(SI_ITEMQUALITY3) .. ", " .. GetString(SI_ITEMQUALITY4), 		--Arcane or artifact
+    WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY     = GetString(SI_ITEMQUALITY4) .. ", " .. GetString(SI_ITEMQUALITY5), 	    --Artifact or legendary
+    WISHLIST_ITEM_QUALITY_MAGIC_TO_LEGENDARY        = GetString(SI_ITEMQUALITY2) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Magic to legendary
+    WISHLIST_ITEM_QUALITY_ARCANE_TO_LEGENDARY       = GetString(SI_ITEMQUALITY3) .. " -> " .. GetString(SI_ITEMQUALITY5), 		--Arcane to legendary
 
     --Tooltips
     WISHLIST_BUTTON_RELOAD_TT = "Alle Sets neu einlesen",
@@ -165,6 +178,10 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT = "Zeige die Loot Benachrichtigung, zusätzlich zum Chat Text, auch als Bildschirm Nachricht an.",
     WISHLIST_LAM_ITEM_FOUND_TEXT = "Nachrichtentext beim Looten",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT = "Spezifiziere den Nachrichtentext, welcher beim Looten eines Gegenstandes von deiner " .. GetString(WISHLIST_TITLE) .. " im Chat, und falls aktiviert auch in der Bildschirmnachricht, angezeigt werden soll.\nLasse das Editfeld leer um eine Standard Loot Nachricht anzuzeigen.\n\nDu kannst die folgenden Platzhalter in dem Text verwenden, welche dann mit den Daten aus dem gelooteten Gegenstand ersetzt werden:\n<<1>>    Name (Link)\n<<2>>  Gelooted von\n<<3>>   Eigenschaft\n<<4>>  Qualität\n<<5>>  Level\n<<6>>  Set Name",
+
+    WISHLIST_LAM_FORMAT_OPTIONS                     = "Ausgabe Format",
+    WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set Name Sprache",
+    WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Aktiviere die Set Name Sprachen welche in der " .. GetString(WISHLIST_TITLE) .. " (mit einem / Zeichen getrennt) angezeigt werden sollen. Die aktuelle Spiel Sprache wird zuerst angezeigt (Wenn unterstützt. Ansonsten wird English zuerst angezeigt).",
 }
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 setmetatable(strings, {__index = WL.stringsEN})
