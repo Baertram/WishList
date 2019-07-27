@@ -12,7 +12,7 @@ WL.comingFromSortScrollListSetupFunction = false
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.5
+WL.addonVars.addonRealVersion		= 2.6
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
@@ -1192,19 +1192,30 @@ function WL.init(_, addonName)
 
     --Load the settings
     WL.loadSettings()
-    --Check if the sets are updated with LibSets v0.06 data
-    --Does the "setsLastScanned" entry exist or does the "names" subtable exist?
-    --If not we did not scan the sets new and got old setData. Therefore we need to update it now once via LibSets, but silently
-    local setsData = WL.accData.sets
-    if setsData then
-        for _, setData in pairs(setsData) do
-            if WL.accData.setsLastScanned == nil or setData.names == nil then
-                WL.GetAllSetData(true)
-                break -- Get out of the lop now
+    --Check if the last scan of the sets was done with an older LibSets version
+    local scanSetsNowSilently = false
+    local lastLibSetsVersionScanDone = WL.accData.setsLastScannedLibSetsVersion
+    if lastLibSetsVersionScanDone == nil or lastLibSetsVersionScanDone < libSets.version then
+        scanSetsNowSilently = true
+    end
+    if not scanSetsNowSilently then
+        --Check if the sets are updated with LibSets v0.06 (or higher) data
+        --Does the "setsLastScanned" entry exist or does the "names" subtable exist?
+        --If not we did not scan the sets new and got old setData. Therefore we need to update it now once via LibSets, but silently
+        local setsData = WL.accData.sets
+        if setsData then
+            for _, setData in pairs(setsData) do
+                if WL.accData.setsLastScanned == nil or setData.names == nil then
+                    scanSetsNowSilently = true
+                    break -- Get out of the lop now
+                end
             end
         end
     end
-
+    --Scan the sets now silently?
+    if scanSetsNowSilently then
+        WL.GetAllSetData(true)
+    end
     --Get the characters of the currently logged in account and list all available ones in a list (for the char selection dropdown at the WishList tab e.g.)
     WL.getCharsOfAccount()
 

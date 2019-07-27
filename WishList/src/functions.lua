@@ -980,7 +980,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
                             --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
                             local data = {}
                             data.setId                  = WL.currentSetId
-                            data.setName                = setsData.name
+                            data.setName                = setsData.names[WL.clientLang]
                             data.id                     = setItemId
                             data.itemType               = itemType
                             --data.itemTypeName           = itemTypeName
@@ -1413,116 +1413,6 @@ local function showTotalItemsLoaded()
     d("<<=============================================<<")
 end
 
---[[
-function WL.LoadSets()
-    --Hide Controls
-    WL.window.labelNoSets:SetHidden(true)
-    WL.window.buttonLoadSets:SetHidden(true)
-
-    --Show Loading controls
-    WL.window.labelLoadingSets:SetHidden(false)
-    d(">>=============================================>>")
-    d("[" .. GetString(WISHLIST_TITLE) .."]")
-    d(GetString(WISHLIST_LOADING_SETS))
-
-    --Update UI, no sets loaded yet -> Beginning to load sets
-    WL.CurrentTab = WISHLIST_TAB_SEARCH
-    WL.window:UpdateUI(WISHLIST_TAB_STATE_SETS_LOADING)
-
-    --Clear all set data
-    WishList.accData.sets = {}
-    WishList.accData.setCount = 0
-    WishList.accData.itemCount = 0
-
-    --Clear the setCount variables
-    WishList.setNames = {}
-
-    --Loop through all item ids and save all sets to an array
-    --Split the itemId packages into 5000 itemIds each, so the client is not lagging that
-    --much and is not crashing!
-    --> Change variable numItemIdPackages and increase it to support new added set itemIds
-    --> Total itemIds collected: 0 to (numItemIdPackages * numItemIdPackageSize)
-    local miliseconds = 0
-    local numItemIdPackages = 40       -- Increase this to find new added set itemIds after and update
-    local numItemIdPackageSize = 5000  -- do not increase this or the client may crash!
-    local fromTo = {}
-    local fromVal = 0
-    for numItemIdPackage = 1, numItemIdPackages, 1 do
-        --Set the to value to loop counter muliplied with the package size (e.g. 1*500, 2*5000, 3*5000, ...)
-        local toVal = numItemIdPackage * numItemIdPackageSize
-        --Add the from and to values to the totla itemId check array
-        table.insert(fromTo, {from = fromVal, to = toVal})
-        --For the next loop: Set the from value to the to value + 1 (e.g. 5000+1, 10000+1, ...)
-        fromVal = toVal + 1
-    end
-    --Add itemIds and scan them for set parts!
-    for _, v in pairs(fromTo) do
-        zo_callLater(function()
-            WL.LoadSetsByIds(v.from,v.to)
-        end, miliseconds)
-        miliseconds = miliseconds + 2000 -- scan item ID packages every 2 seconds to get not kicked/crash the client!
-    end
-    --Were all item IDs scanned? Show the results list now
-    zo_callLater(function()
-        showTotalItemsLoaded()
-    end, miliseconds + 2000)
-end
-
-function WL.LoadSetsByIds(from,to)
-    local setData = WishList.accData.sets
-
-    for setItemId=from,to do
-        --Generate link for item
-        local itemLink = WL.buildItemLink(setItemId)
-        if itemLink and itemLink ~= "" then
-            if not IsItemLinkCrafted(itemLink) then
-                local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-                if isSet then
-                    local itemType = GetItemLinkItemType(itemLink)
-                    --Some set items are only "containers" ...
-                    if WL.checkItemTypes[itemType] then
-                        --Remove the gender stuff from the setname
-                        setName = zo_strformat("<<C:1>>", setName)
-                        --Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
-                        if setData[setId] == nil then
-                            setData[setId] = {}
-                            setData[setId].name = setName
-                        end
-                        setData[setId][setItemId] = true -- itemType=itemType, trait=traitType, type=armorOrWeaponType, slot=equipType, bonuses=numBonuses}
-
-                        --Update the set's item count
-                        WL.accData.itemCount = WL.accData.itemCount + 1
-
-                        --Update the Set names table
-                        if WL.setNames[setName] == nil then
-                            WL.setNames[setName] = true
-                            --Update the set counts value
-                            WL.accData.setCount = WL.accData.setCount + 1
-                        end
-                    end
-                end
-            end
-        end
-    end
-    WL.UpdateSetCount()
-end
-
-function WL.UpdateSetCount()
-    local accData = WishList.accData
-    if accData.setCount == nil or accData.setCount == 0 then
-        local setCount = 0
-        local setsData = accData.sets
-        for _,_ in pairs(setsData) do
-            setCount = setCount + 1
-        end
-        accData.setCount = setCount
-    end
-    local setsFoundText = zo_strformat(GetString(WISHLIST_SETS_FOUND), accData.setCount, accData.itemCount)
-    d(">" .. setsFoundText)
-    WL.window.labelLoadingSets:SetText(setsFoundText)
-end
-]]
-
 --New with version 2.5 as LibSets provides the setData now and scanning is not needed anymore
 function WL.GetAllSetData(silent)
     silent = silent or false
@@ -1554,6 +1444,7 @@ function WL.GetAllSetData(silent)
     if WL.LibSets == nil then WL.LibSets = LibSets end
     if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
     local libSets = WL.LibSets
+    local libSetsVersion = libSets.version
     local setsDataPreloaded = {}
     setsDataPreloaded = libSets.setDataPreloaded
     local setItemIdsPreloaded   = setsDataPreloaded["setItemIds"]
@@ -1593,6 +1484,7 @@ function WL.GetAllSetData(silent)
         --Update the sets count
         WL.accData.setCount = setCount
         WL.accData.setsLastScanned = GetTimeStamp()
+        WL.accData.setsLastScannedLibSetsVersion = libSetsVersion
     end
     if not silent then
         showTotalItemsLoaded()
