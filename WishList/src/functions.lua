@@ -1292,10 +1292,14 @@ end
 
 function WL.showWayshrineNodeIdOnMap(wayshrineNodeId)
     if not wayshrineNodeId then return false end
-    showWorldMap()
+    local libSets = WL.LibSets
+    if not libSets.GetWayshrinesZoneId then return end
+    local zoneId = libSets.GetWayshrinesZoneId(wayshrineNodeId)
+    if not zoneId then return end
+    WL.openMapOfZoneId(zoneId)
     zo_callLater(function()
         ZO_WorldMap_PanToWayshrine(wayshrineNodeId)
-    end, 50)
+    end, 100)
 end
 
 --Set list/wishList row right click context menu
