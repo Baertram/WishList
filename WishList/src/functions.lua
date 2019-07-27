@@ -1356,7 +1356,7 @@ function WL.showContextMenu(control, button, upInside)
                                 label 		    = wayshrineName,
                                 callback 	    = function() WL.showWayshrineNodeIdOnMap(wayshrineNodeIndex) end --libSets.JumpToSetId(data.setId, factionIndex) end,
                             }
-                            table.insert(alreadyAddedWayshrines, subMenuEntry)
+                            table.insert(wayshrinesContextMenuEntries, subMenuEntry)
                             alreadyAddedWayshrines[wayshrineNodeIndex] = true
                         end
                     end
