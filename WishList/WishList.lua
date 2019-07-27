@@ -397,7 +397,6 @@ end
 
 --ZO_SortScrollList - Item for the sets tab's list
 function WL.CreateEntryForSet( setId, setData )
-WL._setDataCreateEntryForSet = setData
 	--Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
     --local setsData = WL.accData.sets
 	local itemId = WL.GetFirstSetItem(setId)
@@ -452,11 +451,14 @@ WL._setDataCreateEntryForSet = setData
     local zoneIdsAdded = {}
     local function checkAndGetZoneName(p_zoneId, p_setId)
         if p_zoneId ~= -1 and not zoneIdsAdded[p_zoneId] then
-            local zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
+            local zoneNameLocalized = nil
+            if p_zoneId ~= -99 then
+                zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
+            end
             if zoneNameLocalized == nil or zoneNameLocalized == "" then
                 --Get the setType and check if it's from a battleground (there is no zoneId for them so we need to use a fixed String)
-                local setTypeLibSets = libSets.GetSetType(p_setId)
-                if setTypeLibSets and setTypeLibSets == LIBSETS_SETTYPE_BATTLEGROUND then
+                local isBGSetType = libSets.IsBattlegroundSet(p_setId)
+                if isBGSetType then
                     zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_BG)
                 end
             end
@@ -475,12 +477,20 @@ WL._setDataCreateEntryForSet = setData
         if type(dropLocationsZoneIds) == "table" then
             --Get each zoneId, get the zoneName localized via LibZone (via LiBSets) or from LibSets data
             for _, zoneId in ipairs(dropLocationsZoneIds) do
-                checkAndGetZoneName(zoneId)
+                checkAndGetZoneName(zoneId, setId)
             end
-        elseif type(dropLocationsZoneIds) == "number" then
-            checkAndGetZoneName(dropLocationsZoneIds)
         end
+    else
+        checkAndGetZoneName(-99, setId)
     end
+    --Get the drop location wayshrines
+    local setWayshrines = libSets.GetWayshrineIds(setId)
+    --Get the DLC id
+    local dlcId = libSets.GetDLCId(setId)
+    --Get set type
+    local setType = libSets.GetSetType(setId)
+    --Get traits needed for craftable sets
+    local traitsNeeded = libSets.GetTraitsNeeded(setId)
 
     local maxNameColumnWidth = 200 + columnWidthAdd
     if WL.maxNameColumnWidth == nil or maxNameColumnWidth > WL.maxNameColumnWidth then
@@ -497,7 +507,13 @@ WL._setDataCreateEntryForSet = setData
         columnWidth = maxNameColumnWidth,
 		itemLink    = itemLink,
 		bonuses     = numBonuses,
+        --LibSets data
+        setType     = setType,
+        traitsNeeded= traitsNeeded,
+        dlcId       = dlcId,
         locality    = dropLocationsText,
+        zoneIds     = dropLocationsZoneIds,
+        wayshrines  = setWayshrines,
 	})
 end
 

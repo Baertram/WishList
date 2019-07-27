@@ -30,6 +30,8 @@ local stringsBase = {
     WISHLIST_DIALOG_ADD_ITEM            = "Add item",
     WISHLIST_BUTTON_REMOVE_HISTORY_TT   = "Clear history",
 
+    WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
+    WISHLIST_DROPLOCATIONS              = "Drop locations",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
 }
 WL.stringsBaseEN = stringsBase
