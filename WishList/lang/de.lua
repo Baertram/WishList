@@ -25,6 +25,8 @@ local stringsBase = {
 
     WISHLIST_DIALOG_ADD_ITEM            = "Gegenstand hinzufügen",
     WISHLIST_BUTTON_REMOVE_HISTORY_TT   = "Historie leeren",
+
+    WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
 }
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 --setmetatable(stringsBase, {__index = WL.stringsBaseEN})

@@ -54,7 +54,7 @@
                 </Label>
                 <Label name="$(parent)Locality" inherits="WishListRowLabel">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)UserName" />
-                    <Dimensions y="30" />
+                    <Dimensions x="100" y="30" />
                 </Label>
 				<Label name="$(parent)Quality" inherits="WishListRowLabel">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Locality" />
@@ -315,7 +315,7 @@
                                 ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_LOCALITY), "locality", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)UserName" />
-                            <Dimensions y="32" />
+                            <Dimensions x="100" y="32" />
                         </Control>
 						<Control name="$(parent)Quality" inherits="WhisListSortHeader">
 							<OnInitialized>
@@ -356,7 +356,7 @@
 
 				<!-- Last scanned set -->
 				<Label name="$(parent)SetsLastScanned" font="ZoFontGameSmall" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-					<Anchor point="BOTTOM" relativeTo="$(parent)Reload" relativePoint="BOTTOM" offsetY="40" offsetX="0" />
+					<Anchor point="LEFT" relativeTo="$(parent)Reload" relativePoint="RIGHT" offsetX="20" offsetY="0"/>
 				</Label>
 
 				<!-- Tab Buttons -->

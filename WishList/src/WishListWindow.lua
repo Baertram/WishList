@@ -66,6 +66,7 @@ function WishListWindow:Setup( )
     --Sort headers
 	self.headers = self.frame:GetNamedChild("Headers")
     self.headerDate = self.headers:GetNamedChild("DateTime")
+    self.headerName = self.headers:GetNamedChild("Name")
 	self.headerArmorOrWeaponType = self.headers:GetNamedChild("ArmorOrWeaponType")
 	self.headerSlot = self.headers:GetNamedChild("Slot")
 	self.headerTrait = self.headers:GetNamedChild("Trait")
@@ -151,6 +152,40 @@ local function WLW_UpdateSceneFragmentTitle(sceneName, fragment, childName, newT
     end
     return false
 end
+
+function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWidth, nameHeaderHeight)
+    if wlTab == WISHLIST_TAB_SEARCH then
+        if WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADED then
+            self.headerDate:ClearAnchors()
+            self.headerName:ClearAnchors()
+            self.headerName:SetDimensions(nameHeaderWidth, nameHeaderHeight)
+            self.headerName:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
+            self.headerLocality:ClearAnchors()
+            self.headerLocality:SetAnchor(TOPLEFT, self.headerName, TOPRIGHT, 0, 0)
+            self.headerLocality:SetAnchor(TOPRIGHT, self.headers, TOPRIGHT, -16, 0)
+        end
+    elseif wlTab == WISHLIST_TAB_WISHLIST then
+        self.headerDate:ClearAnchors()
+        self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
+        self.headerName:ClearAnchors()
+        self.headerName:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, 0, 0)
+        self.headerName:SetDimensions(200, nameHeaderHeight)
+        self.headerQuality:ClearAnchors()
+        self.headerQuality:SetAnchor(LEFT, self.headerTrait, RIGHT, 0, 0)
+        self.headerQuality:SetAnchor(RIGHT, self.headers, RIGHT, -16, 0)
+        self.headerLocality:ClearAnchors()
+    elseif wlTab == WISHLIST_TAB_HISTORY then
+        self.headerDate:ClearAnchors()
+        self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
+        self.headerName:ClearAnchors()
+        self.headerName:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, 0, 0)
+        self.headerName:SetDimensions(200, nameHeaderHeight)
+        self.headerLocality:ClearAnchors()
+        self.headerLocality:SetAnchor(TOPLEFT, self.headerUsername, TOPRIGHT, 0, 0)
+        self.headerLocality:SetAnchor(TOPRIGHT, self.headers, TOPRIGHT, -16, 0)
+    end
+end
+
 
 function WishListWindow:UpdateUI(state)
 	WL.CurrentState = state
@@ -283,7 +318,7 @@ function WishListWindow:UpdateUI(state)
             self.headerTrait:SetHidden(true)
             self.headerQuality:SetHidden(true)
             self.headerUsername:SetHidden(true)
-            self.headerLocality:SetHidden(true)
+            self.headerLocality:SetHidden(false)
 
             self.frame:GetNamedChild("List"):SetHidden(false)
             WL.initializeSearchDropdown(self, WL.CurrentTab, "set")
@@ -396,6 +431,7 @@ function WishListWindow:UpdateUI(state)
 
         self:RefreshData()
 	end
+    self:updateSortHeaderAnchorsAndPositions(WL.CurrentTab, 200, 32)
 end
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
@@ -409,6 +445,8 @@ function WishListWindow:BuildMasterList(calledFromFilterFunction)
 		for setId, setData in pairs(setsData) do
 			table.insert(self.masterList, WL.CreateEntryForSet(setId, setData))
 		end
+        self:updateSortHeaderAnchorsAndPositions(WL.CurrentTab, WL.maxNameColumnWidth, 32)
+
 ------------------------------------------------------------------------------------------------------------------------
 	--Wishlist tab row creation from wishlist savedvars items
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
@@ -454,10 +492,9 @@ function WishListWindow:SetupItemRow( control, data )
     --local clientLang = WL.clientLang or WL.fallbackSetLang
     --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
-
+    local updateSortHeaderDimensionsAndAnchors = false
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
-    local nameColumnValue = ""
     if not data.columnWidth then data.columnWidth = 200 end
     nameColumn:SetDimensions(data.columnWidth, 30)
     nameColumn:SetText(data.name)
@@ -470,15 +507,45 @@ function WishListWindow:SetupItemRow( control, data )
     local localityColumn = control:GetNamedChild("Locality")
     localityColumn.localityName = nil
     ------------------------------------------------------------------------------------------------------------------------
-    if WL.CurrentTab == WISHLIST_TAB_WISHLIST then
+    if WL.CurrentTab == WISHLIST_TAB_SEARCH then
+        --d(">WISHLIST_TAB_SEARCH")
+        dateColumn:SetHidden(true)
+        dateColumn:ClearAnchors()
+        nameColumn:ClearAnchors()
+        nameColumn:SetAnchor(LEFT, control, nil, 0, 0)
+        nameColumn:SetHidden(false)
+        userNameColumn:SetHidden(true)
+        armorOrWeaponTypeColumn:SetHidden(true)
+        slotColumn:SetHidden(true)
+        traitColumn:SetHidden(true)
+        qualityColumn:SetHidden(true)
+        localityColumn:SetHidden(false)
+        dateColumn:SetText("")
+        armorOrWeaponTypeColumn:SetText("")
+        slotColumn:SetText("")
+        traitColumn:SetText("")
+        localityColumn:ClearAnchors()
+        localityColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
+        localityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
+        localityColumn:SetText(data.locality)
+        localityColumn.localityName = data.locality
+        qualityColumn:SetText("")
+    ------------------------------------------------------------------------------------------------------------------------
+    elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
         --d(">WISHLIST_TAB_WISHLIST")
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
+        dateColumn:ClearAnchors()
+        dateColumn:SetAnchor(LEFT, control, nil, 0, 0)
         dateColumn:SetText(dateTimeStr)
         dateColumn:SetHidden(false)
+        nameColumn:SetHidden(false)
+        nameColumn:ClearAnchors()
+        nameColumn:SetAnchor(LEFT, dateColumn, RIGHT, 0, 0)
         userNameColumn:SetHidden(true)
         qualityColumn:SetHidden(false)
         localityColumn:SetHidden(true)
+        localityColumn:ClearAnchors()
         armorOrWeaponTypeColumn:SetHidden(false)
         slotColumn:SetHidden(false)
         traitColumn:SetHidden(false)
@@ -507,14 +574,22 @@ function WishListWindow:SetupItemRow( control, data )
         if data.quality then
             qualityText = WL.quality[data.quality]
         end
+        qualityColumn:ClearAnchors()
+        qualityColumn:SetAnchor(LEFT, traitColumn, RIGHT, 0, 0)
+        qualityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
         qualityColumn:SetText(qualityText)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
+        dateColumn:ClearAnchors()
+        dateColumn:SetAnchor(LEFT, control, nil, 0, 0)
         dateColumn:SetText(dateTimeStr)
         dateColumn:SetHidden(false)
+        nameColumn:SetHidden(false)
+        nameColumn:ClearAnchors()
+        nameColumn:SetAnchor(LEFT, dateColumn, RIGHT, 0, 0)
         qualityColumn:SetHidden(true)
         userNameColumn:SetHidden(false)
         local userNameText = ""
@@ -533,6 +608,8 @@ function WishListWindow:SetupItemRow( control, data )
         end
         userNameColumn:SetText(userNameText)
         localityColumn:SetHidden(false)
+        localityColumn:ClearAnchors()
+        localityColumn:SetAnchor(LEFT, userNameColumn, RIGHT, 0, 0)
         localityColumn:SetText(data.locality)
         localityColumn.localityName = data.locality
         armorOrWeaponTypeColumn:SetHidden(false)
@@ -559,21 +636,6 @@ function WishListWindow:SetupItemRow( control, data )
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
         traitColumn:SetText(traitText)
-        qualityColumn:SetText("")
-        ------------------------------------------------------------------------------------------------------------------------
-    elseif WL.CurrentTab == WISHLIST_TAB_SEARCH then
-        --d(">WISHLIST_TAB_SEARCH")
-        userNameColumn:SetHidden(true)
-        localityColumn:SetHidden(true)
-        dateColumn:SetHidden(true)
-        armorOrWeaponTypeColumn:SetHidden(true)
-        slotColumn:SetHidden(true)
-        traitColumn:SetHidden(true)
-        qualityColumn:SetHidden(true)
-        armorOrWeaponTypeColumn:SetText("")
-        slotColumn:SetText("")
-        traitColumn:SetText("")
-        dateColumn:SetText("")
         qualityColumn:SetText("")
     end
     --Set the row to the list now

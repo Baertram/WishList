@@ -29,6 +29,8 @@ local stringsBase = {
 
     WISHLIST_DIALOG_ADD_ITEM            = "Add item",
     WISHLIST_BUTTON_REMOVE_HISTORY_TT   = "Clear history",
+
+    WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
 }
 WL.stringsBaseEN = stringsBase
 for stringId, stringValue in pairs(stringsBase) do

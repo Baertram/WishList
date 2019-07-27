@@ -12,7 +12,7 @@ WL.comingFromSortScrollListSetupFunction = false
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.6
+WL.addonVars.addonRealVersion		= 2.7
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
@@ -99,6 +99,7 @@ WL.preventerVars = {}
 WL.preventerVars.addonMenuBuild = false
 WL.preventerVars.writCreatorAutoLootBoxesActive = false
 WL.preventerVars.runSetNameLanguageChecks = false
+WL.maxNameColumnWidth = nil
 
 ------------------------------------------------
 --- Event Handlers
@@ -445,15 +446,57 @@ WL._setDataCreateEntryForSet = setData
         columnWidthAdd = langsAdded * 125
     end
 
---Table entry for the ZO_ScrollList data
+    --Get the drop location(s) of the set via LibSets
+    local dropLocationsText = ""
+    local dropLocationsZoneIds = libSets.GetZoneIds(setId)
+    local zoneIdsAdded = {}
+    local function checkAndGetZoneName(p_zoneId, p_setId)
+        if p_zoneId ~= -1 and not zoneIdsAdded[p_zoneId] then
+            local zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
+            if zoneNameLocalized == nil or zoneNameLocalized == "" then
+                --Get the setType and check if it's from a battleground (there is no zoneId for them so we need to use a fixed String)
+                local setTypeLibSets = libSets.GetSetType(p_setId)
+                if setTypeLibSets and setTypeLibSets == LIBSETS_SETTYPE_BATTLEGROUND then
+                    zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_BG)
+                end
+            end
+            if zoneNameLocalized and zoneNameLocalized ~= "" then
+                if dropLocationsText == "" then
+                    dropLocationsText = zoneNameLocalized
+                else
+                    dropLocationsText = dropLocationsText .. ", " .. zoneNameLocalized
+                end
+                zoneIdsAdded[p_zoneId] = true
+            end
+        end
+    end
+    --Get the zoneIds' text now
+    if dropLocationsZoneIds ~= nil then
+        if type(dropLocationsZoneIds) == "table" then
+            --Get each zoneId, get the zoneName localized via LibZone (via LiBSets) or from LibSets data
+            for _, zoneId in ipairs(dropLocationsZoneIds) do
+                checkAndGetZoneName(zoneId)
+            end
+        elseif type(dropLocationsZoneIds) == "number" then
+            checkAndGetZoneName(dropLocationsZoneIds)
+        end
+    end
+
+    local maxNameColumnWidth = 200 + columnWidthAdd
+    if WL.maxNameColumnWidth == nil or maxNameColumnWidth > WL.maxNameColumnWidth then
+        WL.maxNameColumnWidth = maxNameColumnWidth
+    end
+
+    --Table entry for the ZO_ScrollList data
 	return({
         type        = WL.sortType,
 		setId       = setId,
 		name        = nameColumnValue,
         names       = setData.names,
-        columnWidth = 200 + columnWidthAdd,
+        columnWidth = maxNameColumnWidth,
 		itemLink    = itemLink,
-		bonuses     = numBonuses
+		bonuses     = numBonuses,
+        locality    = dropLocationsText,
 	})
 end
 
