@@ -154,12 +154,13 @@ local function WLW_UpdateSceneFragmentTitle(sceneName, fragment, childName, newT
 end
 
 function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWidth, nameHeaderHeight)
+--d("[WishListWindow]:updateSortHeaderAnchorsAndPositions")
     if wlTab == WISHLIST_TAB_SEARCH then
         if WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADED then
             self.headerDate:ClearAnchors()
             self.headerName:ClearAnchors()
-            self.headerName:SetDimensions(nameHeaderWidth, nameHeaderHeight)
             self.headerName:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
+            self.headerName:SetDimensions(nameHeaderWidth, nameHeaderHeight)
             self.headerLocality:ClearAnchors()
             self.headerLocality:SetAnchor(TOPLEFT, self.headerName, TOPRIGHT, 0, 0)
             self.headerLocality:SetAnchor(TOPRIGHT, self.headers, TOPRIGHT, -16, 0)
@@ -431,8 +432,8 @@ function WishListWindow:UpdateUI(state)
 
         self:RefreshData()
 	end
-    self:updateSortHeaderAnchorsAndPositions(WL.CurrentTab, 200, 32)
-end
+    self:updateSortHeaderAnchorsAndPositions(WL.CurrentTab, WL.maxNameColumnWidth, 32)
+end -- WishListWindow:UpdateUI(state)
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
     calledFromFilterFunction = calledFromFilterFunction or false

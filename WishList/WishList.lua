@@ -484,6 +484,7 @@ WL._setDataCreateEntryForSet = setData
 
     local maxNameColumnWidth = 200 + columnWidthAdd
     if WL.maxNameColumnWidth == nil or maxNameColumnWidth > WL.maxNameColumnWidth then
+--d(">WL.maxNameColumnWidth changed to: " ..tostring(WL.maxNameColumnWidth))
         WL.maxNameColumnWidth = maxNameColumnWidth
     end
 
