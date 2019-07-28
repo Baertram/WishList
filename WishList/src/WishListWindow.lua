@@ -1244,7 +1244,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             if      searchValueType == "string" then
                 local zoneIdsNames = data.zoneIdNames
                 if zoneIdsNames then
-                    for zoneId, zoneIdName in ipairs(zoneIdsNames) do
+                    for _, zoneIdName in pairs(zoneIdsNames) do
                         if zo_plainstrfind(zoneIdName:lower(), searchInput:lower()) then
                             return true
                         end
@@ -1270,7 +1270,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             if      searchValueType == "string" then
                 local wayshrineNames = data.wayshrineNames
                 if wayshrineNames then
-                    for wayshrineNodeIndex, wayshrineName in ipairs(wayshrineNames) do
+                    for _, wayshrineName in pairs(wayshrineNames) do
                         if zo_plainstrfind(wayshrineName:lower(), searchInput:lower()) then
                             return true
                         end

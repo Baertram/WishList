@@ -397,7 +397,7 @@ local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
                 p_dropLocationsText = p_dropLocationsText .. ", " .. zoneNameLocalized
             end
             zoneIdsAdded[p_zoneId] = true
-            table.insert(zoneIdNames, {[p_zoneId] = zoneNameLocalized})
+            zoneIdNames[p_zoneId] = zoneNameLocalized
         end
     end
     return p_dropLocationsText
@@ -414,7 +414,7 @@ local function checkAndGetWayshrineName(p_wayShrines)
                     wsNameLocalized = ZO_CachedStrFormat("<<C:1>", wsName)
                     if wsNameLocalized and wsNameLocalized ~= "" then
                         wayshrinesAdded[wsIndex] = true
-                        table.insert(wayshrineNames, {[wsIndex] = wsNameLocalized})
+                        wayshrineNames[wsIndex] = wsNameLocalized
                     end
                 end
             end
