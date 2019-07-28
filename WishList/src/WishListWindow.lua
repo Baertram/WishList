@@ -749,7 +749,7 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
 end
 
 function WishListWindow:FilterScrollList()
-d("[WishListWindow:FilterScrollList]")
+--d("[WishListWindow:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 

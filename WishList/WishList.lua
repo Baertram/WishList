@@ -411,7 +411,7 @@ local function checkAndGetWayshrineName(p_wayShrines)
                 --function GetFastTravelNodeInfo(nodeIndex) end
                 local _, wsName = GetFastTravelNodeInfo(wsIndex)
                 if wsName and wsName ~= "" then
-                    wsNameLocalized = ZO_CachedStringFormat("<<C:1>", wsName)
+                    wsNameLocalized = ZO_CachedStrFormat("<<C:1>", wsName)
                     if wsNameLocalized and wsNameLocalized ~= "" then
                         wayshrinesAdded[wsIndex] = true
                         table.insert(wayshrineNames, {[wsIndex] = wsNameLocalized})
