@@ -493,8 +493,10 @@ function WL.CreateEntryForSet( setId, setData )
     checkAndGetWayshrineName(setWayshrines)
     --Get the DLC id
     local dlcId = libSets.GetDLCId(setId)
+    local dlcName = libSets.GetDLCName(dlcId)
     --Get set type
     local setType = libSets.GetSetType(setId)
+    local setTypeName = libSets.GetSetTypeName(setType)
     --Get traits needed for craftable sets
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
 
@@ -522,6 +524,8 @@ function WL.CreateEntryForSet( setId, setData )
         wayshrines  = setWayshrines,
         zoneIdNames = zoneIdNames,
         wayshrineNames = wayshrineNames,
+        dlcName     = dlcName,
+        setTypeName = setTypeName,
 	})
 end
 
@@ -555,8 +559,10 @@ function WL.CreateEntryForItem(item)
     checkAndGetWayshrineName(setWayshrines)
     --Get the DLC id
     local dlcId = libSets.GetDLCId(setId)
+    local dlcName = libSets.GetDLCName(dlcId)
     --Get set type
     local setType = libSets.GetSetType(setId)
+    local setTypeName = libSets.GetSetTypeName(setType)
     --Get traits needed for craftable sets
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
     --The return table of the item on the WishList
@@ -585,6 +591,8 @@ function WL.CreateEntryForItem(item)
         wayshrines  = setWayshrines,
         zoneIdNames = zoneIdNames,
         wayshrineNames = wayshrineNames,
+        dlcName     = dlcName,
+        setTypeName = setTypeName,
     }
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
 	return wlEntryTable
@@ -619,8 +627,10 @@ function WL.CreateHistoryEntryForItem(item)
     checkAndGetWayshrineName(setWayshrines)
     --Get the DLC id
     local dlcId = libSets.GetDLCId(setId)
+    local dlcName = libSets.GetDLCName(dlcId)
     --Get set type
     local setType = libSets.GetSetType(setId)
+    local setTypeName = libSets.GetSetTypeName(setType)
     --Get traits needed for craftable sets
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
@@ -654,6 +664,8 @@ function WL.CreateHistoryEntryForItem(item)
         wayshrines  = setWayshrines,
         zoneIdNames = zoneIdNames,
         wayshrineNames = wayshrineNames,
+        dlcName     = dlcName,
+        setTypeName = setTypeName,
     })
 end
 

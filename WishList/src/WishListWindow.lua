@@ -840,9 +840,11 @@ function WishListWindow:FilterScrollList()
                     data["dlcId"]           = mlData.dlcId
                     data["zoneIds"]         = mlData.zoneIds
                     data["wayshrines"]      = mlData.wayshrines
-                    data["zoneIdNames"]      = mlData.zoneIdNames
-                    data["wayshrineNames"]      = mlData.wayshrineNames
-                end
+                    data["zoneIdNames"]     = mlData.zoneIdNames
+                    data["wayshrineNames"]  = mlData.wayshrineNames
+                    data["dlcName"]         = mlData.dlcName
+                    data["setTypeName"]     = mlData.setTypeName
+               end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
                     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
@@ -918,6 +920,8 @@ function WishListWindow:FilterScrollList()
                     data["wayshrines"]      = mlData.wayshrines
                     data["zoneIdNames"]      = mlData.zoneIdNames
                     data["wayshrineNames"]      = mlData.wayshrineNames
+                    data["dlcName"]         = mlData.dlcName
+                    data["setTypeName"]     = mlData.setTypeName
                 end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then

@@ -56,10 +56,10 @@ local strings = {
     WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
     --LibSets searches
     WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set type",
-    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC id",
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC",
     WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Traits needed",
-    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Zone id",
-    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": Wayshrine node index",
+    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Zone",
+    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": Wayshrine",
 
     WISHLIST_LOOT_MSG_YOU            = "YOU LOOTED ",
     WISHLIST_LOOT_MSG_OTHER          = " LOOTED ",
