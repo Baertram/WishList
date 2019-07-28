@@ -378,9 +378,9 @@ local wayshrinesAdded = {}
 local zoneIdNames = {}
 local wayshrineNames = {}
 local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
-    if (p_zoneId == -99 or p_zoneId > 0) and not zoneIdsAdded[p_zoneId] then
+    if p_zoneId > 0 and not zoneIdsAdded[p_zoneId] then
         local zoneNameLocalized = nil
-        if p_zoneId ~= -99 then
+        if p_zoneId ~= WISHLIST_ZONEID_BATTLEGROUNDS then
             zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
         end
         if zoneNameLocalized == nil or zoneNameLocalized == "" then
@@ -487,7 +487,9 @@ function WL.CreateEntryForSet( setId, setData )
             end
         end
     else
-        dropLocationsText = checkAndGetZoneName(-99, setId, dropLocationsText)
+        --For battleground sets there is no zoneId. Use the constant here
+        dropLocationsText = checkAndGetZoneName(WISHLIST_ZONEID_BATTLEGROUNDS, setId, dropLocationsText)
+        dropLocationsZoneIds = {WISHLIST_ZONEID_BATTLEGROUNDS}
     end
     --Get the drop location wayshrines
     local setWayshrines = libSets.GetWayshrineIds(setId)
