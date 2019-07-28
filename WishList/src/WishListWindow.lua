@@ -1253,7 +1253,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             elseif searchValueType == "number" then
                 for _, zoneId in ipairs(zoneIds) do
                     if zoneId > 0 then
-                        if zoneId == searchInput then return true  end
+                        if zoneId == searchInputNumber then return true  end
                     end
                 end
             end
@@ -1279,7 +1279,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             elseif searchValueType == "number" then
                 for _, wayshrineNodeIndex in ipairs(wayshrines) do
                     if wayshrineNodeIndex > 0 then
-                        if wayshrineNodeIndex == searchInput then return true  end
+                        if wayshrineNodeIndex == searchInputNumber then return true  end
                     end
                 end
             end
