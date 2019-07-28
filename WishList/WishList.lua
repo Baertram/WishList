@@ -410,6 +410,7 @@ local function checkAndGetWayshrineName(p_wayShrines)
                 --@return known bool,name string,normalizedX number,normalizedY number,icon textureName,glowIcon textureName:nilable,poiType [PointOfInterestType|#PointOfInterestType],isShownInCurrentMap bool,linkedCollectibleIsLocked bool
                 --function GetFastTravelNodeInfo(nodeIndex) end
                 local _, wsName = GetFastTravelNodeInfo(wsIndex)
+d(">wsName: " ..tostring(wsName))
                 if wsName and wsName ~= "" then
                     wsNameLocalized = ZO_CachedStrFormat("<<C:1>", wsName)
                     if wsNameLocalized and wsNameLocalized ~= "" then
@@ -476,6 +477,7 @@ function WL.CreateEntryForSet( setId, setData )
     local dropLocationsZoneIds = libSets.GetZoneIds(setId)
     zoneIdsAdded = {}
     zoneIdNames = {}
+    wayshrinesAdded = {}
     wayshrineNames = {}
     --Get the zoneIds' text now
     if dropLocationsZoneIds ~= nil then
@@ -550,7 +552,9 @@ function WL.CreateEntryForItem(item)
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
 
+    zoneIdsAdded = {}
     zoneIdNames = {}
+    wayshrinesAdded = {}
     wayshrineNames = {}
     --Get the drop location(s) of the set via LibSets
     local dropLocationsZoneIds = libSets.GetZoneIds(setId)
@@ -618,7 +622,9 @@ function WL.CreateHistoryEntryForItem(item)
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
 
+    zoneIdsAdded = {}
     zoneIdNames = {}
+    wayshrinesAdded = {}
     wayshrineNames = {}
     --Get the drop location(s) of the set via LibSets
     local dropLocationsZoneIds = libSets.GetZoneIds(setId)
