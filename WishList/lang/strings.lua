@@ -33,6 +33,8 @@ local stringsBase = {
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
     WISHLIST_DROPLOCATIONS              = "Drop locations",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
+
+    WISHLIST_LIBSETS                    = "LibSets",
 }
 WL.stringsBaseEN = stringsBase
 for stringId, stringValue in pairs(stringsBase) do
@@ -51,8 +53,13 @@ local strings = {
     WISHLIST_SEARCHDROP6       = GetString(WISHLIST_CONST_ITEMID),
     WISHLIST_SEARCHDROP7       = GetString(WISHLIST_HEADER_DATE),
     WISHLIST_SEARCHDROP8       = GetString(WISHLIST_HEADER_LOCALITY),
-    WISHLIST_SEARCHDROP9      = GetString(WISHLIST_HEADER_USERNAME),
-    --WISHLIST_SEARCHDROP10       = GetString(WISHLIST_HEADER_TYPE), disabled
+    WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
+    --LibSets searches
+    WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set type",
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC id",
+    WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Traits needed",
+    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Zone id",
+    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": Wayshrine node index",
 
     WISHLIST_LOOT_MSG_YOU            = "YOU LOOTED ",
     WISHLIST_LOOT_MSG_OTHER          = " LOOTED ",

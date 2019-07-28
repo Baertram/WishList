@@ -29,6 +29,8 @@ local stringsBase = {
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
     WISHLIST_DROPLOCATIONS              = "Fundorte",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
+
+    WISHLIST_LIBSETS                    = "LibSets",
 }
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 --setmetatable(stringsBase, {__index = WL.stringsBaseEN})
@@ -48,8 +50,13 @@ local strings = {
     WISHLIST_SEARCHDROP6       = GetString(WISHLIST_CONST_ITEMID),
     WISHLIST_SEARCHDROP7       = GetString(WISHLIST_HEADER_DATE),
     WISHLIST_SEARCHDROP8       = GetString(WISHLIST_HEADER_LOCALITY),
-    WISHLIST_SEARCHDROP9      = GetString(WISHLIST_HEADER_USERNAME),
-    --WISHLIST_SEARCHDROP10       = GetString(WISHLIST_HEADER_TYPE), --deaktiviert
+    WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
+    --LibSets searches
+    WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set Typ",
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC #",
+    WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Benötigte Eigenschaften",
+    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Zonen #",
+    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": Wegschrein Knoten #",
 
     WISHLIST_LOOT_MSG_YOU = "Du findest: ",
     WISHLIST_LOOT_MSG_OTHER = " hat gefunden: ",

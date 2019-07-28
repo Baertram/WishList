@@ -1,5 +1,6 @@
 WishList = WishList or {}
 local WL = WishList
+local libSets = WL.LibSets
 
 ------------------------------------------------
 --- WishList Window -> ZO_SortFilterList
@@ -296,7 +297,6 @@ function WishListWindow:UpdateUI(state)
             if WL.accData.setsLastScanned ~= nil and WL.accData.setsLastScanned > 0 then
                 local setsLastScanned = WL.getDateTimeFormatted(WL.accData.setsLastScanned)
                 local libSetsVersionInfo = ""
-                local libSets = WL.LibSets
                 if libSets and libSets.name and libSets.version then
                     libSetsVersionInfo = setsLastScanned .. "\n" .. libSets.name .. " v" .. tostring(libSets.version)
                     setsLastScanned = libSetsVersionInfo
@@ -749,7 +749,7 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
 end
 
 function WishListWindow:FilterScrollList()
---d("[WishListWindow:FilterScrollList]")
+d("[WishListWindow:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
@@ -832,6 +832,17 @@ function WishListWindow:FilterScrollList()
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
                 data["timestamp"]               = wlDataOfCharId["timestamp"]
+                --LibSets data
+                local mlData = self.masterList[i]
+                if mlData then
+                    data["setType"]         = mlData.setType
+                    data["traitsNeeded"]    = mlData.traitsNeeded
+                    data["dlcId"]           = mlData.dlcId
+                    data["zoneIds"]         = mlData.zoneIds
+                    data["wayshrines"]      = mlData.wayshrines
+                    data["zoneIdNames"]      = mlData.zoneIdNames
+                    data["wayshrineNames"]      = mlData.wayshrineNames
+                end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
                     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
@@ -897,6 +908,17 @@ function WishListWindow:FilterScrollList()
                     data["displayName"]             = histDataOfCharId["displayName"]
                 end
                 data["locality"]                = histDataOfCharId["locality"]
+                --LibSets data
+                local mlData = self.masterList[i]
+                if mlData then
+                    data["setType"]         = mlData.setType
+                    data["traitsNeeded"]    = mlData.traitsNeeded
+                    data["dlcId"]           = mlData.dlcId
+                    data["zoneIds"]         = mlData.zoneIds
+                    data["wayshrines"]      = mlData.wayshrines
+                    data["zoneIdNames"]      = mlData.zoneIdNames
+                    data["wayshrineNames"]      = mlData.wayshrineNames
+                end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
                     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
@@ -1034,6 +1056,14 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["username"]                = histDataOfCharId["username"]
     data["displayName"]             = histDataOfCharId["displayName"]
     data["locality"]                = histDataOfCharId["locality"]
+    --LibSets data
+    data["setType"]         = mlData.setType
+    data["traitsNeeded"]    = mlData.traitsNeeded
+    data["dlcId"]           = mlData.dlcId
+    data["zoneIds"]         = mlData.zoneIds
+    data["wayshrines"]      = mlData.wayshrines
+    data["zoneIdNames"]      = mlData.zoneIdNames
+    data["wayshrineNames"]      = mlData.wayshrineNames
 ]]
     --Search by item type
     if searchType == WISHLIST_SEARCH_TYPE_BY_TYPE then
@@ -1153,6 +1183,108 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
                 --and compare it to the entered date format
             end
         end
+
+    --LibSets searches
+
+        --Search by dlcId
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE then
+        local searchInputNumber = tonumber(searchInput)
+        if searchInputNumber ~= nil then
+            searchValueType = type(searchInputNumber)
+        end
+        if      searchValueType == "string" then
+            local setTypeName = data.setTypeName
+            if setTypeName and setTypeName ~= "" then
+                if zo_plainstrfind(setTypeName:lower(), searchInput:lower()) then
+                    return true
+                end
+            end
+        elseif  searchValueType == "number" then
+            local setType = data.setType
+            if setType ~= nil and setType == searchInputNumber then return true end
+        end
+
+    --Search by dlcId
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID then
+        local searchInputNumber = tonumber(searchInput)
+        if searchInputNumber ~= nil then
+            searchValueType = type(searchInputNumber)
+        end
+        if      searchValueType == "string" then
+            local dlcName = data.dlcName
+            if dlcName and dlcName ~= "" then
+                if zo_plainstrfind(dlcName:lower(), searchInput:lower()) then
+                    return true
+                end
+            end
+        elseif  searchValueType == "number" then
+            local dlcId = data.dlcId
+            if dlcId ~= nil and dlcId == searchInputNumber then return true end
+        end
+
+    --Search by traitsNeeded
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED then
+        local searchInputNumber = tonumber(searchInput)
+        if searchInputNumber ~= nil then
+            searchValueType = type(searchInputNumber)
+        end
+        if  searchValueType == "number" then
+            local traitsNeeded = data.traitsNeeded
+            if traitsNeeded ~= nil and traitsNeeded == searchInputNumber then return true end
+        end
+
+    --Search by zoneId
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID then
+        local zoneIds = data.zoneIds
+        if zoneIds then
+            local searchInputNumber = tonumber(searchInput)
+            if searchInputNumber ~= nil then
+                searchValueType = type(searchInputNumber)
+            end
+            if      searchValueType == "string" then
+                local zoneIdsNames = data.zoneIdNames
+                if zoneIdsNames then
+                    for zoneId, zoneIdName in ipairs(zoneIdsNames) do
+                        if zo_plainstrfind(zoneIdName:lower(), searchInput:lower()) then
+                            return true
+                        end
+                    end
+                end
+            elseif searchValueType == "number" then
+                for _, zoneId in ipairs(zoneIds) do
+                    if zoneId > 0 then
+                        if zoneId == searchInput then return true  end
+                    end
+                end
+            end
+        end
+
+    --Search by wayshrine
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX then
+        local wayshrines = data.wayshrines
+        if wayshrines then
+            local searchInputNumber = tonumber(searchInput)
+            if searchInputNumber ~= nil then
+                searchValueType = type(searchInputNumber)
+            end
+            if      searchValueType == "string" then
+                local wayshrineNames = data.wayshrineNames
+                if wayshrineNames then
+                    for wayshrineNodeIndex, wayshrineName in ipairs(wayshrineNames) do
+                        if zo_plainstrfind(wayshrineName:lower(), searchInput:lower()) then
+                            return true
+                        end
+                    end
+                end
+            elseif searchValueType == "number" then
+                for _, wayshrineNodeIndex in ipairs(wayshrines) do
+                    if wayshrineNodeIndex > 0 then
+                        if wayshrineNodeIndex == searchInput then return true  end
+                    end
+                end
+            end
+        end
+
     end
     return false
 end
@@ -1182,7 +1314,11 @@ function WishListWindow:CheckForMatch( data, searchInput )
                 [WISHLIST_SEARCH_TYPE_BY_USERNAME]              = true,
                 [WISHLIST_SEARCH_TYPE_BY_ITEMID]                = true,
                 [WISHLIST_SEARCH_TYPE_BY_DATE]                  = true,
-                --[WISHLIST_SEARCH_TYPE_BY_TYPE]                  = true, -- disabled
+                [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]        = true,
+                [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]          = true,
+                [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED]   = true,
+                [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]         = true,
+                [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = true,
             }
             local searchTypeForCriteria = searchTypesForCriteria[self.searchType] or nil
             if searchTypeForCriteria ~= nil then
@@ -1273,25 +1409,76 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
     if currentTab == WISHLIST_TAB_WISHLIST and (WL.charsData == nil or #WL.charsData == 0) then return false end
     local currentTab2SearchDropValues = {
         [WISHLIST_TAB_SEARCH]   = {
-            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_SEARCH_ENTRY_COUNT},
+            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_SEARCH_ENTRY_COUNT,
+                        exclude = {
+                            [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
+                            [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
+                            [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = true,
+                            [WISHLIST_SEARCH_TYPE_BY_SLOT]                = true,
+                            [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = true,
+                            [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = true,
+                            [WISHLIST_SEARCH_TYPE_BY_DATE]                = true,
+                            [WISHLIST_SEARCH_TYPE_BY_LOCATION]            = true,
+                            [WISHLIST_SEARCH_TYPE_BY_USERNAME]            = true,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]      = false,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]        = false,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                        }, --exclude the search entries from the set search
+            },
         },
         [WISHLIST_TAB_WISHLIST] = {
-            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_WHISLIST_ENTRY_COUNT},
+            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_WHISLIST_ENTRY_COUNT,
+                       exclude = {
+                           [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = false,
+                           [WISHLIST_SEARCH_TYPE_BY_SLOT]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = false,
+                           [WISHLIST_SEARCH_TYPE_BY_DATE]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LOCATION]            = true,
+                           [WISHLIST_SEARCH_TYPE_BY_USERNAME]            = true,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]      = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]        = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                       }, --exclude the search entries from the set search
+            },
             ["char"]= {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
         },
         [WISHLIST_TAB_HISTORY] = {
-            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_HISTORY_ENTRY_COUNT},
-            ["char"]= {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
-        }
+            ["set"] = {dropdown=wishListWindow.searchDrop,  prefix=WISHLIST_SEARCHDROP_PREFIX,  entryCount=WISHLIST_TAB_HISTORY_ENTRY_COUNT,
+                       exclude = {
+                           [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = false,
+                           [WISHLIST_SEARCH_TYPE_BY_SLOT]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = false,
+                           [WISHLIST_SEARCH_TYPE_BY_DATE]                = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LOCATION]            = false,
+                           [WISHLIST_SEARCH_TYPE_BY_USERNAME]            = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]      = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]        = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                       }, --exclude the search entries from the set search
+            },
+            ["char"] = {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
+        },
     }
     local searchDropAtTab = currentTab2SearchDropValues[currentTab]
     local searchDropData = searchDropAtTab[searchBoxType]
     if searchDropData == nil then return false end
     --d(">searchDropData: " .. tostring(searchDropData.dropdown) ..", " ..tostring(searchDropData.prefix) .. ", " .. tostring(searchDropData.entryCount))
-    wishListWindow:InitializeComboBox(searchDropData.dropdown, searchDropData.prefix, searchDropData.entryCount)
+    wishListWindow:InitializeComboBox(searchDropData.dropdown, searchDropData.prefix, searchDropData.entryCount, searchDropData.exclude )
 end
 
-function WishListWindow:InitializeComboBox( control, prefix, max )
+function WishListWindow:InitializeComboBox( control, prefix, max, exclude )
     local isCharCB = (prefix == WISHLIST_CHARSDROP_PREFIX) or false
     local isSetSearchCB = (prefix == WISHLIST_SEARCHDROP_PREFIX) or false
 --d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
@@ -1321,42 +1508,44 @@ function WishListWindow:InitializeComboBox( control, prefix, max )
         end
     end
     for i = 1, max do
-        local entry
-        --Character combo box?
-        if isCharCB then
-            local charData = WL.charsData[i]
-            local charNameToken = prefix .. tostring(charData.id)
---d(">charNameToken: " ..tostring(charNameToken))
-            local charName = GetString(charNameToken)
-            --d(">charName: " .. tostring(charName))
-            entry = ZO_ComboBox:CreateItemEntry(charName, callback)
-            local charId = -1
-            if charData ~= nil then
-                charId = charData.id
-                --[[
-                if charData.nameClean == currentCharName then
-                    itemToSelect = i
+        if not exclude or (exclude and not exclude[i]) then
+            local entry
+            --Character combo box?
+            if isCharCB then
+                local charData = WL.charsData[i]
+                local charNameToken = prefix .. tostring(charData.id)
+                --d(">charNameToken: " ..tostring(charNameToken))
+                local charName = GetString(charNameToken)
+                --d(">charName: " .. tostring(charName))
+                entry = ZO_ComboBox:CreateItemEntry(charName, callback)
+                local charId = -1
+                if charData ~= nil then
+                    charId = charData.id
+                    --[[
+                    if charData.nameClean == currentCharName then
+                        itemToSelect = i
+                    end
+                    ]]
+                    if charId == currentCharId then
+                        itemToSelect = i
+                    end
+                else
+                    charId = i
                 end
-                ]]
-                if charId == currentCharId then
-                    itemToSelect = i
-                end
-            else
-                charId = i
-            end
-            entry.id         = charId
-            entry.name       = charData.name
-            entry.nameClean  = charData.nameClean
-            entry.class      = charData.class
+                entry.id         = charId
+                entry.name       = charData.name
+                entry.nameClean  = charData.nameClean
+                entry.class      = charData.class
 
-        --Search type combo box
-        elseif isSetSearchCB then
-            local entryText = GetString(prefix, i)
-            --entryText = entryText .. GetString(setSearchCBEntryStart, i)
-            entry = ZO_ComboBox:CreateItemEntry(entryText, callback)
-            entry.id = i
+                --Search type combo box
+            elseif isSetSearchCB then
+                local entryText = GetString(prefix, i)
+                --entryText = entryText .. GetString(setSearchCBEntryStart, i)
+                entry = ZO_ComboBox:CreateItemEntry(entryText, callback)
+                entry.id = i
+            end
+            control:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
         end
-        control:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
     end
     if itemToSelect ~= nil then
         control:SelectItemByIndex(itemToSelect, true)

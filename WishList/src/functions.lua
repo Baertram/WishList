@@ -1,5 +1,7 @@
 WishList = WishList or {}
 local WL = WishList
+local libSets = WL.LibSets
+
 local allowedItemTypes = WL.checkItemTypes
 --Only body armor parts
 local isBodyArmorPart = {
@@ -459,7 +461,7 @@ function WL.buildItemLink(itemId, qualityIdWishList)
     --and must be mapped to the real qualityIds for the itemlink.
     local qualityIdItemLink = WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
     --Using LibSets to get the itemLink
-    return WL.LibSets.buildItemLink(itemId, qualityIdItemLink)
+    return libSets.buildItemLink(itemId, qualityIdItemLink)
     --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, qualityIdItemLink, ITEMSTYLE_NONE, 0, 10000)
 end
 
@@ -1269,37 +1271,77 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
     end
 end
 
-local function showWorldMap()
-    if not ZO_WorldMap_IsWorldMapShowing() then
-        if IsInGamepadPreferredMode() then
-            SCENE_MANAGER:Push("gamepad_worldMap")
-        else
-            MAIN_MENU_KEYBOARD:ShowCategory(MENU_CATEGORY_MAP)
+--Show the map of a zoneId
+function WL.openMapOfZoneId(zoneId)
+    if libSets.openMapOfZoneId then
+        libSets.openMapOfZoneId(zoneId)
+    end
+end
+
+--Show the wayshrine on a map
+function WL.showWayshrineNodeIdOnMap(wayshrineNodeId)
+    if libSets.showWayshrineNodeIdOnMap then
+        libSets.showWayshrineNodeIdOnMap(wayshrineNodeId)
+    end
+end
+
+local function buildSetDropLocationContextMenuEntries(data)
+d("buildSetDropLocationContextMenuEntries")
+    --Got drop zones of the item?
+    local alreadyAddedZoneIds = {}
+    if data.zoneIds then
+        local zoneIdContextMenuEntries = {}
+        for _, zoneId in ipairs(data.zoneIds) do
+            if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
+                local zoneName = libSets.GetZoneName(zoneId, WL.clientLang)
+                if zoneName == nil then
+                    if data.setType == LIBSETS_SETTYPE_BATTLEGROUND then
+                        zoneName = GetString(WISHLIST_DROPLOCATION_BG)
+                    end
+                end
+                local subMenuEntry = {
+                    label 		    = zoneName,
+                    callback 	    = function() WL.openMapOfZoneId(zoneId) end
+                }
+d(">adding zone: " ..tostring(zoneName))
+                table.insert(zoneIdContextMenuEntries, subMenuEntry)
+                alreadyAddedZoneIds[zoneId] = true
+            end
+        end
+        --Add submenu in contextmenus howing the different zoneId names as each new row
+        if zoneIdContextMenuEntries and #zoneIdContextMenuEntries > 0 then
+d(">>adding submenu zones: " .. tostring(#zoneIdContextMenuEntries))
+            AddCustomSubMenuItem(GetString(WISHLIST_DROPLOCATIONS), zoneIdContextMenuEntries)
         end
     end
 end
 
-function WL.openMapOfZoneId(zoneId)
-    if not zoneId then return false end
-    local mapIndex = GetMapIndexByZoneId(zoneId)
-    if mapIndex then
-        showWorldMap()
-        zo_callLater(function()
-            ZO_WorldMap_SetMapByIndex(mapIndex)
-        end, 50)
+local function buildSetWayshrinesContextMenuEntries(data)
+d("buildSetWayshrinesContextMenuEntries")
+    local alreadyAddedWayshrines = {}
+    if data.wayshrines then
+        local wayshrinesContextMenuEntries = {}
+        for _, wayshrineNodeIndex in ipairs(data.wayshrines) do
+            if wayshrineNodeIndex > 0 and not alreadyAddedWayshrines[wayshrineNodeIndex] then
+                --GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
+                --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+                local wsKnown, wsName = GetFastTravelNodeInfo(wayshrineNodeIndex)
+                local wayshrineName = ZO_CachedStrFormat("<<C:1>>", wsName)
+                local subMenuEntry = {
+                    label 		    = wayshrineName,
+                    callback 	    = function() WL.showWayshrineNodeIdOnMap(wayshrineNodeIndex) end --libSets.JumpToSetId(data.setId, factionIndex) end,
+                }
+d(">adding wayshrine: " ..tostring(wayshrineName))
+                table.insert(wayshrinesContextMenuEntries, subMenuEntry)
+                alreadyAddedWayshrines[wayshrineNodeIndex] = true
+            end
+        end
+        --Add submenu in contextmenus howing the different zoneId names as each new row
+        if wayshrinesContextMenuEntries and #wayshrinesContextMenuEntries > 0 then
+d(">>adding submenu wayshrines: " .. tostring(#wayshrinesContextMenuEntries))
+            AddCustomSubMenuItem(GetString(WISHLIST_WAYSHRINES), wayshrinesContextMenuEntries)
+        end
     end
-end
-
-function WL.showWayshrineNodeIdOnMap(wayshrineNodeId)
-    if not wayshrineNodeId then return false end
-    local libSets = WL.LibSets
-    if not libSets.GetWayshrinesZoneId then return end
-    local zoneId = libSets.GetWayshrinesZoneId(wayshrineNodeId)
-    if not zoneId then return end
-    WL.openMapOfZoneId(zoneId)
-    zo_callLater(function()
-        ZO_WorldMap_PanToWayshrine(wayshrineNodeId)
-    end, 100)
 end
 
 --Set list/wishList row right click context menu
@@ -1315,61 +1357,18 @@ function WL.showContextMenu(control, button, upInside)
                 WL.showAddItem(control.data, true)
 
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
-                data = control.data
-                ClearMenu()
-                AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT), function() StartChatInput(CHAT_SYSTEM.textEntry:GetText()..data.itemLink) end) -- Link to chat
-                AddCustomMenuItem(GetString(WISHLIST_DIALOG_ADD_ITEM), function() WL.showAddItem(data, true) end) -- Add item
-                --LibSets data
-                local libSets = WL.LibSets
-                --Got drop zones of the item?
-                local alreadyAddedZoneIds = {}
-                if data.zoneIds then
-                    local zoneIdContextMenuEntries = {}
-                    for _, zoneId in ipairs(data.zoneIds) do
-                        if zoneId ~= -1 and not alreadyAddedZoneIds[zoneId] then
-                            local zoneName = libSets.GetZoneName(zoneId, WL.clientLang)
-                            if zoneName == nil then
-                                if data.setType == LIBSETS_SETTYPE_BATTLEGROUND then
-                                    zoneName = GetString(WISHLIST_DROPLOCATION_BG)
-                                end
-                            end
-                            local subMenuEntry = {
-                                label 		    = zoneName,
-                                callback 	    = function() WL.openMapOfZoneId(zoneId) end
-                            }
-                            table.insert(zoneIdContextMenuEntries, subMenuEntry)
-                            alreadyAddedZoneIds[zoneId] = true
-                        end
-                    end
-                    --Add submenu in contextmenus howing the different zoneId names as each new row
-                    if zoneIdContextMenuEntries and #zoneIdContextMenuEntries > 0 then
-                        AddCustomSubMenuItem(GetString(WISHLIST_DROPLOCATIONS), zoneIdContextMenuEntries)
-                    end
+                if control and control.data then
+                    data = control.data
+                    ClearMenu()
+                    AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT), function() StartChatInput(CHAT_SYSTEM.textEntry:GetText()..data.itemLink) end) -- Link to chat
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_ADD_ITEM), function() WL.showAddItem(data, true) end) -- Add item
+                    --LibSets data
+                    --Got drop zones of the item?
+                    buildSetDropLocationContextMenuEntries(data)
+                    --Got wayshrines of the item?
+                    buildSetWayshrinesContextMenuEntries(data)
+                    ShowMenu()
                 end
-                --Got wayshrines of the item?
-                local alreadyAddedWayshrines = {}
-                if data.zoneIds then
-                    local wayshrinesContextMenuEntries = {}
-                    for _, wayshrineNodeIndex in ipairs(data.wayshrines) do
-                        if wayshrineNodeIndex > 0 and not alreadyAddedWayshrines[wayshrineNodeIndex] then
-                            --GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
-                            --** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
-                            local wsKnown, wsName = GetFastTravelNodeInfo(wayshrineNodeIndex)
-                            local wayshrineName = ZO_CachedStrFormat("<<C:1>>", wsName)
-                            local subMenuEntry = {
-                                label 		    = wayshrineName,
-                                callback 	    = function() WL.showWayshrineNodeIdOnMap(wayshrineNodeIndex) end --libSets.JumpToSetId(data.setId, factionIndex) end,
-                            }
-                            table.insert(wayshrinesContextMenuEntries, subMenuEntry)
-                            alreadyAddedWayshrines[wayshrineNodeIndex] = true
-                        end
-                    end
-                    --Add submenu in contextmenus howing the different zoneId names as each new row
-                    if wayshrinesContextMenuEntries and #wayshrinesContextMenuEntries > 0 then
-                        AddCustomSubMenuItem(GetString(WISHLIST_WAYSHRINES), wayshrinesContextMenuEntries)
-                    end
-                end
-                ShowMenu()
             end
         end
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
@@ -1421,6 +1420,11 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET),
                         function() WL.showChangeQuality(data, true, true)
                     end)  -- Change quality of whole set
+                    --LibSets data
+                    --Got drop zones of the item?
+                    buildSetDropLocationContextMenuEntries(data)
+                    --Got wayshrines of the item?
+                    buildSetWayshrinesContextMenuEntries(data)
                 end
                 ShowMenu()
             end
@@ -1478,8 +1482,12 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName), function()
                         WL.showRemoveItem(data, true, true, true)
                     end)  -- Remove whole set from history
+                    --LibSets data
+                    --Got drop zones of the item?
+                    buildSetDropLocationContextMenuEntries(data)
+                    --Got wayshrines of the item?
+                    buildSetWayshrinesContextMenuEntries(data)
                 end
-
                 ShowMenu()
             end
         end
@@ -1529,7 +1537,7 @@ function WL.GetAllSetData(silent)
     --Get all sets using LibSets
     if WL.LibSets == nil then WL.LibSets = LibSets end
     if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
-    local libSets = WL.LibSets
+    libSets = WL.LibSets
     local libSetsVersion = libSets.version
     local setsDataPreloaded = {}
     setsDataPreloaded = libSets.setDataPreloaded

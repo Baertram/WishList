@@ -1,5 +1,7 @@
 WishList = WishList or {}
 local WL = WishList
+local libSets = WL.LibSets
+
 --> Taken from addon DolgubonLazyWritCretaor to speed up the loot messages!
 --The flavour text of a writ reward box
 local writRewardContainerFlavText = GetItemLinkFlavorText("|H1:item:121302:175:1:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h")
@@ -8,32 +10,7 @@ local writRewardContainerContentContainerFlavText = GetItemLinkFlavorText("|H1:i
 local allowedItemTypes = WL.checkItemTypes
 WL.comingFromSortScrollListSetupFunction = false
 
-------------------------------------------------
---- Addon data
-------------------------------------------------
-WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.7
-WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
-WL.addonVars.addonName				= "WishList"
-WL.addonVars.addonSavedVars			= "WishList_Data"
-WL.addonVars.settingsName   		= "Wish List"
-WL.addonVars.settingsDisplayName   	= WL.addonVars.settingsName
-WL.addonVars.addonAuthor			= "Meai & Baertram"
-WL.addonVars.addonWebsite			= "http://www.esoui.com/downloads/info1641-WishList.html"
-
---Libraries
-WL.addonMenu = LibAddonMenu2
-if WL.addonMenu == nil and LibStub then LibStub:GetLibrary("LibAddonMenu-2.0") end
-WL.LMM2 = LibMainMenu2
-if WL.LMM2 == nil and LibStub then LibStub:GetLibrary("LibMainMenu-2.0") end
-WL.LibSets = LibSets
---Check if the version is found and >= 0.06
-local libSets = WL.LibSets
-local libSetsVersionExists = libSets.version ~= nil
-local libSetsVersionIsGreaterEqualNeededValue = libSets.version >= 0.06
-local libSetsHTTPLinkEsoui = "https://www.esoui.com/downloads/info2241-LibSets.html"
-assert(libSetsVersionExists and libSetsVersionIsGreaterEqualNeededValue, "[WishList] ERROR - Needed library \'LibSets\' is not found or not loaded with the needed version 0.06 or higher!\nPlease download the newest version: " .. libSetsHTTPLinkEsoui)
-
+--Start data of addon
 WL.CurrentState = WISHLIST_TAB_STATE_NO_SETS 	    --1=NoSets, 2=Loading, 3=SetsLoaded
 WL.CurrentTab   = WISHLIST_TAB_SEARCH               --1=Search, 2=WishList
 WL.CurrentCharData = {}
@@ -395,6 +372,56 @@ local function checkLanguageToAddFirst()
     return langToAddFirst
 end
 
+--Helper function to get the zoneName for a zoneId
+local zoneIdsAdded = {}
+local wayshrinesAdded = {}
+local zoneIdNames = {}
+local wayshrineNames = {}
+local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
+    if p_zoneId > 0 and not zoneIdsAdded[p_zoneId] then
+        local zoneNameLocalized = nil
+        if p_zoneId ~= -99 then
+            zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
+        end
+        if zoneNameLocalized == nil or zoneNameLocalized == "" then
+            --Get the setType and check if it's from a battleground (there is no zoneId for them so we need to use a fixed String)
+            local isBGSetType = libSets.IsBattlegroundSet(p_setId)
+            if isBGSetType then
+                zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_BG)
+            end
+        end
+        if zoneNameLocalized and zoneNameLocalized ~= "" then
+            if p_dropLocationsText == "" then
+                p_dropLocationsText = zoneNameLocalized
+            else
+                p_dropLocationsText = p_dropLocationsText .. ", " .. zoneNameLocalized
+            end
+            zoneIdsAdded[p_zoneId] = true
+            table.insert(zoneIdNames, {[p_zoneId] = zoneNameLocalized})
+        end
+    end
+    return p_dropLocationsText
+end
+local function checkAndGetWayshrineName(p_wayShrines)
+    if p_wayShrines and type(p_wayShrines) == "table" then
+        for _, wsIndex in ipairs(p_wayShrines) do
+            if wsIndex > 0 and not wayshrinesAdded[wsIndex] then
+                local wsNameLocalized = nil
+                --@return known bool,name string,normalizedX number,normalizedY number,icon textureName,glowIcon textureName:nilable,poiType [PointOfInterestType|#PointOfInterestType],isShownInCurrentMap bool,linkedCollectibleIsLocked bool
+                --function GetFastTravelNodeInfo(nodeIndex) end
+                local _, wsName = GetFastTravelNodeInfo(wsIndex)
+                if wsName and wsName ~= "" then
+                    wsNameLocalized = ZO_CachedStringFormat("<<C:1>", wsName)
+                    if wsNameLocalized and wsNameLocalized ~= "" then
+                        wayshrinesAdded[wsIndex] = true
+                        table.insert(wayshrineNames, {[wsIndex] = wsNameLocalized})
+                    end
+                end
+            end
+        end
+    end
+end
+
 --ZO_SortScrollList - Item for the sets tab's list
 function WL.CreateEntryForSet( setId, setData )
 	--Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
@@ -444,47 +471,26 @@ function WL.CreateEntryForSet( setId, setData )
     if langsAdded > 1 then
         columnWidthAdd = langsAdded * 125
     end
-
     --Get the drop location(s) of the set via LibSets
     local dropLocationsText = ""
     local dropLocationsZoneIds = libSets.GetZoneIds(setId)
-    local zoneIdsAdded = {}
-    local function checkAndGetZoneName(p_zoneId, p_setId)
-        if p_zoneId ~= -1 and not zoneIdsAdded[p_zoneId] then
-            local zoneNameLocalized = nil
-            if p_zoneId ~= -99 then
-                zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
-            end
-            if zoneNameLocalized == nil or zoneNameLocalized == "" then
-                --Get the setType and check if it's from a battleground (there is no zoneId for them so we need to use a fixed String)
-                local isBGSetType = libSets.IsBattlegroundSet(p_setId)
-                if isBGSetType then
-                    zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_BG)
-                end
-            end
-            if zoneNameLocalized and zoneNameLocalized ~= "" then
-                if dropLocationsText == "" then
-                    dropLocationsText = zoneNameLocalized
-                else
-                    dropLocationsText = dropLocationsText .. ", " .. zoneNameLocalized
-                end
-                zoneIdsAdded[p_zoneId] = true
-            end
-        end
-    end
+    zoneIdsAdded = {}
+    zoneIdNames = {}
+    wayshrineNames = {}
     --Get the zoneIds' text now
     if dropLocationsZoneIds ~= nil then
         if type(dropLocationsZoneIds) == "table" then
             --Get each zoneId, get the zoneName localized via LibZone (via LiBSets) or from LibSets data
             for _, zoneId in ipairs(dropLocationsZoneIds) do
-                checkAndGetZoneName(zoneId, setId)
+                dropLocationsText = checkAndGetZoneName(zoneId, setId, dropLocationsText)
             end
         end
     else
-        checkAndGetZoneName(-99, setId)
+        dropLocationsText = checkAndGetZoneName(-99, setId, dropLocationsText)
     end
     --Get the drop location wayshrines
     local setWayshrines = libSets.GetWayshrineIds(setId)
+    checkAndGetWayshrineName(setWayshrines)
     --Get the DLC id
     local dlcId = libSets.GetDLCId(setId)
     --Get set type
@@ -514,6 +520,8 @@ function WL.CreateEntryForSet( setId, setData )
         locality    = dropLocationsText,
         zoneIds     = dropLocationsZoneIds,
         wayshrines  = setWayshrines,
+        zoneIdNames = zoneIdNames,
+        wayshrineNames = wayshrineNames,
 	})
 end
 
@@ -537,25 +545,49 @@ function WL.CreateEntryForItem(item)
     end
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
-    --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
-	return({
+
+    zoneIdNames = {}
+    wayshrineNames = {}
+    --Get the drop location(s) of the set via LibSets
+    local dropLocationsZoneIds = libSets.GetZoneIds(setId)
+    --Get the drop location wayshrines
+    local setWayshrines = libSets.GetWayshrineIds(setId)
+    checkAndGetWayshrineName(setWayshrines)
+    --Get the DLC id
+    local dlcId = libSets.GetDLCId(setId)
+    --Get set type
+    local setType = libSets.GetSetType(setId)
+    --Get traits needed for craftable sets
+    local traitsNeeded = libSets.GetTraitsNeeded(setId)
+    --The return table of the item on the WishList
+    local wlEntryTable = {
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
         setId                   = setId,
-		id                      = item.id,
-		itemType                = item.itemType,
+        id                      = item.id,
+        itemType                = item.itemType,
         itemTypeName            = itemTypeName,
         trait                   = item.trait,
         traitName               = itemTraitName,
         armorOrWeaponType       = item.armorOrWeaponType,
         armorOrWeaponTypeName   = itemArmorOrWeaponTypeName,
-		slot                    = item.slot,
+        slot                    = item.slot,
         slotName                = itemSlotName,
-		name                    = setName,
-		itemLink                = itemLink,
+        name                    = setName,
+        itemLink                = itemLink,
         timestamp               = item.timestamp,
         quality                 = item.quality,
         qualityName             = itemQualityName,
-	})
+        --LibSets data
+        setType     = setType,
+        traitsNeeded= traitsNeeded,
+        dlcId       = dlcId,
+        zoneIds     = dropLocationsZoneIds,
+        wayshrines  = setWayshrines,
+        zoneIdNames = zoneIdNames,
+        wayshrineNames = wayshrineNames,
+    }
+    --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
+	return wlEntryTable
 end
 
 --ZO_SortFilterList - Item for the History tab's list (called within BuildMasterList)
@@ -577,6 +609,20 @@ function WL.CreateHistoryEntryForItem(item)
     end
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
+
+    zoneIdNames = {}
+    wayshrineNames = {}
+    --Get the drop location(s) of the set via LibSets
+    local dropLocationsZoneIds = libSets.GetZoneIds(setId)
+    --Get the drop location wayshrines
+    local setWayshrines = libSets.GetWayshrineIds(setId)
+    checkAndGetWayshrineName(setWayshrines)
+    --Get the DLC id
+    local dlcId = libSets.GetDLCId(setId)
+    --Get set type
+    local setType = libSets.GetSetType(setId)
+    --Get traits needed for craftable sets
+    local traitsNeeded = libSets.GetTraitsNeeded(setId)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     return({
@@ -600,6 +646,14 @@ function WL.CreateHistoryEntryForItem(item)
         locality                = item.locality,
         quality                 = item.quality,
         qualityName             = itemQualityName,
+        --LibSets data
+        setType     = setType,
+        traitsNeeded= traitsNeeded,
+        dlcId       = dlcId,
+        zoneIds     = dropLocationsZoneIds,
+        wayshrines  = setWayshrines,
+        zoneIdNames = zoneIdNames,
+        wayshrineNames = wayshrineNames,
     })
 end
 

@@ -1,6 +1,32 @@
 WishList = WishList or {}
 local WL = WishList
 
+------------------------------------------------
+--- Addon data
+------------------------------------------------
+WL.addonVars =  {}
+WL.addonVars.addonRealVersion		= 2.7
+WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
+WL.addonVars.addonName				= "WishList"
+WL.addonVars.addonSavedVars			= "WishList_Data"
+WL.addonVars.settingsName   		= "Wish List"
+WL.addonVars.settingsDisplayName   	= WL.addonVars.settingsName
+WL.addonVars.addonAuthor			= "Meai & Baertram"
+WL.addonVars.addonWebsite			= "http://www.esoui.com/downloads/info1641-WishList.html"
+
+--Libraries
+WL.addonMenu = LibAddonMenu2
+if WL.addonMenu == nil and LibStub then LibStub:GetLibrary("LibAddonMenu-2.0") end
+WL.LMM2 = LibMainMenu2
+if WL.LMM2 == nil and LibStub then LibStub:GetLibrary("LibMainMenu-2.0") end
+WL.LibSets = LibSets
+--Check if the version is found and >= 0.06
+local libSets = WL.LibSets
+local libSetsVersionExists = libSets.version ~= nil
+local libSetsVersionIsGreaterEqualNeededValue = libSets.version >= 0.06
+local libSetsHTTPLinkEsoui = "https://www.esoui.com/downloads/info2241-LibSets.html"
+assert(libSetsVersionExists and libSetsVersionIsGreaterEqualNeededValue, "[WishList] ERROR - Needed library \'LibSets\' is not found or not loaded with the needed version 0.06 or higher!\nPlease download the newest version: " .. libSetsHTTPLinkEsoui)
+
 --Constants
 WISHLIST_SCENE_NAME = "WishListScene"
 --For the ZO_SortList row, the datatpye
@@ -23,11 +49,16 @@ WISHLIST_SEARCH_TYPE_BY_ITEMID              = 6
 WISHLIST_SEARCH_TYPE_BY_DATE                = 7
 WISHLIST_SEARCH_TYPE_BY_LOCATION            = 8
 WISHLIST_SEARCH_TYPE_BY_USERNAME            = 9
+WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE      = 10
+WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID        = 11
+WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED = 12
+WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID       = 13
+WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX = 14
 --WISHLIST_SEARCH_TYPE_BY_TYPE                = 10 -- disabled
 --Constants for the number of search dropdown entries at each tab:
-WISHLIST_TAB_SEARCH_ENTRY_COUNT = 2
-WISHLIST_TAB_WHISLIST_ENTRY_COUNT = 7
-WISHLIST_TAB_HISTORY_ENTRY_COUNT = 9
+WISHLIST_TAB_SEARCH_ENTRY_COUNT     = 14
+WISHLIST_TAB_WHISLIST_ENTRY_COUNT   = 14
+WISHLIST_TAB_HISTORY_ENTRY_COUNT    = 14
 --The add dialog set part types
 WISHLIST_ADD_TYPE_WHOLE_SET                             = 1
 WISHLIST_ADD_TYPE_BY_ITEMTYPE                           = 2
