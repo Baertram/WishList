@@ -1286,7 +1286,6 @@ function WL.showWayshrineNodeIdOnMap(wayshrineNodeId)
 end
 
 local function buildSetDropLocationContextMenuEntries(data)
-d("buildSetDropLocationContextMenuEntries")
     --Got drop zones of the item?
     local alreadyAddedZoneIds = {}
     if data.zoneIds then
@@ -1303,21 +1302,18 @@ d("buildSetDropLocationContextMenuEntries")
                     label 		    = zoneName,
                     callback 	    = function() WL.openMapOfZoneId(zoneId) end
                 }
-d(">adding zone: " ..tostring(zoneName))
                 table.insert(zoneIdContextMenuEntries, subMenuEntry)
                 alreadyAddedZoneIds[zoneId] = true
             end
         end
         --Add submenu in contextmenus howing the different zoneId names as each new row
         if zoneIdContextMenuEntries and #zoneIdContextMenuEntries > 0 then
-d(">>adding submenu zones: " .. tostring(#zoneIdContextMenuEntries))
             AddCustomSubMenuItem(GetString(WISHLIST_DROPLOCATIONS), zoneIdContextMenuEntries)
         end
     end
 end
 
 local function buildSetWayshrinesContextMenuEntries(data)
-d("buildSetWayshrinesContextMenuEntries")
     local alreadyAddedWayshrines = {}
     if data.wayshrines then
         local wayshrinesContextMenuEntries = {}
@@ -1331,14 +1327,12 @@ d("buildSetWayshrinesContextMenuEntries")
                     label 		    = wayshrineName,
                     callback 	    = function() WL.showWayshrineNodeIdOnMap(wayshrineNodeIndex) end --libSets.JumpToSetId(data.setId, factionIndex) end,
                 }
-d(">adding wayshrine: " ..tostring(wayshrineName))
                 table.insert(wayshrinesContextMenuEntries, subMenuEntry)
                 alreadyAddedWayshrines[wayshrineNodeIndex] = true
             end
         end
         --Add submenu in contextmenus howing the different zoneId names as each new row
         if wayshrinesContextMenuEntries and #wayshrinesContextMenuEntries > 0 then
-d(">>adding submenu wayshrines: " .. tostring(#wayshrinesContextMenuEntries))
             AddCustomSubMenuItem(GetString(WISHLIST_WAYSHRINES), wayshrinesContextMenuEntries)
         end
     end
