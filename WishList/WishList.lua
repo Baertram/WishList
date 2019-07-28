@@ -378,7 +378,7 @@ local wayshrinesAdded = {}
 local zoneIdNames = {}
 local wayshrineNames = {}
 local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
-    if p_zoneId > 0 and not zoneIdsAdded[p_zoneId] then
+    if (p_zoneId == -99 or p_zoneId > 0) and not zoneIdsAdded[p_zoneId] then
         local zoneNameLocalized = nil
         if p_zoneId ~= -99 then
             zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
