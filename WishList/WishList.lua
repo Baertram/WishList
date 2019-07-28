@@ -410,9 +410,8 @@ local function checkAndGetWayshrineName(p_wayShrines)
                 --@return known bool,name string,normalizedX number,normalizedY number,icon textureName,glowIcon textureName:nilable,poiType [PointOfInterestType|#PointOfInterestType],isShownInCurrentMap bool,linkedCollectibleIsLocked bool
                 --function GetFastTravelNodeInfo(nodeIndex) end
                 local _, wsName = GetFastTravelNodeInfo(wsIndex)
-d(">wsName: " ..tostring(wsName))
                 if wsName and wsName ~= "" then
-                    wsNameLocalized = ZO_CachedStrFormat("<<C:1>", wsName)
+                    wsNameLocalized = ZO_CachedStrFormat("<<C:1>>", wsName)
                     if wsNameLocalized and wsNameLocalized ~= "" then
                         wayshrinesAdded[wsIndex] = true
                         wayshrineNames[wsIndex] = wsNameLocalized
