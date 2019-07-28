@@ -26,7 +26,7 @@ local stringsBase = {
     WISHLIST_DIALOG_ADD_ITEM            = "Gegenstand hinzufügen",
     WISHLIST_BUTTON_REMOVE_HISTORY_TT   = "Historie leeren",
 
-    WISHLIST_ZONE                       = GetString(SI_MAPFILTER8),
+    WISHLIST_ZONE                       = GetString(SI_CHAT_CHANNEL_NAME_ZONE),
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
     WISHLIST_DROPLOCATIONS              = "Fundorte",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
@@ -54,7 +54,7 @@ local strings = {
     WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
     --LibSets searches
     WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set Typ",
-    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC",
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_DLC),
     WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Benötigte Eigenschaften",
     WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ZONE),
     WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_WAYSHRINES),

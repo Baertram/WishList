@@ -30,6 +30,8 @@ local stringsBase = {
     WISHLIST_DIALOG_ADD_ITEM            = "Add item",
     WISHLIST_BUTTON_REMOVE_HISTORY_TT   = "Clear history",
 
+    WISHLIST_DLC                        = GetString(SI_MARKET_PRODUCT_TOOLTIP_DLC),
+    WISHLIST_ZONE                       = GetString(SI_CHAT_CHANNEL_NAME_ZONE),
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
     WISHLIST_DROPLOCATIONS              = "Drop locations",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
@@ -56,10 +58,10 @@ local strings = {
     WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
     --LibSets searches
     WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set type",
-    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": DLC",
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_DLC),
     WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Traits needed",
-    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Zone",
-    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": Wayshrine",
+    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ZONE),
+    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_WAYSHRINES),
 
     WISHLIST_LOOT_MSG_YOU            = "YOU LOOTED ",
     WISHLIST_LOOT_MSG_OTHER          = " LOOTED ",
