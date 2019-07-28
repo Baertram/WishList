@@ -34,6 +34,7 @@ local stringsBase = {
     WISHLIST_ZONE                       = GetString(SI_CHAT_CHANNEL_NAME_ZONE),
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
     WISHLIST_DROPLOCATIONS              = "Drop locations",
+    WISHLIST_DROPLOCATION_SPECIAL       = "Speziell (e.g. Level Up, Prophet)",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
 
     WISHLIST_LIBSETS                    = "LibSets",

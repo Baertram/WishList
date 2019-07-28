@@ -377,10 +377,10 @@ local zoneIdsAdded = {}
 local wayshrinesAdded = {}
 local zoneIdNames = {}
 local wayshrineNames = {}
-local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
+local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText, p_dropLocationsZoneIds)
     if p_zoneId > 0 and not zoneIdsAdded[p_zoneId] then
         local zoneNameLocalized = nil
-        if p_zoneId ~= WISHLIST_ZONEID_BATTLEGROUNDS then
+        if p_zoneId ~= WISHLIST_ZONEID_BATTLEGROUNDS and p_zoneId ~= WISHLIST_ZONEID_SPECIAL then
             zoneNameLocalized = libSets.GetZoneName(p_zoneId, WL.clientLang)
         end
         if zoneNameLocalized == nil or zoneNameLocalized == "" then
@@ -388,6 +388,19 @@ local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
             local isBGSetType = libSets.IsBattlegroundSet(p_setId)
             if isBGSetType then
                 zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_BG)
+                if p_dropLocationsZoneIds == nil then
+                    p_dropLocationsZoneIds = {}
+                    p_dropLocationsZoneIds = {[1] = WISHLIST_ZONEID_BATTLEGROUNDS}
+                end
+            else
+                --Get the setType and check if it's from a battleground (there is no zoneId for them so we need to use a fixed String)
+                local isSpecialSetType = libSets.IsSpecialSet(p_setId)
+                if isSpecialSetType then
+                    zoneNameLocalized = GetString(WISHLIST_DROPLOCATION_SPECIAL)
+                    if p_dropLocationsZoneIds == nil then
+                        p_dropLocationsZoneIds = {[1] = WISHLIST_ZONEID_SPECIAL}
+                    end
+                end
             end
         end
         if zoneNameLocalized and zoneNameLocalized ~= "" then
@@ -400,7 +413,7 @@ local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText)
             zoneIdNames[p_zoneId] = zoneNameLocalized
         end
     end
-    return p_dropLocationsText
+    return p_dropLocationsText, p_dropLocationsZoneIds
 end
 local function checkAndGetWayshrineName(p_wayShrines)
     if p_wayShrines and type(p_wayShrines) == "table" then
@@ -483,13 +496,12 @@ function WL.CreateEntryForSet( setId, setData )
         if type(dropLocationsZoneIds) == "table" then
             --Get each zoneId, get the zoneName localized via LibZone (via LiBSets) or from LibSets data
             for _, zoneId in ipairs(dropLocationsZoneIds) do
-                dropLocationsText = checkAndGetZoneName(zoneId, setId, dropLocationsText)
+                dropLocationsText = checkAndGetZoneName(zoneId, setId, dropLocationsText, nil)
             end
         end
     else
         --For battleground sets there is no zoneId. Use the constant here
-        dropLocationsText = checkAndGetZoneName(WISHLIST_ZONEID_BATTLEGROUNDS, setId, dropLocationsText)
-        dropLocationsZoneIds = {WISHLIST_ZONEID_BATTLEGROUNDS}
+        dropLocationsText, dropLocationsZoneIds = checkAndGetZoneName(WISHLIST_ZONEID_BATTLEGROUNDS, setId, dropLocationsText, dropLocationsZoneIds)
     end
     --Get the drop location wayshrines
     local setWayshrines = libSets.GetWayshrineIds(setId)
