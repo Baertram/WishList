@@ -595,15 +595,17 @@ end
 ------------------------------------------------
 --- Wishlist marker function
 ------------------------------------------------
-function WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
---d("[WL.MarkWithMarkerIcon] " .. itemLink)
+function WL.MarkWithMarkerIcon(itemId, itemLink, charData, debug)
+    if debug then d("[WL.MarkWithMarkerIcon] " .. itemLink) end
     if itemId == nil or itemLink == nil or charData == nil then return nil end
     local settings = WL.data
     local bagId = BAG_BACKPACK
 
-    --ZOs standard marker icon
+    --ZOs standard locked icons
+    -->Not supported
 
     --ItemSaver marker icon
+    -->Not supported
 
     --FCOItemSaver marker icon
     if FCOIS ~= nil and FCOIS.MarkItem ~= nil then
@@ -617,6 +619,13 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
                 and settings.fcoisMarkerIconLootedSetPartPerChar[charData.id] ~= nil then
             markAllCharsDifferently = true
         end
+        if debug then
+            if markAllCharsTheSame then
+                d(">Mark all chars the same with icon: " ..tostring(settings.fcoisMarkerIconLootedSetPart))
+            elseif markAllCharsDifferently then
+                d(">Mark all chars differently. Char '" .. charData.name .. "': " ..tostring(settings.fcoisMarkerIconLootedSetPartPerChar[charData.id]))
+            end
+        end
         --Nothing to mark? Abort here now
         if not markAllCharsTheSame or not markAllCharsDifferently then return end
         --Check the inventorySingleSlotUpdate parameters collected before as the item got looted
@@ -624,8 +633,6 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
             --Was the slotIndex saved as the item got looted (EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
             local slotIndex = WL.invSingleSlotUpdateData[itemLink] or nil
             if slotIndex ~= nil then
-                --local itemLinkAtBag = GetItemLink(bagId, slotIndex)
-                --d(">slotIndex: " .. tostring(slotIndex) .. ": " .. itemLinkAtBag)
                 --Only update the inventory if it is currently shown. It will be updated automatically if you show it else.
                 local updatePlayerInv = not ZO_PlayerInventoryList:IsHidden() or false
                 --Preset the marker icon with the one for "All the same"
@@ -633,6 +640,10 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
                 --Should the marker icon be the one of another char's WishList instead?
                 if markAllCharsDifferently then
                     wishlistMarkerIconOfChar = settings.fcoisMarkerIconLootedSetPartPerChar[charData.id]
+                end
+                if debug then
+                    local itemLinkAtBag = GetItemLink(bagId, slotIndex)
+                    d(">" .. itemLinkAtBag .. " - slotIndex: " .. tostring(slotIndex) .. ", updateInv: " .. tostring(updatePlayerInv))
                 end
                 --FCOIS.MarkItem(bag, slot, iconId, showIcon, updateInventories)
                 FCOIS.MarkItem(bagId, slotIndex, wishlistMarkerIconOfChar, true, updatePlayerInv)
@@ -747,7 +758,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
         itemId = WL.GetItemIDFromLink(itemLink)
     end
     local item = {}
---d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType))
+--d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType) .. ", quality: " ..tostring(itemQuality))
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
@@ -761,12 +772,10 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                     --Get the itemQuality
                                     itemQuality = itemQuality or GetItemLinkQuality(itemLink)
                                     if itemQuality ~= nil and item.quality ~= nil then
---d(">itemQuality new item: " .. tostring(itemQuality) .. ", itemQuality WishList item (WL quality): " ..tostring(item.quality))
                                         --Get the qualities to check
                                         local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
                                         if qualitiesToCheck ~= nil then
                                             local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
---d(">>isQualityToCheckOnItem: " ..tostring(isQualityToCheckOnItem))
                                             return isQualityToCheckOnItem, itemId, item
                                         else
                                             isAlreadyOnWishList = false
@@ -792,7 +801,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
 end
 
 --After an item is found during loot on a WishList
-function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData)
+function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData, debug)
     --WL._item = item
     --Item is on a wishlist, so output the info and center screen announcement
     --local charName = WL.buildCharNameChatText(charData, nil)
@@ -801,7 +810,9 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     --Character or account name in output?
     local charName = receivedBy.charName
     local accountName = receivedBy.accountName
---d("[WL.IfItemIsOnWishlist] " .. itemLink .. ", accountName: " ..tostring(accountName) .. ", charName: " ..tostring(charName))
+    if debug then
+        d("[WL.IfItemIsOnWishlist] " .. itemLink .. ", accountName: " ..tostring(accountName) .. ", charName: " ..tostring(charName))
+    end
     local charOrAccountName = ""
     if isLootedByPlayer then
         charName    = WL.LoggedInCharData.nameClean
@@ -896,7 +907,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     --Did your current char loot the item, or someone else?
     if isLootedByPlayer then
         --Mark the item with any marker icon now to protect it?
-        WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
+        WL.MarkWithMarkerIcon(itemId, itemLink, charData, debug)
     end
     --Add the looted item to the history
     WL.AddLootToHistory(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData)

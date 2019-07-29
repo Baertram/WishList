@@ -103,7 +103,7 @@ local function checkAntiLootDisableTime(disable)
 end
 
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
-function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpdateReason, _, debug)
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then return false end
 --d("[WL.Inv_Single_Slot_Update] " .. GetItemLink(bagId, slotId) .. ", isNew: " .. tostring(isNewItem))
     if not isNewItem then return false end
@@ -114,16 +114,17 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, itemSoundCategor
     if SCENE_MANAGER:GetCurrentScene() == STABLES_SCENE then return end
     --Check if item in slot is still there
     if GetItemType(bagId, slotId) == ITEMTYPE_NONE then return end
+    debug = debug or false
     --Save the current bagId and slotIndex with the itemLink to internal WishList temp data so the LootReceived event can use it
     if bagId == BAG_BACKPACK and WL.invSingleSlotUpdateData ~= nil then
         local itemLink = GetItemLink(bagId, slotId)
         --WL.invSingleSlotUpdateData[itemLink] = {}
         --WL.invSingleSlotUpdateData[itemLink].bagId = bagId -- Currently only BAG_BACKPACK supported
         WL.invSingleSlotUpdateData[itemLink] = slotId
---d(">slotId: " .. tostring(slotId))
+        if debug then d("[WishList]" .. itemLink .. " - Inv_Single_Slot_Update: Set the slotId " ..tostring(slotId) .. " to the WL internal variables!") end
     end
     --Is DolgubonsLazyWritCreatorAddon active?
-    if not WL.otherAddons.LazyWritCreatorActive then return false end
+    if not debug or WL.otherAddons.LazyWritCreatorActive then return false end
     --Is the automatic opening of the writ container rewards active?
     if WritCreater and WritCreater.savedVars and WritCreater.savedVars.lootContainerOnReceipt then
 --d(">Writ creator active and settings = auto loot container")
@@ -161,7 +162,7 @@ end
 
 local isItemAlreadyOnWishlist = WL.isItemAlreadyOnWishlist
 local IfItemIsOnWishlist = WL.IfItemIsOnWishlist
-local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedByCharName, whereWasItLootedData, debug)
+local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedByCharName, whereWasItLootedData, debug, bagId, slotIndex)
     debug = debug or false
     local receivedBy = {}
     if itemLink == nil or itemId == nil then return nil end
@@ -230,6 +231,8 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
                 end
                 --Is the item on the wishlist?
                 if isOnWishList then
+                    --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
+                    if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(_, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
                     --Add the current date & time to the item
                     item = WL.addTimeStampToItem(item)
                     --Remove the gender stuff from the setname
@@ -242,7 +245,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
                     end
                     receivedBy.charName = receivedByCharName
                     --Is the item on the WishList?
-                    IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData)
+                    IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData, debug)
                 end
             end
         end
@@ -258,6 +261,8 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             d(">>isOnWishList: " .. tostring(isOnWishList))
         end
         if not isOnWishList then return false end
+        --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
+        if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(_, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
         --Add the current date & time to the item
         item = WL.addTimeStampToItem(item)
         --Remove the gender stuff from the setname
@@ -270,13 +275,14 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         end
         receivedBy.charName = receivedByCharName
         --Is the item on the wishlist?
-        IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData)
+        IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData, debug)
     end
 end
 
-function WL.simulateLootReceived(itemLink, receivedBy, isLootedByPlayer)
+function WL.simulateLootReceived(bagId, slotIndex, receivedBy, isLootedByPlayer)
     if isLootedByPlayer == nil then isLootedByPlayer = true end
     receivedBy = receivedBy or GetUnitName("player")
+    local itemLink = GetItemLink(bagId, slotIndex)
     if itemLink == nil then return nil end
     local itemId = GetItemLinkItemId(itemLink)
     --isInPVP, isInDelve, isInPublicDungeon, isInGroupDungeon, isInRaid, isInGroup, groupSize
@@ -288,11 +294,11 @@ function WL.simulateLootReceived(itemLink, receivedBy, isLootedByPlayer)
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
-    lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, true)
+    lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, true, bagId, slotIndex)
 end
 
 --EVENT_LOOT_RECEIVED (number eventCode, string receivedBy, string itemName, number quantity, ItemUISoundCategory soundCategory, LootItemType lootType, boolean self, boolean isPickpocketLoot, string questItemIcon, number itemId, boolean isStolen)
-function WL.LootReceived(_, receivedBy, itemLink, quantity, itemSound, lootType, isLootedByPlayer, isPickpocketLoot, questItemIcon, itemId, isStolen)
+function WL.LootReceived(_, receivedBy, itemLink, _, _, lootType, isLootedByPlayer, _, _, itemId, _)
 --d("WL.LootReceived: " .. tostring(itemLink) .. ", receivedBy: " .. tostring(receivedBy) .. ", isLootedByPlayer: " .. tostring(isLootedByPlayer))
     --Only check if an item was looted
     if not lootType == LOOT_TYPE_ITEM then return false end
@@ -307,7 +313,7 @@ function WL.LootReceived(_, receivedBy, itemLink, quantity, itemSound, lootType,
     --isInPVP, isInDelve, isInPublicDungeon, isInGroupDungeon, isInRaid, isInGroup, groupSize
     local whereWasItLootedData = { WL.getCurrentZoneAndGroupStatus() }
     --Check if the item is on a wishlist
-    lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, WL.debug)
+    lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, WL.debug, nil, nil)
 end
 
 ------------------------------------------------
