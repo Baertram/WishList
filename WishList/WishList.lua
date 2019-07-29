@@ -104,8 +104,9 @@ end
 
 --EVENT_INVENTORY_SINGLE_SLOT_UPDATE (number eventCode, Bag bagId, number slotId, boolean isNewItem, ItemUISoundCategory itemSoundCategory, number inventoryUpdateReason, number stackCountChange)
 function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpdateReason, _, debug)
+    debug = debug or false
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then return false end
---d("[WL.Inv_Single_Slot_Update] " .. GetItemLink(bagId, slotId) .. ", isNew: " .. tostring(isNewItem))
+    if debug then d("[WL.Inv_Single_Slot_Update] " .. GetItemLink(bagId, slotId) .. ", isNew: " .. tostring(isNewItem)) end
     if not isNewItem then return false end
     --Abort here if we are arrested by a guard (thief system) as it will scan our inventory for stolen items and destroy them.
     --We don't need to scan it with our functions too at this case
@@ -114,9 +115,8 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
     if SCENE_MANAGER:GetCurrentScene() == STABLES_SCENE then return end
     --Check if item in slot is still there
     if GetItemType(bagId, slotId) == ITEMTYPE_NONE then return end
-    debug = debug or false
     --Save the current bagId and slotIndex with the itemLink to internal WishList temp data so the LootReceived event can use it
-    if bagId == BAG_BACKPACK and WL.invSingleSlotUpdateData ~= nil then
+    if ((not debug and bagId == BAG_BACKPACK) or debug) and WL.invSingleSlotUpdateData ~= nil then
         local itemLink = GetItemLink(bagId, slotId)
         --WL.invSingleSlotUpdateData[itemLink] = {}
         --WL.invSingleSlotUpdateData[itemLink].bagId = bagId -- Currently only BAG_BACKPACK supported
@@ -127,7 +127,7 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
     if not debug or WL.otherAddons.LazyWritCreatorActive then return false end
     --Is the automatic opening of the writ container rewards active?
     if WritCreater and WritCreater.savedVars and WritCreater.savedVars.lootContainerOnReceipt then
---d(">Writ creator active and settings = auto loot container")
+        --d(">Writ creator active and settings = auto loot container")
         --Is the setting within the addon active to auto loot the boxes?
         local autoLoot
         if WritCreater.savedVars.ignoreAuto then
@@ -139,14 +139,14 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
         local itemLink = GetItemLink(bagId, slotId)
         local itemFlavText = GetItemLinkFlavorText(itemLink)
         if itemFlavText == writRewardContainerFlavText then
---d(">Item is a autolooted writ container: " .. itemLink)
+            --d(">Item is a autolooted writ container: " .. itemLink)
             --Set the preventer functions so the loot event cllback function of Wishlist is not called for the autoloot of the boxes
             WL.preventerVars.writCreatorAutoLootBoxesActive = true
         elseif itemFlavText == writRewardContainerContentContainerFlavText then
             if not autoLoot then
                 return false
             end
---d(">Item is a autolooted writ container content container: " .. itemLink)
+            --d(">Item is a autolooted writ container content container: " .. itemLink)
             --Set the preventer functions so the loot event callback function of Wishlist is not called for the autoloot of the boxes
             WL.preventerVars.writCreatorAutoLootBoxesActive = true
         end
@@ -232,7 +232,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
                 --Is the item on the wishlist?
                 if isOnWishList then
                     --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
-                    if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(_, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
+                    if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(WL.addonVars.addonName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
                     --Add the current date & time to the item
                     item = WL.addTimeStampToItem(item)
                     --Remove the gender stuff from the setname
@@ -262,7 +262,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         end
         if not isOnWishList then return false end
         --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
-        if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(_, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
+        if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(WL.addonVars.addonName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
         --Add the current date & time to the item
         item = WL.addTimeStampToItem(item)
         --Remove the gender stuff from the setname
