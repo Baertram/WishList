@@ -595,7 +595,7 @@ end
 ------------------------------------------------
 --- Wishlist marker function
 ------------------------------------------------
-function WL.MarkWithMarkerIcon(itemId, itemLink, charData, setName)
+function WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
 --d("[WL.MarkWithMarkerIcon] " .. itemLink)
     if itemId == nil or itemLink == nil or charData == nil then return nil end
     local settings = WL.data
@@ -606,21 +606,39 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData, setName)
     --ItemSaver marker icon
 
     --FCOItemSaver marker icon
-    if FCOIS ~= nil and FCOIS.MarkItem ~= nil
-        and settings.fcoisMarkerIconAutoMarkLootedSetPart and settings.fcoisMarkerIconLootedSetPart ~= nil
-        and WL.invSingleSlotUpdateData ~= nil and WL.invSingleSlotUpdateData[itemLink] ~= nil then
-
-        --Was the slotIndex saved as the item got looted (EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-        local slotIndex = WL.invSingleSlotUpdateData[itemLink] or nil
-        if slotIndex ~= nil then
---local itemLinkAtBag = GetItemLink(bagId, slotIndex)
---d(">slotIndex: " .. tostring(slotIndex) .. ": " .. itemLinkAtBag)
-            --Only update the inventory if it is currently shown. It will be updated automatically if you show it else.
-            local updatePlayerInv = not ZO_PlayerInventoryList:IsHidden() or false
-            --FCOIS.MarkItem(bag, slot, iconId, showIcon, updateInventories)
-            FCOIS.MarkItem(bagId, slotIndex, settings.fcoisMarkerIconLootedSetPart, true, updatePlayerInv)
-            --Reset the temporary looted item table for this itemLink
-            WL.invSingleSlotUpdateData[itemLink] = nil
+    if FCOIS ~= nil and FCOIS.MarkItem ~= nil then
+        local markAllCharsTheSame = false
+        local markAllCharsDifferently = false
+        --Mark all characters with the same icon?
+        if settings.fcoisMarkerIconAutoMarkLootedSetPart and settings.fcoisMarkerIconLootedSetPart ~= nil then
+            markAllCharsTheSame = true
+        --Mark each characters with it's own icon?
+        elseif settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar and settings.fcoisMarkerIconLootedSetPartPerChar ~= nil
+                and settings.fcoisMarkerIconLootedSetPartPerChar[charData.id] ~= nil then
+            markAllCharsDifferently = true
+        end
+        --Nothing to mark? Abort here now
+        if not markAllCharsTheSame or not markAllCharsDifferently then return end
+        --Check the inventorySingleSlotUpdate parameters collected before as the item got looted
+        if WL.invSingleSlotUpdateData ~= nil and WL.invSingleSlotUpdateData[itemLink] ~= nil then
+            --Was the slotIndex saved as the item got looted (EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+            local slotIndex = WL.invSingleSlotUpdateData[itemLink] or nil
+            if slotIndex ~= nil then
+                --local itemLinkAtBag = GetItemLink(bagId, slotIndex)
+                --d(">slotIndex: " .. tostring(slotIndex) .. ": " .. itemLinkAtBag)
+                --Only update the inventory if it is currently shown. It will be updated automatically if you show it else.
+                local updatePlayerInv = not ZO_PlayerInventoryList:IsHidden() or false
+                --Preset the marker icon with the one for "All the same"
+                local wishlistMarkerIconOfChar = settings.fcoisMarkerIconLootedSetPart
+                --Should the marker icon be the one of another char's WishList instead?
+                if markAllCharsDifferently then
+                    wishlistMarkerIconOfChar = settings.fcoisMarkerIconLootedSetPartPerChar[charData.id]
+                end
+                --FCOIS.MarkItem(bag, slot, iconId, showIcon, updateInventories)
+                FCOIS.MarkItem(bagId, slotIndex, wishlistMarkerIconOfChar, true, updatePlayerInv)
+                --Reset the temporary looted item table for this itemLink
+                WL.invSingleSlotUpdateData[itemLink] = nil
+            end
         end
     end
 end
@@ -878,7 +896,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     --Did your current char loot the item, or someone else?
     if isLootedByPlayer then
         --Mark the item with any marker icon now to protect it?
-        WL.MarkWithMarkerIcon(itemId, itemLink, charData, setName)
+        WL.MarkWithMarkerIcon(itemId, itemLink, charData)--, setName)
     end
     --Add the looted item to the history
     WL.AddLootToHistory(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData)

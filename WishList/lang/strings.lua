@@ -187,7 +187,11 @@ local strings = {
     WISHLIST_LAM_FCOIS                      = "FCO ItemSaver",
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO       = "Mark looted set item",
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_TT    = "Mark a looted set item from your wishlist with this FCO ItemSaver marker icon",
-    WISHLIST_LAM_FCOIS_MARK_ITEM_ICON       = "Marker icon",
+    WISHLIST_LAM_FCOIS_MARKER_ICONS_PER_CHAR         = "FCOItemSaver - Marker icons for each char's WishList",
+    WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR       = "Mark looted set item indiv. for each char",
+    WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR_TT    = "Mark a looted set item from a characters wishlist with this FCO ItemSaver marker icon.\nEach character's wishlist can use its own marker icon.",
+    WISHLIST_LAM_FCOIS_MARK_ITEM_CHARAKTER_NAME      = "Character name",
+    WISHLIST_LAM_FCOIS_MARK_ITEM_ICON                = "Marker icon",
 
     WISHLIST_LAM_ITEM_FOUND                         = "Found items on " .. GetString(WISHLIST_TITLE),
     WISHLIST_LAM_ITEM_FOUND_USE_CHARACTERNAME       = "Show character or account name",

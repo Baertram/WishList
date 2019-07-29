@@ -308,7 +308,7 @@ function WL.buildAddonMenu()
                 settings.fcoisMarkerIconAutoMarkLootedSetPart = value
             end,
             default = defaults.fcoisMarkerIconAutoMarkLootedSetPart,
-            disabled = function() return not FCOISenabled end,
+            disabled = function() return not FCOISenabled or settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar end,
             width = "half",
         },
         {
@@ -323,11 +323,50 @@ function WL.buildAddonMenu()
                 settings.fcoisMarkerIconLootedSetPart = value
             end,
             default = defaults.fcoisMarkerIconLootedSetPart,
-            disabled = function() return not FCOISenabled or not settings.fcoisMarkerIconAutoMarkLootedSetPart end,
+            disabled = function() return (not FCOISenabled or not settings.fcoisMarkerIconAutoMarkLootedSetPart) or settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar end,
             width = "half",
         },
-
-    }
+        {
+            type = "description",
+            text = GetString(WISHLIST_LAM_FCOIS_MARKER_ICONS_PER_CHAR),
+        },
+        {
+            type = "checkbox",
+            name = GetString(WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR),
+            tooltip = GetString(WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR_TT),
+            getFunc = function() return settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar end,
+            setFunc = function(value)
+                settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar = value
+            end,
+            default = defaults.fcoisMarkerIconAutoMarkLootedSetPartPerChar,
+            disabled = function() return not FCOISenabled or settings.fcoisMarkerIconAutoMarkLootedSetPart end,
+            width = "full",
+        },
+    } -- optionsData
+    --For each character: Add a FCOIS marker icon dropdown
+    WL.checkCharsData()
+    local charsOfAccount = WL.charsData
+    for _, charsData in ipairs(charsOfAccount) do
+        if charsData and charsData.nameClean and charsData.id then
+            local lamDropdownTable = {
+                    type = 'dropdown',
+                    name = charsData.nameClean,
+                    tooltip = GetString(WISHLIST_LAM_FCOIS_MARK_ITEM_ICON),
+                    choices = fcoisMarkerIconsList,
+                    choicesValues = fcoisMarkerIconsListValues,
+                    scrollable = true,
+                    getFunc = function() return settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] end,
+                    setFunc = function(value)
+                        settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] = value
+                    end,
+                    default = defaults.fcoisMarkerIconLootedSetPart,
+                    disabled = function() return (not FCOISenabled or not settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar) or settings.fcoisMarkerIconAutoMarkLootedSetPart end,
+                    width = "half",
+            }
+            table.insert(optionsData, lamDropdownTable)
+        end
+    end
+    --Register the addon panel
     WL.addonMenuPanel = WL.addonMenu:RegisterAddonPanel(addonVars.addonName .. "_SettingsMenu", panelData)
     WL.addonMenu:RegisterOptionControls(addonVars.addonName .. "_SettingsMenu", optionsData)
     WL.preventerVars.addonMenuBuild = true
