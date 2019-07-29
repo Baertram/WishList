@@ -1546,6 +1546,7 @@ function WL.GetAllSetData(silent)
         for setId, _ in pairs(allSetIds) do
             local setNamesAdded = false
             local setItemIdsAdded = false
+            local setsArmorTypes = nil
             setsData[setId] = {}
             --Add set names and client language name
             if setNamesPreloaded[setId] ~= nil then
@@ -1563,6 +1564,13 @@ function WL.GetAllSetData(silent)
                     setsData[setId][setItemId] = true
                     WL.accData.itemCount = WL.accData.itemCount + 1
                     setItemIdsAdded = true
+                end
+                --Get the armorType of the setItemIds and build the setsArmorTypes table
+                if libSets.GetSetArmorTypes then
+                    setsArmorTypes = libSets.GetSetArmorTypes(setId)
+                    if setsArmorTypes then
+                        setsData[setId]["armorTypes"] = setsArmorTypes
+                    end
                 end
             end
             if setNamesAdded or setItemIdsAdded then

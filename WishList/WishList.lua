@@ -521,6 +521,7 @@ function WL.CreateEntryForSet( setId, setData )
         WL.maxNameColumnWidth = maxNameColumnWidth
     end
 
+    local setsData = WL.accData.sets[setId]
     --Table entry for the ZO_ScrollList data
 	return({
         type        = WL.sortType,
@@ -541,6 +542,7 @@ function WL.CreateEntryForSet( setId, setData )
         wayshrineNames = wayshrineNames,
         dlcName     = dlcName,
         setTypeName = setTypeName,
+        armorTypes  = setsData.armorTypes,
 	})
 end
 
@@ -583,6 +585,7 @@ function WL.CreateEntryForItem(item)
     --Get traits needed for craftable sets
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
     --The return table of the item on the WishList
+    local setsData = WL.accData.sets[setId]
     local wlEntryTable = {
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
         setId                   = setId,
@@ -610,6 +613,7 @@ function WL.CreateEntryForItem(item)
         wayshrineNames = wayshrineNames,
         dlcName     = dlcName,
         setTypeName = setTypeName,
+        armorTypes  = setsData.armorTypes,
     }
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
 	return wlEntryTable
@@ -654,6 +658,7 @@ function WL.CreateHistoryEntryForItem(item)
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
+    local setsData = WL.accData.sets[setId]
     return({
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
         setId                   = setId,
@@ -685,6 +690,7 @@ function WL.CreateHistoryEntryForItem(item)
         wayshrineNames = wayshrineNames,
         dlcName     = dlcName,
         setTypeName = setTypeName,
+        armorTypes  = setsData.armorTypes,
     })
 end
 

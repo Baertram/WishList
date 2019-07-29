@@ -28,6 +28,7 @@ local stringsBase = {
 
     WISHLIST_ZONE                       = GetString(SI_CHAT_CHANNEL_NAME_ZONE),
     WISHLIST_WAYSHRINES                 = GetString(SI_MAPFILTER8),
+    WISHLIST_ARMORTYPE                  = GetString(SI_ITEM_FORMAT_STR_ARMOR) .. " " .. GetString(SI_GUILD_HERALDRY_TYPE_HEADER),
     WISHLIST_DROPLOCATIONS              = "Fundorte",
     WISHLIST_DROPLOCATION_SPECIAL       = "Speziell (z.B. Level Aufstieg, Prophet)",
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
@@ -59,6 +60,7 @@ local strings = {
     WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Benötigte Eigenschaften",
     WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ZONE),
     WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_WAYSHRINES),
+    WISHLIST_SEARCHDROP15      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ARMORTYPE),
 
     WISHLIST_LOOT_MSG_YOU = "Du findest: ",
     WISHLIST_LOOT_MSG_OTHER = " hat gefunden: ",

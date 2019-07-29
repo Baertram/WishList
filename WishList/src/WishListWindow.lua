@@ -844,6 +844,7 @@ function WishListWindow:FilterScrollList()
                     data["wayshrineNames"]  = mlData.wayshrineNames
                     data["dlcName"]         = mlData.dlcName
                     data["setTypeName"]     = mlData.setTypeName
+                    data["armorTypes"]      = mlData.armorTypes
                end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
@@ -922,6 +923,7 @@ function WishListWindow:FilterScrollList()
                     data["wayshrineNames"]      = mlData.wayshrineNames
                     data["dlcName"]         = mlData.dlcName
                     data["setTypeName"]     = mlData.setTypeName
+                    data["armorTypes"]      = mlData.armorTypes
                 end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
@@ -1066,8 +1068,11 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["dlcId"]           = mlData.dlcId
     data["zoneIds"]         = mlData.zoneIds
     data["wayshrines"]      = mlData.wayshrines
-    data["zoneIdNames"]      = mlData.zoneIdNames
-    data["wayshrineNames"]      = mlData.wayshrineNames
+    data["zoneIdNames"]     = mlData.zoneIdNames
+    data["wayshrineNames"]  = mlData.wayshrineNames
+    data["dlcName"]         = mlData.dlcName
+    data["setTypeName"]     = mlData.setTypeName
+    data["armorTypes"]      = mlData.armorTypes
 ]]
     --Search by item type
     if searchType == WISHLIST_SEARCH_TYPE_BY_TYPE then
@@ -1289,6 +1294,38 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             end
         end
 
+    --Search by armor type (light, medium, heavy)
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_ARMORTYPE then
+        local searchInputNumber = tonumber(searchInput)
+        if searchInputNumber ~= nil then
+            searchValueType = type(searchInputNumber)
+        end
+        if      searchValueType == "string" then
+            local armorTypes = data.armorTypes
+            if armorTypes then
+                for armorType, hasThisArmorTypeInSet in pairs(armorTypes) do
+                    if armorType ~= nil and hasThisArmorTypeInSet then
+                        local armorTypeName = libSets.GetArmorTypeName(armorType)
+                        if armorTypeName and armorTypeName ~= "" then
+                            if zo_plainstrfind(armorTypeName:lower(), searchInput:lower()) then
+                                return true
+                            end
+                        end
+                    end
+                end
+            end
+
+        elseif  searchValueType == "number" then
+            local armorTypes = data.armorTypes
+            if armorTypes then
+                for armorType, hasThisArmorTypeInSet in pairs(armorTypes) do
+                    if armorType ~= nil and hasThisArmorTypeInSet then
+                        if armorType == searchInputNumber then return true end
+                    end
+                end
+            end
+        end
+
     end
     return false
 end
@@ -1323,6 +1360,7 @@ function WishListWindow:CheckForMatch( data, searchInput )
                 [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED]   = true,
                 [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]         = true,
                 [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = true,
+                [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]             = true,
             }
             local searchTypeForCriteria = searchTypesForCriteria[self.searchType] or nil
             if searchTypeForCriteria ~= nil then
@@ -1429,6 +1467,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                            [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
                         }, --exclude the search entries from the set search
             },
         },
@@ -1449,6 +1488,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
                        }, --exclude the search entries from the set search
             },
             ["char"]= {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
@@ -1470,6 +1510,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
                        }, --exclude the search entries from the set search
             },
             ["char"] = {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
