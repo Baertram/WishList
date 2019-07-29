@@ -627,11 +627,11 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData, debug)
             end
         end
         --Nothing to mark? Abort here now
-        if not markAllCharsTheSame or not markAllCharsDifferently then return end
+        if not markAllCharsTheSame and not markAllCharsDifferently then return end
         --Check the inventorySingleSlotUpdate parameters collected before as the item got looted
         if WL.invSingleSlotUpdateData ~= nil and WL.invSingleSlotUpdateData[itemLink] ~= nil then
             --Was the slotIndex saved as the item got looted (EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-            local slotIndex = WL.invSingleSlotUpdateData[itemLink] or nil
+            local slotIndex = WL.invSingleSlotUpdateData[itemLink]
             if slotIndex ~= nil then
                 --Only update the inventory if it is currently shown. It will be updated automatically if you show it else.
                 local updatePlayerInv = not ZO_PlayerInventoryList:IsHidden() or false
