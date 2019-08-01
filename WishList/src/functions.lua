@@ -647,8 +647,9 @@ function WL.MarkWithMarkerIcon(itemId, itemLink, charData, debug)
                 end
                 --FCOIS.MarkItem(bag, slot, iconId, showIcon, updateInventories)
                 FCOIS.MarkItem(bagId, slotIndex, wishlistMarkerIconOfChar, true, updatePlayerInv)
-                --Reset the temporary looted item table for this itemLink
-                WL.invSingleSlotUpdateData[itemLink] = nil
+                --Reset the temporary looted item table for this itemLink (WL.invSingleSlotUpdateData[itemLink] = nil) won't be done here now
+                --as other characts might have the same itemLink on their Wishlist and the marker icons should be applied to them all!
+                --The reset will be done in file WishList.lua, function "lootReceivedWishListCheck" after all character's wishlist got scanned properly.
             end
         end
     end

@@ -116,15 +116,16 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
     --Check if item in slot is still there
     if GetItemType(bagId, slotId) == ITEMTYPE_NONE then return end
     --Save the current bagId and slotIndex with the itemLink to internal WishList temp data so the LootReceived event can use it
-    if ((not debug and bagId == BAG_BACKPACK) or debug) and WL.invSingleSlotUpdateData ~= nil then
+    if ((not debug and bagId == BAG_BACKPACK) or debug) then
         local itemLink = GetItemLink(bagId, slotId)
-        --WL.invSingleSlotUpdateData[itemLink] = {}
-        --WL.invSingleSlotUpdateData[itemLink].bagId = bagId -- Currently only BAG_BACKPACK supported
-        WL.invSingleSlotUpdateData[itemLink] = slotId
-        if debug then d("[WishList]" .. itemLink .. " - Inv_Single_Slot_Update: Set the slotId " ..tostring(slotId) .. " to the WL internal variables!") end
+        if itemLink then
+            WL.invSingleSlotUpdateData = WL.invSingleSlotUpdateData or {}
+            WL.invSingleSlotUpdateData[itemLink] = slotId
+            if debug then d("[WishList]" .. itemLink .. " - Inv_Single_Slot_Update: Set the slotId " ..tostring(slotId) .. " to the WL internal variables!") end
+        end
     end
-    --Is DolgubonsLazyWritCreatorAddon active?
-    if not debug or WL.otherAddons.LazyWritCreatorActive then return false end
+    --Are we in simulation mode or is DolgubonsLazyWritCreatorAddon not active? Abort here then
+    if debug or not WL.otherAddons.LazyWritCreatorActive then return false end
     --Is the automatic opening of the writ container rewards active?
     if WritCreater and WritCreater.savedVars and WritCreater.savedVars.lootContainerOnReceipt then
         --d(">Writ creator active and settings = auto loot container")
@@ -277,6 +278,8 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         --Is the item on the wishlist?
         IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData, debug)
     end
+    --Reset the INVENTORY_SINGLE_SLOT_UPDATE variable for the automatic icon mark again now
+    WL.invSingleSlotUpdateData[itemLink] = nil
 end
 
 function WL.simulateLootReceived(bagId, slotIndex, receivedBy, isLootedByPlayer)
