@@ -54,6 +54,30 @@ function WL.buildAddonMenu()
         fcoisMarkerIconsList, fcoisMarkerIconsListValues = FCOIS.GetLAMMarkerIconsDropdown("standard", true)
         FCOISenabled = true
     end
+    --The sort header tiebraker (2nd sort group) columns and the values for the settings
+    local sortTiebrakerChoices = {
+        [1] = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_NONE),
+        [2] = GetString(WISHLIST_HEADER_NAME),
+        [3] = GetString(WISHLIST_HEADER_TYPE),
+        [4] = GetString(WISHLIST_HEADER_SLOT),
+        [5] = GetString(WISHLIST_HEADER_TRAIT),
+        [6] = GetString(WISHLIST_HEADER_QUALITY),
+        [7] = GetString(WISHLIST_HEADER_USERNAME),
+        [8] = GetString(WISHLIST_HEADER_LOCALITY),
+        [9] = GetString(WISHLIST_HEADER_DATE),
+    }
+    local sortTiebrakerChoicesValues = {
+        [1] = -1,
+        [2] = 1,
+        [3] = 2,
+        [4] = 3,
+        [5] = 4,
+        [6] = 5,
+        [7] = 6,
+        [8] = 7,
+        [9] = 8,
+    }
+
 
     local panelData    = {
         type                = "panel",
@@ -245,15 +269,17 @@ function WL.buildAddonMenu()
             name = GetString(WISHLIST_LAM_SORT),
         },
         {
-            type = "checkbox",
-            name = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME),
-            tooltip = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME_TT),
-            getFunc = function() return settings.useSortTiebrakerName end,
+            type = "dropdown",
+            choices = sortTiebrakerChoices,
+            choicesValues = sortTiebrakerChoicesValues,
+            name = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER),
+            tooltip = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_TT),
+            getFunc = function() return settings.useSortTiebraker end,
             setFunc = function(value)
-                settings.useSortTiebrakerName = value
+                settings.useSortTiebraker = value
                 WL.window:BuildSortKeys()
             end,
-            default = defaults.useSortTiebrakerName,
+            default = defaults.useSortTiebraker,
         },
         --==============================================================================
         {

@@ -948,10 +948,71 @@ function WishListWindow:UpdateCounter(scrollData)
     self.frame:GetNamedChild("Counter"):SetText(listCountAndTotal)
 end
 
+local function WL_getSortKeysWithTiebrakerFromSettings()
+    local sortKeys = {}
+    local settings = WL.data
+    local tieBreaker = settings.useSortTiebraker
+    local noTiebraker = true
+    local tiebrakerColumn
+    if tieBreaker and tieBreaker ~= -1 then
+        if  tieBreaker == 1 then --Name
+            noTiebraker = false
+            tiebrakerColumn = "name"
+        elseif  tieBreaker == 2 then --ArmorOrWeaponType
+            noTiebraker = false
+            tiebrakerColumn = "armorOrWeaponTypeName"
+        elseif  tieBreaker == 3 then --SlotName
+            noTiebraker = false
+            tiebrakerColumn = "slotName"
+        elseif  tieBreaker == 4 then --Trait
+            noTiebraker = false
+            tiebrakerColumn = "traitName"
+        elseif  tieBreaker == 5 then --Quality
+            noTiebraker = false
+            tiebrakerColumn = "quality"
+        elseif  tieBreaker == 6 then --Username
+            noTiebraker = false
+            tiebrakerColumn = "username"
+        elseif  tieBreaker == 7 then --Locality
+            noTiebraker = false
+            tiebrakerColumn = "locality"
+        elseif  tieBreaker == 8 then --Timestamp
+            noTiebraker = false
+            tiebrakerColumn = "timestamp"
+        end
+        if not noTiebraker and tiebrakerColumn then
+            sortKeys = {
+                ["timestamp"]               = { isId64          = true, tiebreaker = tiebrakerColumn  }, --isNumeric = true
+                ["name"]                    = { caseInsensitive = true, tiebreaker = tiebrakerColumn},
+                ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["slotName"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["traitName"]               = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["quality"]                 = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["username"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["locality"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+            }
+        end
+    end
+    if noTiebraker then
+        sortKeys = {
+            ["timestamp"]               = { isId64          = true }, -- isNumeric = true
+            ["name"]                    = { caseInsensitive = true },
+            ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
+            ["slotName"]                = { caseInsensitive = true },
+            ["traitName"]               = { caseInsensitive = true },
+            ["quality"]                 = { caseInsensitive = true },
+            ["username"]                = { caseInsensitive = true },
+            ["locality"]                = { caseInsensitive = true },
+        }
+    end
+    return sortKeys
+end
+
 function WishListWindow:BuildSortKeys()
 --d("[WL.BuildSortKeys]")
-    self.sortKeys = {}
-    if WL.data.useSortTiebrakerName then
+    self.sortKeys = WL_getSortKeysWithTiebrakerFromSettings()
+    --Get the tiebraker for the 2nd sort after the selected column
+--[[
         self.sortKeys = {
             ["timestamp"]               = { isId64       = true, tiebreaker = "name"  }, --isNumeric = true
             ["name"]                    = { caseInsensitive = true },
@@ -962,18 +1023,7 @@ function WishListWindow:BuildSortKeys()
             ["username"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["locality"]                = { caseInsensitive = true, tiebreaker = "name" },
         }
-    else
-        self.sortKeys = {
-            ["timestamp"]               = { isId64       = true }, -- isNumeric = true
-            ["name"]                    = { caseInsensitive = true },
-            ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
-            ["slotName"]                = { caseInsensitive = true },
-            ["traitName"]               = { caseInsensitive = true },
-            ["quality"]                 = { caseInsensitive = true },
-            ["username"]                = { caseInsensitive = true },
-            ["locality"]                = { caseInsensitive = true },
-        }
-    end
+]]
 end
 
 function WishListWindow:SortScrollList( )

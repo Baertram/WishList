@@ -48,7 +48,8 @@ WL.defaultSettings = {
     preSelectLoggedinCharAtItemAddDialog = true,
     scanAllChars                         = false,
     showMainMenuButton                   = false,
-    useSortTiebrakerName                 = true,
+    --useSortTiebrakerName                 = true,  --Removed and replaced by WL.defaultSettings.useSortTiebraker
+    useSortTiebraker                     = -1,       --No additional group sorting
     fcoisMarkerIconAutoMarkLootedSetPart = false,
     fcoisMarkerIconAutoMarkLootedSetPartPerChar = false,
     fcoisMarkerIconLootedSetPart         = FCOIS_CON_ICON_LOCK or 1, -- Lock icon
@@ -1270,6 +1271,21 @@ end
 ------------------------------------------------
 --- Settings / SavedVariables
 ------------------------------------------------
+local function afterSettings()
+    --==================================================================================================================
+    --UPDATES TO THE SETTINGS AFTER THEY HAVE BEEN LOADED
+    --==================================================================================================================
+    local settings = WL.data
+
+    --WishList version 2.8: TRansfer old obsolete setting useSortTiebrakerName (if set) to new dropdown box setting useSortTiebraker
+    if settings.useSortTiebrakerName ~= nil then
+        if settings.useSortTiebrakerName == true then
+            WL.data.useSortTiebraker = 1
+        end
+        WL.data.useSortTiebrakerName = nil
+    end
+end
+
 function WL.loadSettings()
     local addonVars = WL.addonVars
     local lang = GetCVar("language.2")
@@ -1284,11 +1300,13 @@ function WL.loadSettings()
     if (WL.accData.saveMode == 1) then
         --Load the character user settings
         WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil)
-    --------------------------------------------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------------------------------------------
     else
         --Load the account wide user settings
         WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil, nil)
     end
+
+    afterSettings()
 end
 
 ------------------------------------------------
@@ -1354,6 +1372,7 @@ function WL.init(_, addonName)
 
     --Load the settings
     WL.loadSettings()
+
     --Check if the last scan of the sets was done with an older LibSets version
     local scanSetsNowSilently = false
     local lastLibSetsVersionScanDone = WL.accData.setsLastScannedLibSetsVersion

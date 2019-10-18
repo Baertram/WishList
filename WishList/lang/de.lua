@@ -178,8 +178,9 @@ local strings = {
     WISHLIST_LAM_ADD_MAIN_MENU_BUTTON_TT = "Zeige einen Knopf im Hauptmenü an, um die " .. GetString(WISHLIST_TITLE) .. " anzuzeigen",
 
     WISHLIST_LAM_SORT = "Sortierung",
-    WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME = "Sortierung bildet Gruppe je Set Name",
-    WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME_TT = "Beim Sortieren der Listen werden je Set Name Gruppen gebildet, welche die sortierten Gegenstände dann darunter anzeigt.",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER     = "Sortierung bildet Gruppe",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER_TT  = "Beim Sortieren der Listen werden nach der normal selektierten Sortierspalte auch zusätzlich Gruppen gebildet, welche die sortierten Gegenstände dann mit der hier ausgewählten 2. Spalte gruppiert.",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER_NONE= "Keine Gruppierung!",
 
 
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO = "Markiere gelooteten Gegenstand",

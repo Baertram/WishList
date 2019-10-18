@@ -181,8 +181,9 @@ local strings = {
     WISHLIST_LAM_ADD_MAIN_MENU_BUTTON_TT    = "Show a button in the main menu to show the " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_LAM_SORT                       = "Sort",
-    WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME    = "Group sort by set name",
-    WISHLIST_LAM_SORT_USE_TIEBRAKER_NAME_TT = "Use the set's name as a tiebraker as you sort the lists.\nThis means: The sorting will keep individual groups for each set.",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER         = "Group sort by this tiebreaker",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER_TT      = "Use the selected column as 2nd sort tiebraker. Your selected sort column will then also be grouped by your selected column afterwards.",
+    WISHLIST_LAM_SORT_USE_TIEBRAKER_NONE    = "No grouping!",
 
     WISHLIST_LAM_FCOIS                      = "FCO ItemSaver",
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO       = "Mark looted set item",
