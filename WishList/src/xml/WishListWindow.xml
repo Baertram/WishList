@@ -110,6 +110,21 @@
 				WishList.HideTooltip()
 			</OnMouseExit>
 		</Button>
+		<Button name="WishListButtonSettings" virtual="true">
+			<Dimensions x="35" y="35" />
+			<Textures normal="esoui/art/chatwindow/chat_options_up.dds"
+					  pressed="esoui/art/chatwindow/chat_options_down.dds"
+					  mouseOver="esoui/art/chatwindow/chat_options_over.dds"/>
+			<OnClicked>
+				WishList.ShowLAMSettings()
+			</OnClicked>
+			<OnMouseEnter>
+				WishList.ShowTooltip(self, TOP, GetString(WISHLIST_BUTTON_SETTINGS_TT))
+			</OnMouseEnter>
+			<OnMouseExit>
+				WishList.HideTooltip()
+			</OnMouseExit>
+		</Button>
 		<Button name="WishListButtonReload" virtual="true">
 			<Dimensions x="30" y="30" />
 			<Textures normal="/esoui/art/help/help_tabicon_feedback_up.dds"
@@ -362,15 +377,19 @@
 				<!-- Tab Buttons -->
 				<Button name="$(parent)TabSearch" inherits="WishListButtonSearch">
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
-							offsetX="-140" offsetY="-50" />
+							offsetX="-190" offsetY="-50" />
 				</Button>
 				<Button name="$(parent)TabList" inherits="WishListButtonList">
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
-							offsetX="-90" offsetY="-50" />
+							offsetX="-140" offsetY="-50" />
 				</Button>
 				<Button name="$(parent)TabHistory" inherits="WishListButtonHistory">
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
-							offsetX="-40" offsetY="-50" />
+							offsetX="-90" offsetY="-50" />
+				</Button>
+				<Button name="$(parent)TabSettings" inherits="WishListButtonSettings">
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"
+							offsetX="-40" offsetY="-55" />
 				</Button>
 			</Controls>
 		</TopLevelControl>

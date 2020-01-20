@@ -146,6 +146,7 @@ local strings = {
     WISHLIST_BUTTON_SEARCH_TT = "Set & Gegenstand Suche",
     WISHLIST_BUTTON_WISHLIST_TT = "Deine " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_HISTORY_TT = GetString(WISHLIST_HISTORY_TITLE),
+    WISHLIST_BUTTON_SETTINGS_TT = GetString(WISHLIST_TITLE) .. " Einstellungen",
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_WISHLIST = "[<<C:1>>]\n<<2[Keine Gegenstände/1 Gegenstand/$d Gegenstände]>> auf der " .. GetString(WISHLIST_TITLE),
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_HISTORY = "[<<C:1>>]\n<<2[Keine Einträge/1 Eintrag/$d Einträge]>> in der " .. GetString(WISHLIST_HISTORY_TITLE),
 
@@ -202,7 +203,15 @@ local strings = {
     WISHLIST_LAM_FORMAT_OPTIONS                     = "Ausgabe Format",
     WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set Name Sprache",
     WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Aktiviere die Set Name Sprachen welche in der " .. GetString(WISHLIST_TITLE) .. " (mit einem / Zeichen getrennt) angezeigt werden sollen. Die aktuelle Spiel Sprache wird zuerst angezeigt (Wenn unterstützt. Ansonsten wird English zuerst angezeigt).",
+
+    WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP             = "Nur mit Level = Max. CP" ..tostring(GetChampionPointsPlayerProgressionCap()),
+    WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP_TT          = "Nur benachrichtigen, wenn der Gegenstandslevel der aktuell höchste ChampionPunkte Rang CP" ..tostring(GetChampionPointsPlayerProgressionCap()) .. " ist.",
+    WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS        = "Nur in Verliesen",
+    WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS_TT     = "Nur benachrichtigen, wenn du dich aktuell in einem Verlies befindest.",
+
+    WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sortier Gruppe geändert zu: %s",
 }
+
 --Add missing translations from language "en" strings table as "fallback" (metatable)
 setmetatable(strings, {__index = WL.stringsEN})
 --Add the german strings as new version to overwrite the exisitng EN strings

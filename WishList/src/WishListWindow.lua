@@ -7,6 +7,32 @@ local libSets = WL.LibSets
 ------------------------------------------------
 WishListWindow = ZO_SortFilterList:Subclass()
 
+--Update the title of a scene's fragment with a new text
+local function WLW_UpdateSceneFragmentTitle(sceneName, fragment, childName, newTitle)
+    childName = childName or "Label"
+    if sceneName == nil or fragment == nil or newTitle == nil then return false end
+    local sm = SCENE_MANAGER
+    if not sm then return false end
+    local currentScene = sm.currentScene
+    local currentSceneName = currentScene.name
+    if not currentScene or not currentSceneName or not currentSceneName == sceneName or not currentScene.fragments then return end
+    for _, fragmentInCurrentScene in ipairs(currentScene.fragments) do
+        if fragmentInCurrentScene == fragment then
+            if fragmentInCurrentScene then
+                local fragmentCtrl = fragmentInCurrentScene.control
+                if fragmentCtrl then
+                    local fragmentCtrlChildLabel = fragmentCtrl:GetNamedChild(childName)
+                    if fragmentCtrlChildLabel and fragmentCtrlChildLabel.SetText then
+                        fragmentCtrlChildLabel:SetText(newTitle)
+                    end
+                end
+            end
+            return true
+        end
+    end
+    return false
+end
+
 function WishListWindow:New( control )
 	local list = ZO_SortFilterList.New(self, control)
 	list.frame = control
@@ -88,7 +114,7 @@ function WishListWindow:Setup( )
 
     --Add the WishList scene
 	WL.scene = ZO_Scene:New(WISHLIST_SCENE_NAME, SCENE_MANAGER)
-	WL.scene:AddFragment(ZO_SetTitleFragment:New(WISHLIST_TITLE))
+    WL.scene:AddFragment(ZO_SetTitleFragment:New(WISHLIST_TITLE))
 	WL.scene:AddFragment(ZO_FadeSceneFragment:New(WishListFrame))
 	WL.scene:AddFragment(TITLE_FRAGMENT)
 	WL.scene:AddFragment(RIGHT_BG_FRAGMENT)
@@ -126,32 +152,6 @@ function WL.saveSortGroupHeader(currentTab)
         saveData.sortKey[currentTab]    = WL.window.currentSortKey
         saveData.sortOrder[currentTab]  = WL.window.currentSortOrder
     end
-end
-
---Update the title of a scene's fragment with a new text
-local function WLW_UpdateSceneFragmentTitle(sceneName, fragment, childName, newTitle)
-    childName = childName or "Label"
-    if sceneName == nil or fragment == nil or newTitle == nil then return false end
-    local sm = SCENE_MANAGER
-    if not sm then return false end
-    local currentScene = sm.currentScene
-    local currentSceneName = currentScene.name
-    if not currentScene or not currentSceneName or not currentSceneName == sceneName or not currentScene.fragments then return end
-    for _, fragmentInCurrentScene in ipairs(currentScene.fragments) do
-        if fragmentInCurrentScene == fragment then
-            if fragmentInCurrentScene then
-                local fragmentCtrl = fragmentInCurrentScene.control
-                if fragmentCtrl then
-                    local fragmentCtrlChildLabel = fragmentCtrl:GetNamedChild(childName)
-                    if fragmentCtrlChildLabel and fragmentCtrlChildLabel.SetText then
-                        fragmentCtrlChildLabel:SetText(newTitle)
-                    end
-                end
-            end
-            return true
-        end
-    end
-    return false
 end
 
 function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWidth, nameHeaderHeight)
@@ -193,7 +193,7 @@ function WishListWindow:UpdateUI(state)
 	WL.CurrentState = state
 --d("[WishListWindow:UpdateUI] state: " ..tostring(state) .. ", currentTab: " ..tostring(WL.CurrentTab))
 
-------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------------------------------------------------------------------
     --SEARCH tab
 	if WL.CurrentTab == WISHLIST_TAB_SEARCH then
 		--Set the texture of the search button to "pressed"
@@ -207,7 +207,8 @@ function WishListWindow:UpdateUI(state)
 --......................................................................................................................
         --Sets are not loaded yet -> Show load button
         if WL.CurrentState == WISHLIST_TAB_STATE_NO_SETS then
-            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) ..  " - " .. zo_strformat(GetString(WISHLIST_SETS_LOADED), 0))
+            --WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) ..  " - " .. zo_strformat(GetString(WISHLIST_SETS_LOADED), 0))
+            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_BUTTON_SEARCH_TT):upper())
 
             --No Sets Loaded
             self.setsLoading = false
@@ -247,7 +248,9 @@ function WishListWindow:UpdateUI(state)
             --......................................................................................................................
             --Sets are currently loading -> Update label with count of sets & items
         elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADING then
-            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_LOADING_SETS))
+            --WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_LOADING_SETS))
+            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_BUTTON_SEARCH_TT):upper())
+
             --Sets Loading
             self.setsLoading = true
             --Disable the Wishlist tab button
@@ -282,7 +285,7 @@ function WishListWindow:UpdateUI(state)
             --......................................................................................................................
             --Sets are loaded -> Show them in list
         elseif WL.CurrentState == WISHLIST_TAB_STATE_SETS_LOADED then
-            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE))
+            WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_BUTTON_SEARCH_TT):upper())
 
             --Sets Loaded
             self.setsLoading = false
@@ -337,7 +340,7 @@ function WishListWindow:UpdateUI(state)
 ------------------------------------------------------------------------------------------------------------------------
     --WISHLIST tab
 	elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
-        WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE))
+        WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_BUTTON_WISHLIST_TT):upper())
         --Set the texture of the search button to "pressed"
         local normalSearchTexture = "/esoui/art/miscellaneous/search_icon.dds"
         local normalListTexture = "/esoui/art/journal/journal_tabicon_cadwell_down.dds"
@@ -386,7 +389,7 @@ function WishListWindow:UpdateUI(state)
 ------------------------------------------------------------------------------------------------------------------------
     --HISTORY tab
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
-        WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_HISTORY_TITLE):upper())
+        WLW_UpdateSceneFragmentTitle(WISHLIST_SCENE_NAME, TITLE_FRAGMENT, "Label", GetString(WISHLIST_TITLE) .. " - " .. GetString(WISHLIST_HISTORY_TITLE):upper())
         --Set the texture of the search button to "pressed"
         local normalSearchTexture = "/esoui/art/miscellaneous/search_icon.dds"
         local normalListTexture = "/esoui/art/journal/journal_tabicon_cadwell_up.dds"
@@ -948,12 +951,24 @@ function WishListWindow:UpdateCounter(scrollData)
     self.frame:GetNamedChild("Counter"):SetText(listCountAndTotal)
 end
 
-local function WL_getSortKeysWithTiebrakerFromSettings()
+--Build the sortheader key table, including a tiebraker chosen from the settings
+function WL.getSortKeysWithTiebrakerFromSettings()
+--d("[WishList]getSortKeysWithTiebrakerFromSettings")
     local sortKeys = {}
     local settings = WL.data
     local tieBreaker = settings.useSortTiebraker
     local noTiebraker = true
     local tiebrakerColumn
+    local baseDatatForSortKeys = {
+        ["timestamp"]               = { isId64          = true, }, --isNumeric = true
+        ["name"]                    = { caseInsensitive = true, },
+        ["armorOrWeaponTypeName"]   = { caseInsensitive = true, },
+        ["slotName"]                = { caseInsensitive = true, },
+        ["traitName"]               = { caseInsensitive = true, },
+        ["quality"]                 = { caseInsensitive = true, },
+        ["username"]                = { caseInsensitive = true, },
+        ["locality"]                = { caseInsensitive = true, },
+    }
     if tieBreaker and tieBreaker ~= -1 then
         if  tieBreaker == 1 then --Name
             noTiebraker = false
@@ -980,20 +995,31 @@ local function WL_getSortKeysWithTiebrakerFromSettings()
             noTiebraker = false
             tiebrakerColumn = "timestamp"
         end
-        if not noTiebraker and tiebrakerColumn then
+        if noTiebraker == false and (tiebrakerColumn ~= nil and tiebrakerColumn ~= "") then
+            --[[
             sortKeys = {
-                ["timestamp"]               = { isId64          = true, tiebreaker = tiebrakerColumn  }, --isNumeric = true
-                ["name"]                    = { caseInsensitive = true, tiebreaker = tiebrakerColumn},
-                ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
-                ["slotName"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
-                ["traitName"]               = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
-                ["quality"]                 = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
-                ["username"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
-                ["locality"]                = { caseInsensitive = true, tiebreaker = tiebrakerColumn },
+                ["timestamp"]               = { isId64          = true, tiebreaker = tostring(tiebrakerColumn) }, --isNumeric = true
+                ["name"]                    = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["slotName"]                = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["traitName"]               = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["quality"]                 = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["username"]                = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
+                ["locality"]                = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
             }
+            ]]
+            for sortKeysKey, sortKeysBaseData in pairs(baseDatatForSortKeys) do
+                if sortKeysKey ~= nil and sortKeysBaseData ~= nil then
+                    sortKeys[sortKeysKey] = {}
+                    sortKeys[sortKeysKey] = sortKeysBaseData
+                    if tiebrakerColumn ~= sortKeysKey then
+                        sortKeys[sortKeysKey].tiebreaker = tostring(tiebrakerColumn)
+                    end
+                end
+            end
         end
     end
-    if noTiebraker then
+    if noTiebraker == true then
         sortKeys = {
             ["timestamp"]               = { isId64          = true }, -- isNumeric = true
             ["name"]                    = { caseInsensitive = true },
@@ -1010,11 +1036,12 @@ end
 
 function WishListWindow:BuildSortKeys()
 --d("[WL.BuildSortKeys]")
-    self.sortKeys = WL_getSortKeysWithTiebrakerFromSettings()
-    --Get the tiebraker for the 2nd sort after the selected column
---[[
+    if WL.sortKeys ~= nil and type(WL.sortKeys) == "table" then
+        self.sortKeys = WL.sortKeys
+    else
+        --Get the tiebraker for the 2nd sort after the selected column
         self.sortKeys = {
-            ["timestamp"]               = { isId64       = true, tiebreaker = "name"  }, --isNumeric = true
+            ["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
@@ -1023,7 +1050,7 @@ function WishListWindow:BuildSortKeys()
             ["username"]                = { caseInsensitive = true, tiebreaker = "name" },
             ["locality"]                = { caseInsensitive = true, tiebreaker = "name" },
         }
-]]
+    end
 end
 
 function WishListWindow:SortScrollList( )

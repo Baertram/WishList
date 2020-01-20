@@ -64,6 +64,8 @@ WL.defaultSettings = {
         ["ru"] = false,
         ["jp"] = false,
     },
+    notifyOnFoundItemsOnlyMaxCP = false,
+    notifyOnFoundItemsOnlyInDungeons = false,
 }
 --SavedVars
 WL.data = {}
@@ -211,6 +213,34 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     local settings = WL.data
     local isOnWishList, item, itemIdOfSetPart
     local charData = {}
+
+    --Check if not in dungeon and setting to be in a ddngeon upon notify is enabled
+    if settings.notifyOnFoundItemsOnlyInDungeons == true then
+        if not IsUnitInDungeon("player") then
+            if debug then d("<<<should be in dungeon but is not!") end
+            return
+        end
+    end
+
+    --Check the item's level and if the setting to only notify if the level is the currently max CP level is enabled
+    local doGoOn = true
+    if settings.notifyOnFoundItemsOnlyMaxCP == true then
+        doGoOn = false
+        local maxLevel = GetMaxLevel()
+        local requiredLevel = GetItemLinkRequiredLevel(itemLink)
+        local itemReqCPLevel = GetItemLinkRequiredChampionPoints(itemLink)
+        if requiredLevel >= maxLevel then doGoOn = true end
+        if doGoOn == true then
+            local maxCP = GetChampionPointsPlayerProgressionCap()
+            if itemReqCPLevel <= 0 or itemReqCPLevel < maxCP then
+                doGoOn = false
+            end
+        end
+        if doGoOn == false then
+            if debug then d("<<<item level should be max CP but is only " ..tostring(requiredLevel) .. " and " .. tostring(itemReqCPLevel) .. " CP)") end
+            return
+        end
+    end
     --Scan all characters or only the currently logged in?
     if settings.scanAllChars then
         if debug then
@@ -316,6 +346,7 @@ function WL.LootReceived(_, receivedBy, itemLink, _, _, lootType, isLootedByPlay
     --Check where the item was looted
     --isInPVP, isInDelve, isInPublicDungeon, isInGroupDungeon, isInRaid, isInGroup, groupSize
     local whereWasItLootedData = { WL.getCurrentZoneAndGroupStatus() }
+
     --Check if the item is on a wishlist
     lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, WL.debug, nil, nil)
 end
@@ -1352,6 +1383,48 @@ end
 ------------------------------------------------
 --- Initialization
 ------------------------------------------------
+
+local function WL_Hooks()
+    --Sort header OnMouseUp callback function for SHIFT key checks
+    local function WL_SortHeaderOnMouseUp(sortHeaderCtrl, upInside)
+        --Was the mouse released above the ctrl ?
+        if upInside == true and sortHeaderCtrl ~= nil
+            and sortHeaderCtrl.GetParent ~= nil and sortHeaderCtrl:GetParent() == WishListFrameHeaders then
+            --Was the shift key pressed?
+            if IsShiftKeyDown() then
+                WL._clickedSortHeader = sortHeaderCtrl
+                --Get the key of the sortHeader
+                local sortHeaderKey = sortHeaderCtrl.key
+                if sortHeaderKey == nil then return end
+                local sortTiebrakerChoicesWithSortHeaderKeys = WL.sortTiebrakerChoicesWithSortHeaderKeys
+                if sortTiebrakerChoicesWithSortHeaderKeys == nil then return end
+                local newTiebrakerValue = 0
+                for newTiebrakerIndex, tiebrakerName in ipairs(sortTiebrakerChoicesWithSortHeaderKeys) do
+                    if tiebrakerName == sortHeaderKey then
+                        local nameOfSortHeader = ""
+                        local nameOfSortHeaderCtrl = WINDOW_MANAGER:GetControlByName(sortHeaderCtrl:GetName(), "Name")
+                        if nameOfSortHeaderCtrl ~= nil and nameOfSortHeaderCtrl.GetText then
+                            nameOfSortHeader = nameOfSortHeaderCtrl:GetText()
+                        end
+                        d(string.format(GetString(WISHLIST_SORTHEADER_GROUP_CHANGED), tostring(nameOfSortHeader)))
+                        newTiebrakerValue = newTiebrakerIndex
+                        break
+                    end
+                end
+                --Get the settingsm for the selected key and change it accordingly
+                if newTiebrakerValue and newTiebrakerValue > 0 then
+                    WL.data.useSortTiebraker = newTiebrakerValue
+                    --Rebuild the sortKeys now
+                    WL.sortKeys =  WL.getSortKeysWithTiebrakerFromSettings()
+                end
+                --Do not run the normal sort header group OnMouseDown event now!
+                return true
+            end
+        end
+    end
+    ZO_PreHook("ZO_SortHeader_OnMouseUp", WL_SortHeaderOnMouseUp)
+end
+
 function WL.init(_, addonName)
     local addonVars = WL.addonVars
     if addonName ~= addonVars.addonName then
@@ -1372,6 +1445,9 @@ function WL.init(_, addonName)
 
     --Load the settings
     WL.loadSettings()
+
+    --Build the list sortkeys depending on the selected dropdown entry from LAM settings
+    WL.sortKeys =  WL.getSortKeysWithTiebrakerFromSettings()
 
     --Check if the last scan of the sets was done with an older LibSets version
     local scanSetsNowSilently = false
@@ -1424,6 +1500,9 @@ function WL.init(_, addonName)
 
     --Register the slash commands
     WL_RegisterSlashCommands()
+
+    --Hooks
+    WL_Hooks()
 
     WL.firstWishListCall = true
     WL.initDone = true

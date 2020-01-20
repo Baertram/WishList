@@ -5,11 +5,11 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.8
+WL.addonVars.addonRealVersion		= 2.91
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
-WL.addonVars.settingsName   		= "Wish List"
+WL.addonVars.settingsName   		= "WishList"
 WL.addonVars.settingsDisplayName   	= WL.addonVars.settingsName
 WL.addonVars.addonAuthor			= "Meai & Baertram"
 WL.addonVars.addonWebsite			= "http://www.esoui.com/downloads/info1641-WishList.html"
@@ -95,3 +95,39 @@ WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 12
 --ZoneIds for LibSets data
 WISHLIST_ZONEID_BATTLEGROUNDS = 999999
 WISHLIST_ZONEID_SPECIAL       = 999998
+
+--Sort header names
+local sortTiebrakerChoicesWithSortHeaderKeys = {
+    [-1] = "!None",
+    [1] = "name",
+    [2] = "armorOrWeaponTypeName",
+    [3] = "slotName",
+    [4] = "traitName",
+    [5] = "quality",
+    [6] = "username",
+    [7] = "locality",
+    [8] = "timestamp",
+}
+WL.sortTiebrakerChoicesWithSortHeaderKeys = sortTiebrakerChoicesWithSortHeaderKeys
+
+--LAM dropdown box entries for the possible tiebraker choices
+local sortTiebrakerChoices = {
+    [1] = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_NONE),
+    [2] = GetString(WISHLIST_HEADER_NAME),
+    [3] = GetString(WISHLIST_HEADER_TYPE),
+    [4] = GetString(WISHLIST_HEADER_SLOT),
+    [5] = GetString(WISHLIST_HEADER_TRAIT),
+    [6] = GetString(WISHLIST_HEADER_QUALITY),
+    [7] = GetString(WISHLIST_HEADER_USERNAME),
+    [8] = GetString(WISHLIST_HEADER_LOCALITY),
+    [9] = GetString(WISHLIST_HEADER_DATE),
+}
+WL.sortTiebrakerChoices = sortTiebrakerChoices
+
+--LAM dropdown box entries for the possible tiebraker choices values
+local sortTiebrakerChoicesValues = {}
+table.insert(sortTiebrakerChoicesValues, -1)
+for value=1, #sortTiebrakerChoices-1 do
+    table.insert(sortTiebrakerChoicesValues, value)
+end
+WL.sortTiebrakerChoicesValues = sortTiebrakerChoicesValues

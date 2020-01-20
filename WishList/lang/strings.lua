@@ -5,7 +5,7 @@ local WL = WishList
 --English base strings: These need to be seperated from other strings which "use these base strings",
 -- so they can be created before the other strings
 local stringsBase = {
-    WISHLIST_TITLE                      = "Wish List",
+    WISHLIST_TITLE                      = "WishList",
     WISHLIST_HISTORY_TITLE              = "history",
 
     WISHLIST_TOOLTIP_COLOR_KEY          = "|cFFA500", --Orange, RGB: 255 165 000
@@ -149,6 +149,7 @@ local strings = {
     WISHLIST_BUTTON_SEARCH_TT                = "Set & item search",
     WISHLIST_BUTTON_WISHLIST_TT              = "Your " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_HISTORY_TT               = zo_strformat("<<C:1>>", GetString(WISHLIST_HISTORY_TITLE)),
+    WISHLIST_BUTTON_SETTINGS_TT              = GetString(WISHLIST_TITLE) .. " settings",
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_WISHLIST = "[<<C:1>>]\n<<2[No item/1 item/$d items]>> on " .. GetString(WISHLIST_TITLE),
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_HISTORY  = "[<<C:1>>]\n<<2[No entry/1 entry/$d entries]>> in " .. GetString(WISHLIST_HISTORY_TITLE),
 
@@ -161,8 +162,8 @@ local strings = {
     WISHLIST_LAM_ADDON_DESC                 = GetString(WISHLIST_TITLE) .. " - Your list of wanted set items",
     WISHLIST_LAM_SAVEDVARIABLES             = "Saving the settings",
     WISHLIST_LAM_SV                         = "Save type",
-    WISHLIST_LAM_SV_TT                      = "Choose if you want to save your addon data acocunt wide, or different for each of your character.\n\nThis does not apply to the Wish Lists as you can choose which character gets and item added/removed from every character!",
-    WISHLIST_LAM_SV_ACCOUNT_WIDE            = "Acocunt wide",
+    WISHLIST_LAM_SV_TT                      = "Choose if you want to save your addon data account wide, or different for each of your character.\n\nThis does not apply to the Wish Lists as you can choose which character gets and item added/removed from every character!",
+    WISHLIST_LAM_SV_ACCOUNT_WIDE            = "Account wide",
     WISHLIST_LAM_SV_EACH_CHAR               = "Each character",
     WISHLIST_LAM_USE_24h_FORMAT             = "Use 24h time format",
     WISHLIST_LAM_USE_24h_FORMAT_TT          = "Use the 24 hours time format for date & time formats",
@@ -205,6 +206,13 @@ local strings = {
     WISHLIST_LAM_FORMAT_OPTIONS                     = "Output format",
     WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set name languages",
     WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character). The current client language will be shown first (If supported. Else English is shown first).",
+
+    WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP             = "Only item level at CP" ..tostring(GetChampionPointsPlayerProgressionCap()),
+    WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP_TT          = "Only notify if the found item's level is the currently maximum available ChampionPoints level CP"..tostring(GetChampionPointsPlayerProgressionCap()),
+    WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS        = "Only inside dungeons",
+    WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS_TT     = "Only notify if you are currently inside a dungeon.",
+
+    WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sort grouping changed to: %s",
 }
 WL.stringsEN = strings
 

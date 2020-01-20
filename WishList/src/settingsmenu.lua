@@ -55,30 +55,10 @@ function WL.buildAddonMenu()
         FCOISenabled = true
     end
     --The sort header tiebraker (2nd sort group) columns and the values for the settings
-    local sortTiebrakerChoices = {
-        [1] = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_NONE),
-        [2] = GetString(WISHLIST_HEADER_NAME),
-        [3] = GetString(WISHLIST_HEADER_TYPE),
-        [4] = GetString(WISHLIST_HEADER_SLOT),
-        [5] = GetString(WISHLIST_HEADER_TRAIT),
-        [6] = GetString(WISHLIST_HEADER_QUALITY),
-        [7] = GetString(WISHLIST_HEADER_USERNAME),
-        [8] = GetString(WISHLIST_HEADER_LOCALITY),
-        [9] = GetString(WISHLIST_HEADER_DATE),
-    }
-    local sortTiebrakerChoicesValues = {
-        [1] = -1,
-        [2] = 1,
-        [3] = 2,
-        [4] = 3,
-        [5] = 4,
-        [6] = 5,
-        [7] = 6,
-        [8] = 7,
-        [9] = 8,
-    }
+    local sortTiebrakerChoices = WL.sortTiebrakerChoices
+    local sortTiebrakerChoicesValues = WL.sortTiebrakerChoicesValues
 
-
+    --The LAM panel data
     local panelData    = {
         type                = "panel",
         name                = addonVars.settingsName,
@@ -91,6 +71,7 @@ function WL.buildAddonMenu()
         website             = addonVars.addonWebsite
     }
 
+    --The saved variables save types
     local savedVariablesOptions = {
         [1] = GetString(WISHLIST_LAM_SV_EACH_CHAR),
         [2] = GetString(WISHLIST_LAM_SV_ACCOUNT_WIDE),
@@ -270,21 +251,44 @@ function WL.buildAddonMenu()
         },
         {
             type = "dropdown",
-            choices = sortTiebrakerChoices,
-            choicesValues = sortTiebrakerChoicesValues,
+            choices         = sortTiebrakerChoices,
+            choicesValues   = sortTiebrakerChoicesValues,
             name = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER),
             tooltip = GetString(WISHLIST_LAM_SORT_USE_TIEBRAKER_TT),
             getFunc = function() return settings.useSortTiebraker end,
             setFunc = function(value)
                 settings.useSortTiebraker = value
-                WL.window:BuildSortKeys()
+                --Rebuild the sortKeys now
+                WL.sortKeys =  WL.getSortKeysWithTiebrakerFromSettings()
+                --ReloadUI()
             end,
             default = defaults.useSortTiebraker,
+            --requiresReload = true,
         },
         --==============================================================================
         {
             type = 'header',
             name = GetString(WISHLIST_LAM_ITEM_FOUND),
+        },
+        {
+            type = "checkbox",
+            name = GetString(WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP),
+            tooltip = GetString(WISHLIST_LAM_ITEM_FOUND_ONLY_MAX_CP_TT),
+            getFunc = function() return settings.notifyOnFoundItemsOnlyMaxCP end,
+            setFunc = function(value)
+                settings.notifyOnFoundItemsOnlyMaxCP = value
+            end,
+            default = defaults.notifyOnFoundItemsOnlyMaxCP,
+        },
+        {
+            type = "checkbox",
+            name = GetString(WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS),
+            tooltip = GetString(WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS_TT),
+            getFunc = function() return settings.notifyOnFoundItemsOnlyInDungeons end,
+            setFunc = function(value)
+                settings.notifyOnFoundItemsOnlyInDungeons = value
+            end,
+            default = defaults.notifyOnFoundItemsOnlyInDungeons,
         },
         {
             type = "checkbox",
@@ -398,3 +402,8 @@ function WL.buildAddonMenu()
     WL.preventerVars.addonMenuBuild = true
 end
 
+--Open the WishList LAM settings
+function WL.ShowLAMSettings()
+    if WL.addonMenu == nil or WL.addonMenuPanel == nil then return nil end
+    WL.addonMenu:OpenToPanel(WL.addonMenuPanel)
+end
