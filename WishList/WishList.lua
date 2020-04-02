@@ -829,7 +829,7 @@ function WL.AddSetItems(addType)
     local selectedItemQualityData = WishListAddItemDialogContentQualityCombo.m_comboBox.m_selectedItemData
     if selectedItemQualityData == nil or selectedItemQualityData.id == nil then return false end
 
-    --d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id))
+--d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id) .. ", selectedItemQuality: " ..tostring(selectedItemQualityData.id))
     --The items to add table
     local items = {}
     --Get the set parts to add

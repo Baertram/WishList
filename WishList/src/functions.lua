@@ -1022,7 +1022,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
                             --data.slotName               = itemSlotName
                             data.trait                  = traitType
                             --data.traitName              = itemTraitName
-                            data.quality                = selectedItemQualityData
+                            data.quality                = selectedItemQualityData.id
                             table.insert(items, data)
                         end
                     end
