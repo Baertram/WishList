@@ -25,6 +25,8 @@ local stringsBase = {
     WISHLIST_CONST_SET                  = "set",
     WISHLIST_CONST_BONUS                = "bonuses",
     WISHLIST_CONST_ARMORANDWEAPONTYPE   = "Armor / Weapon type",
+    WISHLIST_CONST_ARMORTYPE            = "Armor type",
+    WISHLIST_CONST_WEAPONTYPE           = "Weapon type",
     WISHLIST_CONST_ITEMID               = "ItemId",
 
     WISHLIST_DIALOG_ADD_ITEM            = "Add item",
@@ -39,6 +41,10 @@ local stringsBase = {
     WISHLIST_DROPLOCATION_BG            = GetString(SI_LEADERBOARDTYPE4), --Battleground
 
     WISHLIST_LIBSETS                    = "LibSets",
+
+    WISHLIST_ARMOR                      = GetString(SI_ITEMTYPE2),
+    WISHLIST_WEAPONS                    = GetString(SI_ITEMFILTERTYPE1),
+    WISHLIST_JEWELRY                    = GetString(SI_ITEMFILTERTYPE25),
 }
 WL.stringsBaseEN = stringsBase
 for stringId, stringValue in pairs(stringsBase) do
@@ -51,20 +57,21 @@ local strings = {
     WISHLIST_SEARCHDROP_START        = "Search by ",
     WISHLIST_SEARCHDROP1       = GetString(WISHLIST_HEADER_NAME),
     WISHLIST_SEARCHDROP2       = GetString(WISHLIST_CONST_SET) .. " " .. GetString(WISHLIST_CONST_BONUS),
-    WISHLIST_SEARCHDROP3       = GetString(WISHLIST_CONST_ARMORANDWEAPONTYPE),
-    WISHLIST_SEARCHDROP4       = GetString(WISHLIST_HEADER_SLOT),
-    WISHLIST_SEARCHDROP5       = GetString(WISHLIST_HEADER_TRAIT),
-    WISHLIST_SEARCHDROP6       = GetString(WISHLIST_CONST_ITEMID),
-    WISHLIST_SEARCHDROP7       = GetString(WISHLIST_HEADER_DATE),
-    WISHLIST_SEARCHDROP8       = GetString(WISHLIST_HEADER_LOCALITY),
-    WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_USERNAME),
+    WISHLIST_SEARCHDROP3       = GetString(WISHLIST_CONST_ARMORTYPE),
+    WISHLIST_SEARCHDROP4       = GetString(WISHLIST_CONST_WEAPONTYPE),
+    WISHLIST_SEARCHDROP5       = GetString(WISHLIST_HEADER_SLOT),
+    WISHLIST_SEARCHDROP6       = GetString(WISHLIST_HEADER_TRAIT),
+    WISHLIST_SEARCHDROP7       = GetString(WISHLIST_CONST_ITEMID),
+    WISHLIST_SEARCHDROP8       = GetString(WISHLIST_HEADER_DATE),
+    WISHLIST_SEARCHDROP9       = GetString(WISHLIST_HEADER_LOCALITY),
+    WISHLIST_SEARCHDROP10       = GetString(WISHLIST_HEADER_USERNAME),
     --LibSets searches
-    WISHLIST_SEARCHDROP10      = GetString(WISHLIST_LIBSETS) .. ": Set type",
-    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_DLC),
-    WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": Traits needed",
-    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ZONE),
-    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_WAYSHRINES),
-    WISHLIST_SEARCHDROP15      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ARMORTYPE),
+    WISHLIST_SEARCHDROP11      = GetString(WISHLIST_LIBSETS) .. ": Set type",
+    WISHLIST_SEARCHDROP12      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_DLC),
+    WISHLIST_SEARCHDROP13      = GetString(WISHLIST_LIBSETS) .. ": Traits needed",
+    WISHLIST_SEARCHDROP14      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_ZONE),
+    WISHLIST_SEARCHDROP15      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_WAYSHRINES),
+    WISHLIST_SEARCHDROP16      = GetString(WISHLIST_LIBSETS) .. ": " .. GetString(WISHLIST_DROPLOCATIONS),
 
     WISHLIST_LOOT_MSG_YOU            = "YOU LOOTED ",
     WISHLIST_LOOT_MSG_OTHER          = " LOOTED ",

@@ -1518,6 +1518,15 @@ function WL.showContextMenu(control, button, upInside)
     end
 end
 
+--Search dropdown box texts
+function WL.getSearchTypeText(searchType)
+    if not searchType or searchType == "" or searchType < WISHLIST_SEARCH_TYPE_ITERATION_BEGIN or searchType > WISHLIST_SEARCH_TYPE_ITERATION_END then return end
+    local prefix = WISHLIST_SEARCHDROP_PREFIX
+    local searchTypeNameConstant = WISHLIST_SEARCHDROP_PREFIX .. tostring(searchType)
+    local searchTypeName = GetString(_G[searchTypeNameConstant])
+    return searchTypeName
+end
+
 ------------------------------------------------
 --- Load the sets
 ------------------------------------------------
@@ -1563,13 +1572,15 @@ function WL.GetAllSetData(silent)
     if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
     libSets = WL.LibSets
     local libSetsVersion = libSets.version
-    local setsDataPreloaded = {}
-    setsDataPreloaded = libSets.setDataPreloaded
-    local setItemIdsPreloaded   = setsDataPreloaded["setItemIds"]
-    local setNamesPreloaded     = setsDataPreloaded["setNames"]
-    local allSetIds             = libSets.GetAllSetIds()
     local setCount = 0
-    if allSetIds and setItemIdsPreloaded and setNamesPreloaded then
+    local allSetIds = libSets.GetAllSetIds()
+    if allSetIds then
+        local setItemIdsPreloaded = libSets.GetAllSetItemIds()
+        local setNamesPreloaded   = libSets.GetAllSetNames()
+        if not setItemIdsPreloaded or not setNamesPreloaded then
+            d("<<ERROR: LibSets data is missing (itemIds, names)")
+            return
+        end
         --local clientLang = WL.clientLang or WL.fallbackSetLang
         local setsData = WL.accData.sets
         --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
@@ -1577,6 +1588,7 @@ function WL.GetAllSetData(silent)
             local setNamesAdded = false
             local setItemIdsAdded = false
             local setsArmorTypes = nil
+            local setsDropMechanics = nil
             setsData[setId] = {}
             --Add set names and client language name
             if setNamesPreloaded[setId] ~= nil then
@@ -1602,6 +1614,13 @@ function WL.GetAllSetData(silent)
                         setsData[setId]["armorTypes"] = setsArmorTypes
                     end
                 end
+                --Get the dropMEchnic of the setItemIds and build the setsDropMechanics table
+                if libSets.GetDropMechanic then
+                    setsDropMechanics = libSets.GetDropMechanic(setId, false)
+                    if setsDropMechanics then
+                        setsData[setId]["dropMechanics"] = setsDropMechanics
+                    end
+                end
             end
             if setNamesAdded or setItemIdsAdded then
                 setCount = setCount + 1
@@ -1611,6 +1630,8 @@ function WL.GetAllSetData(silent)
         WL.accData.setCount = setCount
         WL.accData.setsLastScanned = GetTimeStamp()
         WL.accData.setsLastScannedLibSetsVersion = libSetsVersion
+    else
+        d("<<ERROR: LibSets data is missing (setIds)")
     end
     if not silent then
         showTotalItemsLoaded()

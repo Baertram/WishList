@@ -5,7 +5,7 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.92
+WL.addonVars.addonRealVersion		= 2.94
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
@@ -20,14 +20,6 @@ WL.addonVars.addonFeedback			= "https://www.esoui.com/downloads/info1641-WishLis
 WL.addonMenu = LibAddonMenu2
 WL.LMM2 = LibMainMenu2
 WL.LibSets = LibSets
---[[
---Check if the version is found and >= 0.06
-local libSets = WL.LibSets
-local libSetsVersionExists = libSets.version ~= nil
-local libSetsVersionIsGreaterEqualNeededValue = libSets.version >= 0.06
-local libSetsHTTPLinkEsoui = "https://www.esoui.com/downloads/info2241-LibSets.html"
-assert(libSetsVersionExists and libSetsVersionIsGreaterEqualNeededValue, "[WishList] ERROR - Needed library \'LibSets\' is not found or not loaded with the needed version 0.06 or higher!\nPlease download the newest version: " .. libSetsHTTPLinkEsoui)
-]]
 
 --Constants
 WISHLIST_SCENE_NAME = "WishListScene"
@@ -44,24 +36,64 @@ WISHLIST_TAB_STATE_SETS_LOADED  = 3
 --The search types
 WISHLIST_SEARCH_TYPE_BY_NAME                = 1
 WISHLIST_SEARCH_TYPE_BY_SET_BONUS           = 2
-WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE  = 3
-WISHLIST_SEARCH_TYPE_BY_SLOT                = 4
-WISHLIST_SEARCH_TYPE_BY_TRAIT               = 5
-WISHLIST_SEARCH_TYPE_BY_ITEMID              = 6
-WISHLIST_SEARCH_TYPE_BY_DATE                = 7
-WISHLIST_SEARCH_TYPE_BY_LOCATION            = 8
-WISHLIST_SEARCH_TYPE_BY_USERNAME            = 9
-WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE      = 10
-WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID        = 11
-WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED = 12
-WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID       = 13
-WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX = 14
-WISHLIST_SEARCH_TYPE_BY_ARMORTYPE           = 15
---WISHLIST_SEARCH_TYPE_BY_TYPE                = 10 -- disabled
+WISHLIST_SEARCH_TYPE_BY_ARMORTYPE           = 3
+WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE          = 4
+WISHLIST_SEARCH_TYPE_BY_SLOT                = 5
+WISHLIST_SEARCH_TYPE_BY_TRAIT               = 6
+WISHLIST_SEARCH_TYPE_BY_ITEMID              = 7
+WISHLIST_SEARCH_TYPE_BY_DATE                = 8
+WISHLIST_SEARCH_TYPE_BY_LOCATION            = 9
+WISHLIST_SEARCH_TYPE_BY_USERNAME            = 10
+WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE      = 11
+WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID        = 12
+WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED = 13
+WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID       = 14
+WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX = 15
+WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC     = 16
+WISHLIST_SEARCH_TYPE_ITERATION_BEGIN = WISHLIST_SEARCH_TYPE_BY_NAME
+WISHLIST_SEARCH_TYPE_ITERATION_END = WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC
+local searchTypesForCriteria = {
+    [WISHLIST_SEARCH_TYPE_BY_NAME]                  = true,
+    [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]             = true,
+    [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]             = true,
+    [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]            = true,
+    [WISHLIST_SEARCH_TYPE_BY_SLOT]                  = true,
+    [WISHLIST_SEARCH_TYPE_BY_TRAIT]                 = true,
+    [WISHLIST_SEARCH_TYPE_BY_LOCATION]              = true,
+    [WISHLIST_SEARCH_TYPE_BY_USERNAME]              = true,
+    [WISHLIST_SEARCH_TYPE_BY_ITEMID]                = true,
+    [WISHLIST_SEARCH_TYPE_BY_DATE]                  = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]        = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]          = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED]   = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]         = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC]       = true,
+}
+WL.searchTypesForCriteria = searchTypesForCriteria
+local searchTypesForContextMenuCriteria = {
+    [WISHLIST_SEARCH_TYPE_BY_NAME]                  = false,
+    [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]             = false,
+    [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]             = true,
+    [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]            = true,
+    [WISHLIST_SEARCH_TYPE_BY_SLOT]                  = true,
+    [WISHLIST_SEARCH_TYPE_BY_TRAIT]                 = true,
+    [WISHLIST_SEARCH_TYPE_BY_LOCATION]              = false,
+    [WISHLIST_SEARCH_TYPE_BY_USERNAME]              = false,
+    [WISHLIST_SEARCH_TYPE_BY_ITEMID]                = false,
+    [WISHLIST_SEARCH_TYPE_BY_DATE]                  = false,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]        = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]          = true,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED]   = false,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]         = false,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
+    [WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC]       = true,
+}
+WL.searchTypesForContextMenuCriteria = searchTypesForContextMenuCriteria
 --Constants for the number of search dropdown entries at each tab:
-WISHLIST_TAB_SEARCH_ENTRY_COUNT     = 15
-WISHLIST_TAB_WHISLIST_ENTRY_COUNT   = 15
-WISHLIST_TAB_HISTORY_ENTRY_COUNT    = 15
+WISHLIST_TAB_SEARCH_ENTRY_COUNT     = WISHLIST_SEARCH_TYPE_ITERATION_END
+WISHLIST_TAB_WHISLIST_ENTRY_COUNT   = WISHLIST_SEARCH_TYPE_ITERATION_END
+WISHLIST_TAB_HISTORY_ENTRY_COUNT    = WISHLIST_SEARCH_TYPE_ITERATION_END
 --The add dialog set part types
 WISHLIST_ADD_TYPE_WHOLE_SET                             = 1
 WISHLIST_ADD_TYPE_BY_ITEMTYPE                           = 2
@@ -81,7 +113,7 @@ WISHLIST_REMOVE_ITEM_TYPE_TRAIT                         = 6
 WISHLIST_SEARCHDROP_PREFIX= "WISHLIST_SEARCHDROP"
 WISHLIST_CHARSDROP_PREFIX = "WISHLIST_CHARSDROP"
 --Qualities
-WL.ESOquality2WLqualityAdd = 2 --Add this number to the ESO quality retuened by GetItemLinkQuality to get the appropriate WishList quality constant
+WL.ESOquality2WLqualityAdd = 2 --Add this number to the ESO quality returned by GetItemLinkQuality to get the appropriate WishList quality constant
 WISHLIST_QUALITY_ALL = 1
 WISHLIST_QUALITY_TRASH = 2
 WISHLIST_QUALITY_NORMAL = 3
@@ -89,11 +121,12 @@ WISHLIST_QUALITY_MAGIC = 4
 WISHLIST_QUALITY_ARCANE = 5
 WISHLIST_QUALITY_ARTIFACT = 6
 WISHLIST_QUALITY_LEGENDARY = 7
-WISHLIST_QUALITY_MAGIC_OR_ARCANE = 8
-WISHLIST_QUALITY_ARCANE_OR_ARTIFACT = 9
-WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY = 10
-WISHLIST_QUALITY_MAGIC_TO_LEGENDARY = 11
-WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 12
+WISHLIST_QUALITY_MYTHIC = 8
+WISHLIST_QUALITY_MAGIC_OR_ARCANE = 9
+WISHLIST_QUALITY_ARCANE_OR_ARTIFACT = 10
+WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY = 11
+WISHLIST_QUALITY_MAGIC_TO_LEGENDARY = 12
+WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 13
 --ZoneIds for LibSets data
 WISHLIST_ZONEID_BATTLEGROUNDS = 999999
 WISHLIST_ZONEID_SPECIAL       = 999998

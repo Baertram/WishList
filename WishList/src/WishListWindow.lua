@@ -86,6 +86,11 @@ function WishListWindow:Setup( )
     --Search box and search functions
 	self.searchBox = self.frame:GetNamedChild("SearchBox")
 	self.searchBox:SetHandler("OnTextChanged", function() self:RefreshFilters() end)
+    self.searchBox:SetHandler("OnMouseUp", function(ctrl, mouseButton, upInside)
+        if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+            self:OnSearchEditBoxContextMenu(self.searchBox)
+        end
+    end)
 	self.search = ZO_StringSearch:New()
 	self.search:AddProcessor(WL.sortType, function(stringSearch, data, searchTerm, cache)
         return(self:ProcessItemEntry(stringSearch, data, searchTerm, cache))
@@ -1118,6 +1123,22 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 --d("[WLW:SearchByCriteria]searchType: " .. tostring(searchType) .. ", searchInput: " .. tostring(searchInput))
     if data == nil or searchInput == nil or searchInput == "" or searchType == nil then return nil end
     local searchValueType = type(searchInput)
+    local searchInputLower
+    local searchValueIsString = false
+    local searchValueIsNumber = false
+    local searchInputNumber = tonumber(searchInput)
+    if searchInputNumber ~= nil then
+        searchValueType = type(searchInputNumber)
+        if searchValueType == "number" then
+            searchValueIsNumber = true
+        end
+    else
+        if searchValueType == "string" then
+            searchValueIsString = true
+            searchInputLower = searchInput:lower()
+        end
+    end
+
 --[[
     data["type"]                    = 1 -- for the search method to work -> Find the processor in zo_stringsearch:Process()
     data["id"]                      = itemId
@@ -1150,85 +1171,96 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["dlcName"]         = mlData.dlcName
     data["setTypeName"]     = mlData.setTypeName
     data["armorTypes"]      = mlData.armorTypes
+    data["dropMechanics"]   = mlData.dropMechanics
 ]]
     --Search by item type
     if searchType == WISHLIST_SEARCH_TYPE_BY_TYPE then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
+        if searchValueIsString then
             local itemTypeName = data.itemTypeName
             if itemTypeName and itemTypeName ~= "" then
-                if zo_plainstrfind(itemTypeName:lower(), searchInput:lower()) then
+                if zo_plainstrfind(itemTypeName:lower(), searchInputLower) then
                     return true
                 end
             end
-        elseif  searchValueType == "number" then
+        elseif searchValueIsNumber then
             local itemType = data.itemType
             if itemType ~= nil and itemType == searchInputNumber then return true end
         end
 
-    --Search by armor or weapon type
-    elseif searchType == WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
-            local armorOrWeaponTypeName = data.armorOrWeaponTypeName
-            if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
-                if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInput:lower()) then
-                    return true
+    --Search by armor type
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_ARMORTYPE then
+        local itemLink = data["itemLink"]
+        if itemLink then
+            local itemType = GetItemLinkItemType(itemLink)
+            if itemType and itemType == ITEMTYPE_ARMOR then
+                if searchValueIsString then
+                    local armorOrWeaponTypeName = data.armorOrWeaponTypeName
+                    if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
+                        if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
+                            return true
+                        end
+                    end
+                elseif searchValueIsNumber then
+                    local armorOrWeaponType = data.armorOrWeaponType
+                    if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
                 end
             end
-        elseif  searchValueType == "number" then
-            local armorOrWeaponType = data.armorOrWeaponType
-            if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+        end
+
+    --Search by weapon type
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE then
+        local itemLink = data["itemLink"]
+        if itemLink then
+            local itemType = GetItemLinkItemType(itemLink)
+            if itemType and itemType == ITEMTYPE_WEAPON then
+                if searchValueIsString then
+                    local armorOrWeaponTypeName = data.armorOrWeaponTypeName
+                    if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
+                        if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
+                            return true
+                        end
+                    end
+                elseif searchValueIsNumber then
+                    local armorOrWeaponType = data.armorOrWeaponType
+                    if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+                end
+            end
         end
 
     --Search by slot
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_SLOT then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
+        if searchValueIsString then
             local slotTypeName = data.slotName
             if slotTypeName and slotTypeName ~= "" then
-                if zo_plainstrfind(slotTypeName:lower(), searchInput:lower()) then
+                if zo_plainstrfind(slotTypeName:lower(), searchInputLower) then
                     return true
                 end
             end
-        elseif  searchValueType == "number" then
+        elseif searchValueIsNumber then
             local slotType = data.slot
             if slotType ~= nil and slotType == searchInputNumber then return true end
         end
 
     --Search by trait
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_TRAIT then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
+        if searchValueIsString then
             local traitTypeName = data.traitName
             if traitTypeName and traitTypeName ~= "" then
-                if zo_plainstrfind(traitTypeName:lower(), searchInput:lower()) then
+                if zo_plainstrfind(traitTypeName:lower(), searchInputLower) then
                     return true
                 end
             end
-        elseif  searchValueType == "number" then
+        elseif searchValueIsNumber then
             local traitType = data.trait
             if traitType ~= nil and traitType == searchInputNumber then return true end
         end
 
     --Search by location
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LOCATION then
-        if searchValueType == "string" then
+        if searchValueIsString then
             local location = data.locality
             if location and location ~= "" then
-                if zo_plainstrfind(location:lower(), searchInput:lower()) then
+                if zo_plainstrfind(location:lower(), searchInputLower) then
                     return true
                 end
             end
@@ -1236,11 +1268,10 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 
     --Search by username
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_USERNAME then
-        if searchValueType == "string" then
+        if searchValueIsString then
             local charName = data.username
             local accName = data.displayName
             if (charName and charName ~= "") or (accName and accName ~= "") then
-                local searchInputLower = searchInput:lower()
                 if (charName and zo_plainstrfind(charName:lower(), searchInputLower)) or (accName and zo_plainstrfind(accName:lower(), searchInputLower)) then
                     return true
                 end
@@ -1256,13 +1287,13 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 
     --Search by date
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_DATE then
-        if searchValueType == "string" then
+        if searchValueIsString then
             local timestamp = data.timestamp
             if timestamp ~= nil then
                 --Create the date format from the timestamp
                 local dateTimeStr = WL.getDateTimeFormatted(timestamp)
                 if dateTimeStr ~= "" then
-                    if zo_plainstrfind(dateTimeStr:lower(), searchInput:lower()) then
+                    if zo_plainstrfind(dateTimeStr:lower(), searchInputLower) then
                         return true
                     end
                 end
@@ -1272,49 +1303,49 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 
     --LibSets searches
 
-        --Search by dlcId
+    --Search by setType
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
+        local setType = data.setType
+        if searchValueIsString then
             local setTypeName = data.setTypeName
             if setTypeName and setTypeName ~= "" then
-                if zo_plainstrfind(setTypeName:lower(), searchInput:lower()) then
-                    return true
+                --Get the translated setType to "en" if the current client language is not "en"
+                local setTypeNameEN
+                if not WL.clientLangIsEN then
+                    setTypeNameEN = libSets.GetSetTypeName(setType, "en")
+                end
+                local setTypeNameLower = setTypeName:lower()
+                if setTypeNameEN and setTypeNameEN ~= "" then
+                    if (zo_plainstrfind(setTypeNameLower, searchInputLower) or zo_plainstrfind(setTypeNameEN:lower(), searchInputLower)) then
+                        return true
+                    end
+                else
+                    if zo_plainstrfind(setTypeNameLower, searchInputLower) then
+                        return true
+                    end
                 end
             end
-        elseif  searchValueType == "number" then
-            local setType = data.setType
+        elseif searchValueIsNumber then
             if setType ~= nil and setType == searchInputNumber then return true end
         end
 
     --Search by dlcId
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
+        if searchValueIsString then
             local dlcName = data.dlcName
             if dlcName and dlcName ~= "" then
-                if zo_plainstrfind(dlcName:lower(), searchInput:lower()) then
+                if zo_plainstrfind(dlcName:lower(), searchInputLower) then
                     return true
                 end
             end
-        elseif  searchValueType == "number" then
+        elseif searchValueIsNumber then
             local dlcId = data.dlcId
             if dlcId ~= nil and dlcId == searchInputNumber then return true end
         end
 
     --Search by traitsNeeded
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if  searchValueType == "number" then
+        if searchValueIsNumber then
             local traitsNeeded = data.traitsNeeded
             if traitsNeeded ~= nil and traitsNeeded == searchInputNumber then return true end
         end
@@ -1323,20 +1354,16 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID then
         local zoneIds = data.zoneIds
         if zoneIds then
-            local searchInputNumber = tonumber(searchInput)
-            if searchInputNumber ~= nil then
-                searchValueType = type(searchInputNumber)
-            end
-            if      searchValueType == "string" then
+            if searchValueIsString then
                 local zoneIdsNames = data.zoneIdNames
                 if zoneIdsNames then
                     for _, zoneIdName in pairs(zoneIdsNames) do
-                        if zo_plainstrfind(zoneIdName:lower(), searchInput:lower()) then
+                        if zo_plainstrfind(zoneIdName:lower(), searchInputLower) then
                             return true
                         end
                     end
                 end
-            elseif searchValueType == "number" then
+            elseif searchValueIsNumber then
                 for _, zoneId in ipairs(zoneIds) do
                     if zoneId > 0 then
                         if zoneId == searchInputNumber then return true  end
@@ -1349,20 +1376,16 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX then
         local wayshrines = data.wayshrines
         if wayshrines then
-            local searchInputNumber = tonumber(searchInput)
-            if searchInputNumber ~= nil then
-                searchValueType = type(searchInputNumber)
-            end
-            if      searchValueType == "string" then
+            if searchValueIsString then
                 local wayshrineNames = data.wayshrineNames
                 if wayshrineNames then
                     for _, wayshrineName in pairs(wayshrineNames) do
-                        if zo_plainstrfind(wayshrineName:lower(), searchInput:lower()) then
+                        if zo_plainstrfind(wayshrineName:lower(), searchInputLower) then
                             return true
                         end
                     end
                 end
-            elseif searchValueType == "number" then
+            elseif searchValueIsNumber then
                 for _, wayshrineNodeIndex in ipairs(wayshrines) do
                     if wayshrineNodeIndex > 0 then
                         if wayshrineNodeIndex == searchInputNumber then return true  end
@@ -1371,77 +1394,59 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             end
         end
 
-    --Search by armor type (light, medium, heavy)
-    elseif searchType == WISHLIST_SEARCH_TYPE_BY_ARMORTYPE then
-        local searchInputNumber = tonumber(searchInput)
-        if searchInputNumber ~= nil then
-            searchValueType = type(searchInputNumber)
-        end
-        if      searchValueType == "string" then
-            local armorTypes = data.armorTypes
-            if armorTypes then
-                for armorType, hasThisArmorTypeInSet in pairs(armorTypes) do
-                    if armorType ~= nil and hasThisArmorTypeInSet then
-                        local armorTypeName = libSets.GetArmorTypeName(armorType)
-                        if armorTypeName and armorTypeName ~= "" then
-                            if zo_plainstrfind(armorTypeName:lower(), searchInput:lower()) then
-                                return true
-                            end
+    --Search by drop mechanic
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC then
+        local dropMechanics = data.dropMechanics
+        if dropMechanics then
+            for _, dropMechanic in ipairs(dropMechanics) do
+                if searchValueIsString then
+                    local dropMechanicName = libSets.GetDropMechanicName(dropMechanic)
+                    if dropMechanicName and dropMechanicName ~= "" then
+                        if zo_plainstrfind(dropMechanicName:lower(), searchInputLower) then
+                            return true
                         end
                     end
-                end
-            end
-
-        elseif  searchValueType == "number" then
-            local armorTypes = data.armorTypes
-            if armorTypes then
-                for armorType, hasThisArmorTypeInSet in pairs(armorTypes) do
-                    if armorType ~= nil and hasThisArmorTypeInSet then
-                        if armorType == searchInputNumber then return true end
-                    end
+                elseif searchValueIsNumber then
+                    if dropMechanic == searchInputNumber then return true end
                 end
             end
         end
-
     end
+
     return false
 end
 
 function WishListWindow:CheckForMatch( data, searchInput )
-    if self.searchType ~= nil then
-        --d("[WLW:CheckForMatch]searchType: " .. tostring(self.searchType) .. ", searchInput: " .. tostring(searchInput))
+    local searchType = self.searchType
+    if searchType ~= nil then
+--d("[WLW:CheckForMatch]searchType: " .. tostring(searchType) .. ", searchInput: " .. tostring(searchInput))
         --Search by name
-        if self.searchType == WISHLIST_SEARCH_TYPE_BY_NAME then
-            return(self.search:IsMatch(searchInput, data))
-        --Search by set bonus
-        elseif (self.searchType == WISHLIST_SEARCH_TYPE_BY_SET_BONUS) then
-            if (type(data.bonuses) == "number") then
-                -- Lazy initialization of set bonus data
-                data.bonuses = WL.GetSetBonuses(data.itemLink, data.bonuses)
+        if searchType == WISHLIST_SEARCH_TYPE_BY_NAME then
+            local isMatch = false
+            local searchInputNumber = tonumber(searchInput)
+            if searchInputNumber ~= nil then
+                local searchValueType = type(searchInputNumber)
+                if searchValueType == "number" then
+                    isMatch = searchInputNumber == data.setId or false
+                end
+            else
+                isMatch = self.search:IsMatch(searchInput, data)
             end
-            return(self:SearchSetBonuses(data.bonuses, searchInput))
+            return isMatch
+        --Search by set bonus
+        elseif (searchType == WISHLIST_SEARCH_TYPE_BY_SET_BONUS) then
+            local bonuses = data.bonuses
+            if (type(bonuses) == "number") then
+                -- Lazy initialization of set bonus data
+                data.bonuses = WL.GetSetBonuses(data.itemLink, bonuses)
+            end
+            return(self:SearchSetBonuses(bonuses, searchInput))
             --Search by type
         else
-            local searchTypesForCriteria = {
-                [WISHLIST_SEARCH_TYPE_BY_NAME]                  = true,
-                [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]             = true,
-                [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]    = true,
-                [WISHLIST_SEARCH_TYPE_BY_SLOT]                  = true,
-                [WISHLIST_SEARCH_TYPE_BY_TRAIT]                 = true,
-                [WISHLIST_SEARCH_TYPE_BY_LOCATION]              = true,
-                [WISHLIST_SEARCH_TYPE_BY_USERNAME]              = true,
-                [WISHLIST_SEARCH_TYPE_BY_ITEMID]                = true,
-                [WISHLIST_SEARCH_TYPE_BY_DATE]                  = true,
-                [WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE]        = true,
-                [WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID]          = true,
-                [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED]   = true,
-                [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]         = true,
-                [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = true,
-                [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]             = true,
-            }
-            local searchTypeForCriteria = searchTypesForCriteria[self.searchType] or nil
+            local searchTypesForCriteria = WL.searchTypesForCriteria
+            local searchTypeForCriteria = searchTypesForCriteria[searchType] or nil
             if searchTypeForCriteria ~= nil then
-                return(self:SearchByCriteria(data, searchInput, self.searchType))
+                return(self:SearchByCriteria(data, searchInput, searchType))
             end
         end
     end
@@ -1456,6 +1461,144 @@ function WishListWindow:ProcessItemEntry( stringSearch, data, searchTerm )
 	return(false)
 end
 
+------------------------------------------------
+--- Wish List Search Dropdown
+------------------------------------------------
+function WishListWindow:SearchNow(searchValue, resetSearchTextBox)
+    resetSearchTextBox = resetSearchTextBox or false
+    if not searchValue then return end
+    local searchBox = self.searchBox
+    if not searchBox then return end
+    searchBox:Clear()
+    if searchValue == "" and resetSearchTextBox then return end
+    searchBox:SetText(searchValue) --Will automatically raise self:RefreshFilters() as OnTextChanged event fires
+end
+
+function WishListWindow:OnSearchEditBoxContextMenu(editboxControl)
+    local wlWindow = self
+    local searchType = self.searchType
+    --d("EditBox right clicked: " ..tostring(editboxControl:GetName()) ..", searchType: " ..tostring(searchType))
+    if searchType == nil then return end
+    local searchTypesForContextMenuCriteria = WL.searchTypesForContextMenuCriteria
+    local searchTypeForContextMenuCriteria = searchTypesForContextMenuCriteria[searchType] or nil
+    --Not supported search type? Then abort here
+    if not searchTypeForContextMenuCriteria then return end
+    local searchTypeText = WL.getSearchTypeText(searchType)
+    if not searchTypeText or searchTypeText == "" then return end
+    local contextMenuEntries = {}
+    local contextSubMenuEntries = {}
+    if     searchType == WISHLIST_SEARCH_TYPE_BY_ARMORTYPE   then
+        local armorTypes = WL.ArmorTypes
+        for armorTypeId, armorTypeText in ipairs(armorTypes) do
+            table.insert(contextMenuEntries, {label = armorTypeText, callback = function() wlWindow:SearchNow(tostring(armorTypeId)) end})
+        end
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE   then
+        local weaponsTypes = WL.WeaponTypes
+        for weaponTypeId,weaponTypeText in ipairs(weaponsTypes) do
+            table.insert(contextMenuEntries, {label = weaponTypeText, callback = function() wlWindow:SearchNow(tostring(weaponTypeId)) end})
+        end
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_SLOT then
+        local slotTypes = WL.SlotTypes
+        for slotTypeId,slotTypeText in ipairs(slotTypes) do
+            table.insert(contextMenuEntries, {label = slotTypeText, callback = function() wlWindow:SearchNow(tostring(slotTypeId)) end})
+        end
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_TRAIT then
+        local traitTypes = WL.TraitTypes
+        local traitTypesToExclude = {
+            [ITEM_TRAIT_TYPE_ARMOR_NIRNHONED] = true,
+            [ITEM_TRAIT_TYPE_WEAPON_NIRNHONED] = true,
+            [ITEM_TRAIT_TYPE_MAX_VALUE + 1] = true,
+            [#traitTypes] = true,
+        }
+        local traitHeadLines = {
+            [ITEM_TRAIT_TYPE_WEAPON_POWERED]    = GetString(WISHLIST_WEAPONS),
+            [ITEM_TRAIT_TYPE_ARMOR_STURDY]      = GetString(WISHLIST_ARMOR),
+            [ITEM_TRAIT_TYPE_JEWELRY_HEALTHY]   = GetString(WISHLIST_JEWELRY),
+        }
+        local useSubMenuNr = 0
+        local subMenuArmor = {}
+        local subMenuWeapons = {}
+        local subMenuJewelry = {}
+        local subMenuTable = {
+            [1] = subMenuArmor,
+            [2] = subMenuWeapons,
+            [3] = subMenuJewelry,
+        }
+        for traitTypeId, traitTypeText in ipairs(traitTypes) do
+            if not traitTypesToExclude[traitTypeId] then
+                local traitHeadlineText = traitHeadLines[traitTypeId] or ""
+                if traitHeadlineText ~= nil and traitHeadlineText ~= "" then
+                    useSubMenuNr = useSubMenuNr + 1
+                end
+                --Add submenu entry
+                table.insert(subMenuTable[useSubMenuNr], {label = traitTypeText, callback = function() wlWindow:SearchNow(tostring(traitTypeId)) end})
+            end
+        end
+        --Insert the nirnhorned trait types to armor and weapon now (as their trade ids are in between at the jewelry id range...) into the submenu entries
+        -->One before the "Weapons" placeholder and one before the "Jewelry" placeholder
+        table.insert(subMenuArmor, {label = traitTypes[ITEM_TRAIT_TYPE_ARMOR_NIRNHONED], callback = function() wlWindow:SearchNow(tostring(ITEM_TRAIT_TYPE_ARMOR_NIRNHONED)) end})
+        table.insert(subMenuWeapons, {label = traitTypes[ITEM_TRAIT_TYPE_WEAPON_NIRNHONED], callback = function() wlWindow:SearchNow(tostring(ITEM_TRAIT_TYPE_WEAPON_NIRNHONED)) end})
+        --Add the submenus to the contextSubMenuEntries table
+        table.insert(contextSubMenuEntries, {subMenuName=traitHeadLines[ITEM_TRAIT_TYPE_WEAPON_POWERED],    subMenuEntries=subMenuArmor})
+        table.insert(contextSubMenuEntries, {subMenuName=traitHeadLines[ITEM_TRAIT_TYPE_ARMOR_STURDY],      subMenuEntries=subMenuWeapons})
+        table.insert(contextSubMenuEntries, {subMenuName=traitHeadLines[ITEM_TRAIT_TYPE_JEWELRY_HEALTHY],   subMenuEntries=subMenuJewelry})
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE then
+        local setTypes = libSets.GetAllSetTypes()
+        for setTypeId,allowed in ipairs(setTypes) do
+            if allowed == true then
+                local setTypeText = libSets.GetSetTypeName(setTypeId)
+                if not setTypeText or setTypeText == "" then
+                    setTypeText = libSets.GetSetTypeName(setTypeId, "en")
+                end
+                table.insert(contextMenuEntries, {label = setTypeText, callback = function() wlWindow:SearchNow(tostring(setTypeId)) end})
+            end
+        end
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSDLCID then
+        local dlcIDs = libSets.GetAllDLCIds()
+        for dlcID,allowed in ipairs(dlcIDs) do
+            if allowed == true then
+                local dlcIdText = libSets.GetDLCName(dlcID)
+                if not dlcIdText or dlcIdText == "" then
+                    dlcIdText = libSets.GetDLCName(dlcID, "en")
+                end
+                table.insert(contextMenuEntries, {label = dlcIdText, callback = function() wlWindow:SearchNow(tostring(dlcID)) end})
+            end
+        end
+        table.insert(contextMenuEntries, 1, {label = libSets.GetDLCName(DLC_BASE_GAME), callback = function() wlWindow:SearchNow(tostring(DLC_BASE_GAME)) end})
+
+    elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC then
+        local dropMechanics = libSets.GetAllDropMechanics()
+        for dropMechanic,allowed in ipairs(dropMechanics) do
+            if allowed == true then
+                local dropMechanicText = libSets.GetDropMechanicName(dropMechanic)
+                if not dropMechanicText or dropMechanicText == "" then
+                    dropMechanicText = libSets.GetDropMechanicName(dropMechanic, "en")
+                end
+                table.insert(contextMenuEntries, {label = dropMechanicText, callback = function() wlWindow:SearchNow(tostring(dropMechanic)) end})
+            end
+        end
+
+    end
+    --Show the context menu, including submenus
+    ClearMenu()
+    AddCustomMenuItem("|c6F6F6F".. searchTypeText .."|r", function() wlWindow:SearchNow("", true) end)
+    AddCustomMenuItem("-")
+    if contextSubMenuEntries and #contextSubMenuEntries > 0 then
+        for _, subMenuData in ipairs(contextSubMenuEntries) do
+            AddCustomSubMenuItem(subMenuData.subMenuName, subMenuData.subMenuEntries)
+        end
+    elseif contextMenuEntries and #contextMenuEntries > 0 then
+        for _, data in ipairs(contextMenuEntries) do
+            AddCustomMenuItem(data.label, data.callback)
+        end
+    end
+    ShowMenu(editboxControl)
+end
 
 ------------------------------------------------
 --- Wish List Row
@@ -1532,7 +1675,8 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                         exclude = {
                             [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
                             [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
-                            [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = true,
+                            [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = true,
+                            [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = true,
                             [WISHLIST_SEARCH_TYPE_BY_SLOT]                = true,
                             [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = true,
                             [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = true,
@@ -1553,7 +1697,8 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                        exclude = {
                            [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
                            [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
-                           [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = false,
                            [WISHLIST_SEARCH_TYPE_BY_SLOT]                = false,
                            [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = false,
                            [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = false,
@@ -1575,7 +1720,8 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                        exclude = {
                            [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
                            [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
-                           [WISHLIST_SEARCH_TYPE_BY_ARMORANDWEAPONTYPE]  = false,
+                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = false,
                            [WISHLIST_SEARCH_TYPE_BY_SLOT]                = false,
                            [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = false,
                            [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = false,

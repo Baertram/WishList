@@ -458,6 +458,7 @@ local function checkAndGetZoneName(p_zoneId, p_setId, p_dropLocationsText, p_dro
     end
     return p_dropLocationsText, p_dropLocationsZoneIds
 end
+
 local function checkAndGetWayshrineName(p_wayShrines)
     if p_wayShrines and type(p_wayShrines) == "table" then
         for _, wsIndex in ipairs(p_wayShrines) do
@@ -586,6 +587,7 @@ function WL.CreateEntryForSet( setId, setData )
         dlcName     = dlcName,
         setTypeName = setTypeName,
         armorTypes  = setsData.armorTypes,
+        dropMechanics = setsData.dropMechanics,
 	})
 end
 
@@ -1441,6 +1443,7 @@ function WL.init(_, addonName)
 
     --The client language
     WL.clientLang = GetCVar("language.2")
+    WL.clientLangIsEN = WL.clientLang == "en" or false
     WL.preventerVars.runSetNameLanguageChecks = true
 
     --Load the settings
