@@ -1440,7 +1440,7 @@ function WishListWindow:CheckForMatch( data, searchInput )
                 -- Lazy initialization of set bonus data
                 data.bonuses = WL.GetSetBonuses(data.itemLink, bonuses)
             end
-            return(self:SearchSetBonuses(bonuses, searchInput))
+            return(self:SearchSetBonuses(data.bonuses, searchInput))
             --Search by type
         else
             local searchTypesForCriteria = WL.searchTypesForCriteria

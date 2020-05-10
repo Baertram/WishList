@@ -659,6 +659,7 @@ function WL.CreateEntryForItem(item)
         dlcName     = dlcName,
         setTypeName = setTypeName,
         armorTypes  = setsData.armorTypes,
+        dropMechanics = setsData.dropMechanics,
     }
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
 	return wlEntryTable
@@ -736,6 +737,7 @@ function WL.CreateHistoryEntryForItem(item)
         dlcName     = dlcName,
         setTypeName = setTypeName,
         armorTypes  = setsData.armorTypes,
+        dropMechanics = setsData.dropMechanics,
     })
 end
 
