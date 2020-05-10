@@ -853,6 +853,7 @@ function WishListWindow:FilterScrollList()
                     data["dlcName"]         = mlData.dlcName
                     data["setTypeName"]     = mlData.setTypeName
                     data["armorTypes"]      = mlData.armorTypes
+                    data["dropMechanics"]   = mlData.dropMechanics
                end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
@@ -932,6 +933,7 @@ function WishListWindow:FilterScrollList()
                     data["dlcName"]         = mlData.dlcName
                     data["setTypeName"]     = mlData.setTypeName
                     data["armorTypes"]      = mlData.armorTypes
+                    data["dropMechanics"]   = mlData.dropMechanics
                 end
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
