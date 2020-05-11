@@ -47,7 +47,7 @@ end
 --German WishList translations (using already created base strings)
 local strings = {
     WISHLIST_SEARCHDROP_START = "Suche nach ",
-    WISHLIST_SEARCHDROP1       = GetString(WISHLIST_HEADER_NAME),
+    WISHLIST_SEARCHDROP1       = GetString(WISHLIST_HEADER_NAME) .. "/SetId",
     WISHLIST_SEARCHDROP2       = GetString(WISHLIST_CONST_SET) .. " " .. GetString(WISHLIST_CONST_BONUS),
     WISHLIST_SEARCHDROP3       = GetString(WISHLIST_CONST_ARMORTYPE),
     WISHLIST_SEARCHDROP4       = GetString(WISHLIST_CONST_WEAPONTYPE),
