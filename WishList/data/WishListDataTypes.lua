@@ -157,3 +157,13 @@ WL.quality = {
 	[WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	= GetString(WISHLIST_ITEM_QUALITY_MAGIC_TO_LEGENDARY), 		--Magic to legendary
 	[WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	= GetString(WISHLIST_ITEM_QUALITY_ARCANE_TO_LEGENDARY), 	--Arcane to legendary
 }
+
+WL.addDialogButtonTextures = {
+	[WISHLIST_ADD_TYPE_WHOLE_SET]                           = "esoui/art/charactercreate/rotate_right_up.dds",
+	[WISHLIST_ADD_TYPE_BY_ITEMTYPE]                         = "esoui/art/charactercreate/rotate_right_up.dds",
+	[WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE]   = "esoui/art/charactercreate/rotate_right_up.dds",
+	[WISHLIST_ADD_ONE_HANDED_WEAPONS] 						= "esoui/art/crafting/progression_tabicon_1handed_up.dds",
+	[WISHLIST_ADD_TWO_HANDED_WEAPONS] 						= "esoui/art/crafting/progression_tabicon_2handed_up.dds",
+	[WISHLIST_ADD_BODY_PARTS_ARMOR] 						= "esoui/art/crafting/smithing_tabicon_armorset_up.dds",
+	[WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR] 					= "esoui/art/crafting/inventory_tabicon_armor_up.dds",
+}

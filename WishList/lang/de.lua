@@ -16,6 +16,7 @@ local stringsBase = {
     WISHLIST_HEADER_USERNAME            = "Benutzer",
     WISHLIST_HEADER_LOCALITY            = "Fundort",
     WISHLIST_HEADER_QUALITY             = GetString(SI_TRADINGHOUSEFEATURECATEGORY5), --Quality
+    WISHLIST_HEADER_LAST_ADDED          = "Zuletzt hinzugefügt",
 
     WISHLIST_CONST_ID                   = "Id",
     WISHLIST_CONST_SET                  = "Set",

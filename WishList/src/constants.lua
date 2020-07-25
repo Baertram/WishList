@@ -5,16 +5,19 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.94
+WL.addonVars.addonRealVersion		= 2.96
 WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				= "WishList"
 WL.addonVars.addonSavedVars			= "WishList_Data"
+WL.addonVars.addonSavedVarsAllServers = "WishList_Data_All_Servers"
 WL.addonVars.settingsName   		= "WishList"
 WL.addonVars.settingsDisplayName   	= WL.addonVars.settingsName
 WL.addonVars.addonAuthor			= "Meai & Baertram"
 WL.addonVars.addonWebsite			= "http://www.esoui.com/downloads/info1641-WishList.html"
 WL.addonVars.addonDonation			= "https://www.esoui.com/portal.php?id=136&a=faq&faqid=131"
 WL.addonVars.addonFeedback			= "https://www.esoui.com/downloads/info1641-WishList.html#comments"
+
+WL.SVrelated_doReloadUINow = false
 
 --Libraries
 WL.addonMenu = LibAddonMenu2
@@ -121,12 +124,11 @@ WISHLIST_QUALITY_MAGIC = 4
 WISHLIST_QUALITY_ARCANE = 5
 WISHLIST_QUALITY_ARTIFACT = 6
 WISHLIST_QUALITY_LEGENDARY = 7
-WISHLIST_QUALITY_MYTHIC = 8
-WISHLIST_QUALITY_MAGIC_OR_ARCANE = 9
-WISHLIST_QUALITY_ARCANE_OR_ARTIFACT = 10
-WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY = 11
-WISHLIST_QUALITY_MAGIC_TO_LEGENDARY = 12
-WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 13
+WISHLIST_QUALITY_MAGIC_OR_ARCANE = 8
+WISHLIST_QUALITY_ARCANE_OR_ARTIFACT = 9
+WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY = 10
+WISHLIST_QUALITY_MAGIC_TO_LEGENDARY = 11
+WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 12
 --ZoneIds for LibSets data
 WISHLIST_ZONEID_BATTLEGROUNDS = 999999
 WISHLIST_ZONEID_SPECIAL       = 999998
@@ -166,3 +168,53 @@ for value=1, #sortTiebrakerChoices-1 do
     table.insert(sortTiebrakerChoicesValues, value)
 end
 WL.sortTiebrakerChoicesValues = sortTiebrakerChoicesValues
+
+------------------------------------------------------------------------------------------------------------------------
+-- SAVED VARIABLES
+------------------------------------------------------------------------------------------------------------------------
+--SavedVars accountwide defaults
+WL.defaultAccSettings = {
+    saveMode = 1,       --1=Each character, 2=Account wide
+    sets = {},
+    setCount = 0,
+    itemCount = 0,
+    use24hFormat = false,
+    useCustomDateFormat = "",
+    setsLastScanned = 0,
+    lastAddedViaDialog = {},
+}
+--SavedVars defaults
+WL.defaultSettings = {
+    wishList = {},
+    history = {},
+    sortKey = {
+        [WISHLIST_TAB_SEARCH]   = "name",
+        [WISHLIST_TAB_WISHLIST] = "name",
+    },
+    sortOrder = {
+        [WISHLIST_TAB_SEARCH]   = ZO_SORT_ORDER_UP,
+        [WISHLIST_TAB_WISHLIST] = ZO_SORT_ORDER_UP,
+    },
+    preSelectLoggedinCharAtItemAddDialog = true,
+    scanAllChars                         = false,
+    showMainMenuButton                   = false,
+    --useSortTiebrakerName                 = true,  --Removed and replaced by WL.defaultSettings.useSortTiebraker
+    useSortTiebraker                     = -1,       --No additional group sorting
+    fcoisMarkerIconAutoMarkLootedSetPart = false,
+    fcoisMarkerIconAutoMarkLootedSetPartPerChar = false,
+    fcoisMarkerIconLootedSetPart         = FCOIS_CON_ICON_LOCK or 1, -- Lock icon
+    fcoisMarkerIconLootedSetPartPerChar  = {},
+    useItemFoundCharacterName            = true,
+    useItemFoundCSA                      = true,
+    itemFoundText                        = GetString(WISHLIST_LOOT_MSG_STANDARD),
+    useLanguageForSetNames               = {
+        ["de"] = false,
+        ["en"] = true,
+        ["fr"] = false,
+        ["ru"] = false,
+        ["jp"] = false,
+    },
+    notifyOnFoundItemsOnlyMaxCP = false,
+    notifyOnFoundItemsOnlyInDungeons = false,
+    dialogAddHistory = {},
+}

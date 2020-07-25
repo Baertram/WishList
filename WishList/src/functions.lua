@@ -918,7 +918,6 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
         d(text)
         --Output the message text to center screen announcement
         if settings.useItemFoundCSA then
-            --CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_BROADCAST, CSA_EVENT_SMALL_TEXT, SOUNDS.CHAMPION_POINTS_COMMITTED, text)
             local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.CHAMPION_POINTS_COMMITTED)
             params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
             params:SetText(text)
@@ -1155,13 +1154,13 @@ function WL.buildItemlinkTooltipData(control)
     return virtualListRowControl
 end
 
-function WL.buildTooltip(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceTex2, zoStrFormatReplaceText3)
+function WL.buildTooltip(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceText2, zoStrFormatReplaceText3)
     local ttText = ""
     if zoStrFormatReplaceText1 ~= nil then
         if zoStrFormatReplaceText3 ~= nil then
-            ttText = zo_strformat(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceTex2, zoStrFormatReplaceText3)
-        elseif zoStrFormatReplaceTex2 ~= nil then
-            ttText = zo_strformat(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceTex2)
+            ttText = zo_strformat(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceText2, zoStrFormatReplaceText3)
+        elseif zoStrFormatReplaceText2 ~= nil then
+            ttText = zo_strformat(tooltipText, zoStrFormatReplaceText1, zoStrFormatReplaceText2)
         else
             ttText = zo_strformat(tooltipText, zoStrFormatReplaceText1)
         end

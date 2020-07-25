@@ -7,11 +7,11 @@
 ## Title: WishList
 ## Description: Add armor sets you wish to farm to a list, get notified when it drops and who looted it
 ## Author: Meai & Baertram
-## Version: 2.94
-## AddOnVersion: 294
-## APIVersion: 100030 100031
-## SavedVariables: WishList_Data
-## DependsOn: LibCustomMenu>=692 LibAddonMenu-2.0>=30 LibMainMenu-2.0>=432 LibSets>=000108
+## Version: 2.96
+## AddOnVersion: 296
+## APIVersion: 100031 100032
+## SavedVariables: WishList_Data WishList_Data_All_Servers
+## DependsOn: LibCustomMenu>=692 LibAddonMenu-2.0>=31 LibMainMenu-2.0>=432 LibSets>=000200
 ## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver
 
 ##Libraries

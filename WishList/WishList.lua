@@ -23,50 +23,6 @@ WL.fallbackSetLang = "en" -- the fallback language for the setNames if the clien
 WL.invSingleSlotUpdateData = {}
 WL.debug = false
 
---SavedVars accountwide defaults
-WL.defaultAccSettings = {
-    saveMode = 1,       --1=Each character, 2=Account wide
-    sets = {},
-    setCount = 0,
-    itemCount = 0,
-    use24hFormat = false,
-    useCustomDateFormat = "",
-    setsLastScanned = 0,
-}
---SavedVars defaults
-WL.defaultSettings = {
-    wishList = {},
-    history = {},
-    sortKey = {
-        [WISHLIST_TAB_SEARCH]   = "name",
-        [WISHLIST_TAB_WISHLIST] = "name",
-    },
-    sortOrder = {
-        [WISHLIST_TAB_SEARCH]   = ZO_SORT_ORDER_UP,
-        [WISHLIST_TAB_WISHLIST] = ZO_SORT_ORDER_UP,
-    },
-    preSelectLoggedinCharAtItemAddDialog = true,
-    scanAllChars                         = false,
-    showMainMenuButton                   = false,
-    --useSortTiebrakerName                 = true,  --Removed and replaced by WL.defaultSettings.useSortTiebraker
-    useSortTiebraker                     = -1,       --No additional group sorting
-    fcoisMarkerIconAutoMarkLootedSetPart = false,
-    fcoisMarkerIconAutoMarkLootedSetPartPerChar = false,
-    fcoisMarkerIconLootedSetPart         = FCOIS_CON_ICON_LOCK or 1, -- Lock icon
-    fcoisMarkerIconLootedSetPartPerChar  = {},
-    useItemFoundCharacterName            = true,
-    useItemFoundCSA                      = true,
-    itemFoundText                        = GetString(WISHLIST_LOOT_MSG_STANDARD),
-    useLanguageForSetNames               = {
-        ["de"] = false,
-        ["en"] = true,
-        ["fr"] = false,
-        ["ru"] = false,
-        ["jp"] = false,
-    },
-    notifyOnFoundItemsOnlyMaxCP = false,
-    notifyOnFoundItemsOnlyInDungeons = false,
-}
 --SavedVars
 WL.data = {}
 WL.accData = {}
@@ -801,36 +757,44 @@ function WL.AddSetItems(addType)
     --d("[WL.AddSetItems] addType: " .. tostring(addType))
     --Close the add item dialog at first!
     WishListAddItemDialogCancel:callback()
+
+    local charsComboBox = WishListAddItemDialogContentCharsCombo.m_comboBox
+    local itemTypeComboBox = WishListAddItemDialogContentItemTypeCombo.m_comboBox
+    local armorOrWeaponComboBox = WishListAddItemDialogContentArmorOrWeaponTypeCombo.m_comboBox
+    local slotComboBox = WishListAddItemDialogContentSlotCombo.m_comboBox
+    local traitComboBox = WishListAddItemDialogContentTraitCombo.m_comboBox
+    local qualityComboBox = WishListAddItemDialogContentQualityCombo.m_comboBox
+
     local addType2ChatMsg = {
-        [WISHLIST_ADD_TYPE_WHOLE_SET]                         = WL.buildTooltip(WISHLIST_DIALOG_ADD_WHOLE_SET_TT),
-        [WISHLIST_ADD_TYPE_BY_ITEMTYPE]                       = WL.buildTooltip(WISHLIST_DIALOG_ADD_ALL_TYPE_OF_SET_TT, WishListAddItemDialogContentItemTypeCombo.m_comboBox.m_selectedItemText:GetText()),
-        [WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE] = WL.buildTooltip(WISHLIST_DIALOG_ADD_ALL_TYPE_TYPE_OF_SET_TT, WishListAddItemDialogContentItemTypeCombo.m_comboBox.m_selectedItemText:GetText(), WishListAddItemDialogContentArmorOrWeaponTypeCombo.m_comboBox.m_selectedItemText:GetText()),
-        [WISHLIST_ADD_BODY_PARTS_ARMOR]                       = WL.buildTooltip(WISHLIST_DIALOG_ADD_BODY_PARTS_ARMOR_OF_SET_TT),
-        [WISHLIST_ADD_ONE_HANDED_WEAPONS]                     = WL.buildTooltip(WISHLIST_DIALOG_ADD_ONE_HANDED_WEAPONS_OF_SET_TT),
-        [WISHLIST_ADD_TWO_HANDED_WEAPONS]                     = WL.buildTooltip(WISHLIST_DIALOG_ADD_TWO_HANDED_WEAPONS_OF_SET_TT),
-        [WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR]                = WL.buildTooltip(WISHLIST_DIALOG_ADD_MONSTER_SET_PARTS_ARMOR_OF_SET_TT),
+        [WISHLIST_ADD_TYPE_WHOLE_SET]                         = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_WHOLE_SET_TT)),
+        [WISHLIST_ADD_TYPE_BY_ITEMTYPE]                       = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_ALL_TYPE_OF_SET_TT), itemTypeComboBox.m_selectedItemText:GetText()),
+        [WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE] = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_ALL_TYPE_TYPE_OF_SET_TT), itemTypeComboBox.m_selectedItemText:GetText(), armorOrWeaponComboBox.m_selectedItemText:GetText()),
+        [WISHLIST_ADD_BODY_PARTS_ARMOR]                       = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_BODY_PARTS_ARMOR_OF_SET_TT)),
+        [WISHLIST_ADD_ONE_HANDED_WEAPONS]                     = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_ONE_HANDED_WEAPONS_OF_SET_TT)),
+        [WISHLIST_ADD_TWO_HANDED_WEAPONS]                     = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_TWO_HANDED_WEAPONS_OF_SET_TT)),
+        [WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR]                = WL.buildTooltip(GetString(WISHLIST_DIALOG_ADD_MONSTER_SET_PARTS_ARMOR_OF_SET_TT)),
     }
     local chatMsg = addType2ChatMsg[addType] or ""
     if chatMsg == nil or chatMsg == "" then return false end
     d(chatMsg)
 
     --Get the character data where the set parts should be added to the wishlist
-    local selectedCharData = WishListAddItemDialogContentCharsCombo.m_comboBox.m_selectedItemData
+    local selectedCharData = charsComboBox.m_selectedItemData
     if selectedCharData == nil or selectedCharData.id == nil then return false end
     --Get the selected itemType
-    local selectedItemTypeData = WishListAddItemDialogContentItemTypeCombo.m_comboBox.m_selectedItemData
+    local selectedItemTypeData = itemTypeComboBox.m_selectedItemData
     if selectedItemTypeData == nil or selectedItemTypeData.id == nil then return false end
     --Get the selected weapon or armor type
-    local selectedItemArmorOrWeaponTypeData = WishListAddItemDialogContentArmorOrWeaponTypeCombo.m_comboBox.m_selectedItemData
+    local selectedItemArmorOrWeaponTypeData = armorOrWeaponComboBox.m_selectedItemData
     if selectedItemArmorOrWeaponTypeData == nil or selectedItemArmorOrWeaponTypeData.id == nil then return false end
     --Get the selected slot type
-    local selectedSlotData = WishListAddItemDialogContentSlotCombo.m_comboBox.m_selectedItemData
+    local selectedSlotData = slotComboBox.m_selectedItemData
     if selectedSlotData == nil or selectedSlotData.id == nil then return false end
     --get the selected item trait
-    local selectedItemTraitData = WishListAddItemDialogContentTraitCombo.m_comboBox.m_selectedItemData
+    local selectedItemTraitData = traitComboBox.m_selectedItemData
     if selectedItemTraitData == nil or selectedItemTraitData.id == nil then return false end
     --get the selected quality
-    local selectedItemQualityData = WishListAddItemDialogContentQualityCombo.m_comboBox.m_selectedItemData
+    local selectedItemQualityData = qualityComboBox.m_selectedItemData
     if selectedItemQualityData == nil or selectedItemQualityData.id == nil then return false end
 
 --d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id) .. ", selectedItemQuality: " ..tostring(selectedItemQualityData.id))
@@ -840,6 +804,8 @@ function WL.AddSetItems(addType)
     items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --Add the items now, if some were found
     if #items > 0 then
+        --Add the currently selected values to the "Last added" history data of the SavedVariables
+        WL.addLastAddedHistoryFromAddItemDialog(WL.currentSetId, itemTypeComboBox, armorOrWeaponComboBox, traitComboBox, slotComboBox, charsComboBox, qualityComboBox, addType)
         --Add the found set items to the WishList of the selected user now
         WishList:AddItem(items, selectedCharData)
     else
@@ -1303,6 +1269,22 @@ function WishList:ReloadItems()
     WL.window:RefreshData()
 end
 
+--Add one  last added setItems history (added via the "Add item dialog")
+function WishList:AddLastAddedHistory(newAddedData)
+    if not newAddedData then return end
+    newAddedData.dateTime = newAddedData.dateTime or GetTimeStamp()
+    local lastAddedHistoryData = WL.accData.lastAddedViaDialog
+    if not lastAddedHistoryData then return end
+   lastAddedHistoryData[newAddedData.dateTime] = newAddedData
+end
+
+--Get the last added setItems history (added via the "Add item dialog")
+function WishList:GetLastAddedHistory()
+    local lastAddedHistoryData = WL.accData.lastAddedViaDialog
+    if not lastAddedHistoryData then return end
+    return lastAddedHistoryData
+end
+
 ------------------------------------------------
 --- Settings / SavedVariables
 ------------------------------------------------
@@ -1319,29 +1301,108 @@ local function afterSettings()
         end
         WL.data.useSortTiebrakerName = nil
     end
+
+    --WishList version 2.96: Added "Add dialog" history of last added data
+    --Build characterId entries in the accountWide SavedVariables
+    --settings.dialogAddHistory
+end
+
+--Migrate the SavedVariables from server non-dependent to server dependent ones
+local function migrateSavedVarsToServerDependent()
+    local worldName = GetWorldName()
+    d("[WishList]SavedVariables -> Migrating to server dependent now")
+    local accountName = GetDisplayName()
+    if not accountName then return end
+    local accountWideSaved = "$AccountWide"
+    --[[
+         ["Default"] =
+        {
+            ["@Baertram"] =
+            {
+                ["$AccountWide"] =
+                {
+                },
+                ["8798292065306120"] =
+                {
+                },
+                ...
+            },
+        }
+    ]]
+    --We got all character data in this table (but it was saved account wide!)
+    local svDataOFAllAccounts = WishList_Data["Default"]
+    if svDataOFAllAccounts ~= nil then
+        d(">Found SV of account \'" .. tostring(accountName) .. "\' &  it's WishList enabled characters")
+        local copyOfNonServerDependentSV = ZO_ShallowTableCopy(svDataOFAllAccounts)
+        if copyOfNonServerDependentSV ~= nil then
+            --d(">>Created copy of all accounts and characters, and moved them to the server dependent SV.")
+            --Create ServerDependent SavedVariable subtables at top (= "profile" parameter of ZO_SavedVars:New(..., profile, ...))
+            WishList_Data[worldName] = copyOfNonServerDependentSV
+            return true
+        end
+    else
+        d("<Aborting: Server dependent SavedVariables do already exist for account: " ..tostring(accountName))
+    end
+    return false
 end
 
 function WL.loadSettings()
+    WL.SVrelated_doReloadUINow = false
     local addonVars = WL.addonVars
     local lang = GetCVar("language.2")
     if lang == "de" then
         WL.defaultAccSettings.use24hFormat = true
     end
-    --Load the acocunt wide settings (Sets, save mode of SavedVars, etc.)
+
+    local worldName = nil
+    --Get non-server dependent general settings
+    local accDataServerIndependent = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVarsAllServers, 999, "AccountwideDataServerIndependent", {}, nil, nil)
+    if accDataServerIndependent.savedVarsWereMigratedToServerDependent then
+        --SV were migrated to the table containing the worldname e.g. "EU Megaserver"
+        worldName = GetWorldName()
+        if WishList_Data[worldName] ~= nil then
+            --Invalidate the old non-server dependent SavedVariables
+            if WishList_Data["Default"] ~= nil then
+                d("[WishList]OLD Non-server dependent WishList SavedVariables still exist -> Removing them now")
+                WishList_Data["Default"] = nil
+                WL.SVrelated_doReloadUINow = true
+            end
+        end
+    end
+
+    --Load the account wide settings (Sets, save mode of SavedVars, etc.)
+    --worldName will be nil before migration so the data wil be read from the old $AccountWide table.
+    --After migration the $AccountWide table (without server!) contains the boolean entry "savedVarsWereMigratedToServerDependent=true", and thus the variable
+    --worldName will be e.g. "EU Megaserver"
     --ZO_SavedVars:NewAccountWide(savedVariableTable, version, namespace, defaults, profile, displayName)
-    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings, nil, nil)
+    WL.accData = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, 999, "AccountwideData", WL.defaultAccSettings, worldName, nil)
+
     --Check, by help of basic version 999 settings, if the settings should be loaded for each character or account wide
     --Use the current addon version to read the settings now
     if (WL.accData.saveMode == 1) then
         --Load the character user settings
-        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil)
+        WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, worldName)
         --------------------------------------------------------------------------------------------------------------------
     else
         --Load the account wide user settings
-        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, nil, nil)
+        WL.data = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, "Data", WL.defaultSettings, worldName, nil)
     end
 
+    --Apply some fixes/add subtables and data, after the settings were loaded
     afterSettings()
+
+    --Migrate the SavedVariables to ServerDependent ones
+    if not accDataServerIndependent.savedVarsWereMigratedToServerDependent then
+        if migrateSavedVarsToServerDependent() == true then
+            accDataServerIndependent.savedVarsWereMigratedToServerDependent = true
+            accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp = os.date("%c")
+            d("[WishList]SavedVariables were successfully migrated to server dependent ones at: " ..tostring(accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp) .. "!")
+            WL.SVrelated_doReloadUINow = true
+        else
+            d("[WishList]SavedVariables were NOT migrated. Still using non-server dependent ones!")
+        end
+    end
+    WL.accDataServerIndependent = accDataServerIndependent
 end
 
 ------------------------------------------------
@@ -1495,6 +1556,32 @@ function WL.init(_, addonName)
     EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, WL.Inv_Single_Slot_Update)
     --Add a filter to the event to speed up item checks only on default items not a weapon charge etc.
     EVENT_MANAGER:AddFilterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, true)
+
+    EVENT_MANAGER:RegisterForEvent(addonVars.addonName.. "_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, function()
+        if WL.SVrelated_doReloadUINow == true then
+            zo_callLater(function()
+                d("[WishList]Reloading the UI due to SavedVariables migration!")
+                if WishList_Data["Default"] == nil then
+                    WL.accDataServerIndependent.savedVarsWereMigratedFinished = true
+                end
+                ReloadUI("ingame") end,
+            50)
+        else
+            --Check if WishList SVs were migrated and finished the reloaduis
+            if WishList_Data["Default"] == nil and WL.accDataServerIndependent then
+                if WL.accDataServerIndependent.savedVarsWereMigratedToServerDependent == true and WL.accDataServerIndependent.savedVarsWereMigratedFinished == true then
+                    WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
+                    --Show an onscreen message + chat message
+                    d("[WishList]Migration of SavedVariables of account \'" ..tostring(GetDisplayName()) .."\' to server \'" ..tostring(GetWorldName()) .. "\' finished!")
+                    --TODO: OnScreen message
+                    local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.CHAMPION_POINTS_COMMITTED)
+                    params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+                    params:SetText("[|c00FF00WishList|r]SavedVariables migrated to server!")
+                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+                end
+            end
+        end
+    end)
 
     --HANDLERs
     --Link handler (for right clicking an item in chat, etc.)

@@ -1,81 +1,93 @@
-<GuiXml>
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <!--<String name="TEXTURE_JEWELRY_NECK" value="LibIcons/Assets/Jewelry/jewelry_up.dds"/>-->
+
     <Controls>
-        <TopLevelControl name="WishListAddItemDialog" inherits="ZO_CustomDialogBase">
-            <Dimensions x="260" y="125" />
+        <TopLevelControl name="WishListAddItemDialog" inherits="ZO_CustomDialogBase" resizeToFitDescendents="true">
+            <Dimensions x="260" y="300" />
             <Anchor point="CENTER" offsetY="-45" />
             <Controls>
-                <Control name="$(parent)Content" inherits="ZO_DialogContentAnchors">
+                <Control name="$(parent)Content" inherits="ZO_DialogContentAnchors" >
                     <Controls>
+                        <Label name="$(parent)LastAddedHistoryLabel" font="ZoFontGame"
+                               color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HINT"
+                               horizontalAlignment="LEFT" text="xxx">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetY="-10" />
+                        </Label>
+                        <Control name="$(parent)LastAddedHistoryCombo" inherits="ZO_ComboBox" >
+                            <Dimensions x="180" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetY="-10" />
+                        </Control>
+
                         <Label name="$(parent)Text" font="ZoFontGame"
-                               color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                               color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
                                horizontalAlignment="CENTER" text="xxx">
-                            <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER"/>
+                            <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="CENTER" offsetY="40" />
                         </Label>
 
                         <Label name="$(parent)ItemTypeText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="30"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="55"/>
                         </Label>
                         <Control name="$(parent)ItemTypeCombo" inherits="ZO_ComboBox" >
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="30" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="55" />
                         </Control>
 
                         <Label name="$(parent)ArmorOrWeaponTypeText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="70"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="95"/>
                         </Label>
                         <Control name="$(parent)ArmorOrWeaponTypeCombo" inherits="ZO_ComboBox">
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="70" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="95" />
                         </Control>
 
                         <Label name="$(parent)SlotText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="110"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="135"/>
                         </Label>
                         <Control name="$(parent)SlotCombo" inherits="ZO_ComboBox">
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="110" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="135" />
                         </Control>
 
                         <Label name="$(parent)TraitText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="150"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="175"/>
                         </Label>
                         <Control name="$(parent)TraitCombo" inherits="ZO_ComboBox">
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="150" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="175" />
                         </Control>
 
                         <Label name="$(parent)QualityText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="190"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="215"/>
                         </Label>
                         <Control name="$(parent)QualityCombo" inherits="ZO_ComboBox">
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="190" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="215" />
                         </Control>
 
                         <Label name="$(parent)CharsText" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
                                horizontalAlignment="LEFT" text="xxx">
-                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="250"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="0" offsetY="255"/>
                         </Label>
                         <Control name="$(parent)CharsCombo" inherits="ZO_ComboBox">
                             <Dimensions x="180" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="250" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="255" />
                         </Control>
                     </Controls>
                 </Control>
                 <Button name="$(parent)ButtonAddWholeSet" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="30" y="20" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX="7" offsetY="64" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX="7" offsetY="104" />
                     <Textures normal    = "esoui/art/charactercreate/rotate_right_up.dds"
                               pressed   = "esoui/art/charactercreate/rotate_right_down.dds"
                               mouseOver = "esoui/art/charactercreate/rotate_right_over.dds"
