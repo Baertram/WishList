@@ -218,3 +218,6 @@ WL.defaultSettings = {
     notifyOnFoundItemsOnlyInDungeons = false,
     dialogAddHistory = {},
 }
+
+--For the add item dialog
+WL.lastSelectedLastAddedHistoryEntry = nil

@@ -92,7 +92,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
             --Last added historycallback
             local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
-                d("[WL]lastAddedHistoryCallback-"..entryText)
+                --d("[WL]lastAddedHistoryCallback-"..entryText)
                 --Get the lastAddedData via the id
                 if entry.id == nil then return end
                 local lastAddedViaDialogData = WL.accData.lastAddedViaDialog
@@ -113,6 +113,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         names       = libSets.GetSetNames(entryData.setId),
                     }
                     delayBeforeChange = 10
+                    WL.lastSelectedLastAddedHistoryEntry = entry
                     WL.showAddItem(setData, true)
                 end
                 --Call delayed if poup dialog was closed and re-opened
@@ -213,7 +214,12 @@ function WL.WishListWindowAddItemInitialize(control)
                         comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
                     end
                 end
-                comboLastAddedHistory:SelectItemByIndex(1, true)
+                if not WL.lastSelectedLastAddedHistoryEntry then
+                    comboLastAddedHistory:SelectItemByIndex(1, true)
+                else
+                    comboLastAddedHistory:SelectItem(WL.lastSelectedLastAddedHistoryEntry, true)
+                    WL.lastSelectedLastAddedHistoryEntry = nil
+                end
             end
             createdLastAddedHistoryComboBoxEntries()
 
@@ -224,7 +230,6 @@ function WL.WishListWindowAddItemInitialize(control)
                     if comboLastAddedHistory.m_selectedItemData ~= nil then
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
                             local entry = comboLastAddedHistory.m_selectedItemData
-                            d("Removing item: " ..tostring(entry.name))
                             if WL.accData.lastAddedViaDialog and WL.accData.lastAddedViaDialog[entry.id] then
                                 WL.accData.lastAddedViaDialog[entry.id] = nil
                                 --As there is no proper "remove item" function we totally need to rebuild the combobox entries...
@@ -234,7 +239,8 @@ function WL.WishListWindowAddItemInitialize(control)
                         AddCustomMenuItem("-", function() end)
                     end
                     AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
-                        --Combobox leeren
+                        --TODO Dialog to ask if all should be cleared!
+                        --Clear combobox
                         comboLastAddedHistory:ClearItems()
                         --SavedVariables nun noch leeren
                         WL.accData.lastAddedViaDialog = nil
@@ -1146,7 +1152,7 @@ function WL.addLastAddedHistoryFromAddItemDialog(setId, comboItemType, comboArmo
     newAddedData.charId = charId
 
     local entryText = string.format(entryTextTemplate, tostring(os.date("%c", newAddedData.dateTime)), tostring(setId),tostring(itemTypeId),tostring(typeId),tostring(slotId),tostring(traitId),tostring(qualityId),tostring(charId),tostring(specialAddedType))
-d("[WL.addLastAddedHistoryFromAddItemDialog] " .. entryText)
+--d("[WL.addLastAddedHistoryFromAddItemDialog] " .. entryText)
     WL:AddLastAddedHistory(newAddedData)
 end
 
