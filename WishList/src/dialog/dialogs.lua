@@ -238,7 +238,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         end)
                         AddCustomMenuItem("-", function() end)
                     end
-                    if comboLastAddedHistory.m_sortedItems and #comboLastAddedHistory.m_sortedItems > 0 then
+                    if comboLastAddedHistory.m_sortedItems and #comboLastAddedHistory.m_sortedItems > 1 then
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
                             --Show ask before clear dialog
                             --But close the current dialog before as no dialog can be shown "above the other opened dialog" :-(
