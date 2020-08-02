@@ -219,7 +219,13 @@ local strings = {
 
     WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sortier Gruppe geändert zu: %s",
 
-    WISHLIST_SV_MIGRATED_TO_SERVER = "[|c00FF00WishList|r]SavedVariables wurden zum Server migriert!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_START       = "[WishList]SavedVariables -> Migriere nun zu Server abhängigen Daten.",
+    WISHLIST_SV_MIGRATION_STILL_OLD_DATA_FOUND  = "[WishList]ALTE nicht-Server abhängige WishList SavedVariables existieren noch -> Entferne diese nun",
+    WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL = "[WishList]SavedVariables wurden erfolgreich zu Server abhängigen migriert, am: %s!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_FAILED      = "[WishList]SavedVariables wurden NICHT migriert. Du nutzt immer noch die nicht-Server abhängigen!",
+    WISHLIST_SV_MIGRATION_RELOADUI              = "[WishList]Benutzeroberfläche wird nun neu geladen. Grund: WishList SavedVariables Migration!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED    = "[WishList]Migration der SavedVariables vom Account \'%s\' zum Server \'%s\' abgeschlossen!",
+    WISHLIST_SV_MIGRATED_TO_SERVER              = "[|c00FF00WishList|r]SavedVariables wurden zum Server migriert!",
 }
 
 --Add missing translations from language "en" strings table as "fallback" (metatable)

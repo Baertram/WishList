@@ -226,7 +226,13 @@ local strings = {
 
     WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sort grouping changed to: %s",
 
-    WISHLIST_SV_MIGRATED_TO_SERVER = "[|c00FF00WishList|r]SavedVariables migrated to server!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_START       = "[WishList]SavedVariables -> Migrating to server dependent now",
+    WISHLIST_SV_MIGRATION_STILL_OLD_DATA_FOUND  = "[WishList]OLD non-server dependent WishList SavedVariables still exist -> Removing them now",
+    WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL = "[WishList]SavedVariables were successfully migrated to server dependent ones at: %s!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_FAILED      = "[WishList]SavedVariables were NOT migrated. Still using non-server dependent ones!",
+    WISHLIST_SV_MIGRATION_RELOADUI              = "[WishList]Reloading the UI due to SavedVariables migration!",
+    WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED    = "[WishList]Migration of SavedVariables of account \'%s\' to server \'%s\' finished!",
+    WISHLIST_SV_MIGRATED_TO_SERVER              = "[|c00FF00WishList|r]SavedVariables migrated to server!",
 }
 WL.stringsEN = strings
 

@@ -1325,7 +1325,7 @@ end
 --Migrate the SavedVariables from server non-dependent to server dependent ones
 local function migrateSavedVarsToServerDependent()
     local worldName = GetWorldName()
-    d("[WishList]SavedVariables -> Migrating to server dependent now")
+    d(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_START))
     local accountName = GetDisplayName()
     if not accountName then return end
     local accountWideSaved = "$AccountWide"
@@ -1347,7 +1347,6 @@ local function migrateSavedVarsToServerDependent()
     --We got all character data in this table (but it was saved account wide!)
     local svDataOFAllAccounts = WishList_Data["Default"]
     if svDataOFAllAccounts ~= nil then
-        d(">Found SV of account \'" .. tostring(accountName) .. "\' &  it's WishList enabled characters")
         local copyOfNonServerDependentSV = ZO_ShallowTableCopy(svDataOFAllAccounts)
         if copyOfNonServerDependentSV ~= nil then
             --d(">>Created copy of all accounts and characters, and moved them to the server dependent SV.")
@@ -1355,8 +1354,6 @@ local function migrateSavedVarsToServerDependent()
             WishList_Data[worldName] = copyOfNonServerDependentSV
             return true
         end
-    else
-        d("<Aborting: Server dependent SavedVariables do already exist for account: " ..tostring(accountName))
     end
     return false
 end
@@ -1378,7 +1375,7 @@ function WL.loadSettings()
         if WishList_Data[worldName] ~= nil then
             --Invalidate the old non-server dependent SavedVariables
             if WishList_Data["Default"] ~= nil then
-                d("[WishList]OLD non-server dependent WishList SavedVariables still exist -> Removing them now")
+                d(GetString(WISHLIST_SV_MIGRATION_STILL_OLD_DATA_FOUND))
                 WishList_Data["Default"] = nil
                 WL.SVrelated_doReloadUINow = true
             end
@@ -1411,10 +1408,10 @@ function WL.loadSettings()
         if migrateSavedVarsToServerDependent() == true then
             accDataServerIndependent.savedVarsWereMigratedToServerDependent = true
             accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp = os.date("%c")
-            d("[WishList]SavedVariables were successfully migrated to server dependent ones at: " ..tostring(accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp) .. "!")
+            d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL), tostring(os.date("%c", accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp))))
             WL.SVrelated_doReloadUINow = true
         else
-            d("[WishList]SavedVariables were NOT migrated. Still using non-server dependent ones!")
+            d(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FAILED))
         end
     end
     WL.accDataServerIndependent = accDataServerIndependent
@@ -1575,7 +1572,7 @@ function WL.init(_, addonName)
     EVENT_MANAGER:RegisterForEvent(addonVars.addonName.. "_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, function()
         if WL.SVrelated_doReloadUINow == true then
             zo_callLater(function()
-                d("[WishList]Reloading the UI due to SavedVariables migration!")
+                d(GetString(WISHLIST_SV_MIGRATION_RELOADUI))
                 if WishList_Data["Default"] == nil then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = true
                 end
@@ -1588,7 +1585,7 @@ function WL.init(_, addonName)
                 if accDataServerIndependent.savedVarsWereMigratedToServerDependent == true and accDataServerIndependent.savedVarsWereMigratedFinished == true then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
                     --Show an onscreen message + chat message
-                    d("[WishList]Migration of SavedVariables of account \'" ..tostring(GetDisplayName()) .."\' to server \'" ..tostring(GetWorldName()) .. "\' finished!")
+                    d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED), tostring(GetDisplayName()), tostring(GetWorldName())))
                      WL.CSA(GetString(WISHLIST_SV_MIGRATED_TO_SERVER))
                 end
             end
