@@ -196,7 +196,7 @@ local strings = {
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_TT = "Markiert einen gelooteten Set Gegenstand von deiner Wunschliste mit diesem FCO ItemSaver Markierungssymbol",
     WISHLIST_LAM_FCOIS_MARKER_ICONS_PER_CHAR         = "FCOItemSaver - Markierungssymbol je Charakter Wunschliste",
     WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR       = "Mark. gelooteten Gegenstand indiv. je Charakter",
-    WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR_TT    = "Markiert einen gelooteten Set Gegenstand von der Wunschliste esines deiner Charaktere mit einem FCO ItemSaver Markierungssymbol.\nJeder Charakter kann für seine Wunschliste ein eigenes Symbol nutzen.",
+    WISHLIST_LAM_FCOIS_MARK_ITEM_AUTO_PER_CHAR_TT    = "Markiert einen gelooteten Set Gegenstand von der Wunschliste eines deiner Charaktere mit einem FCO ItemSaver Markierungssymbol.\nJeder Charakter kann für seine Wunschliste ein eigenes Symbol nutzen.",
     WISHLIST_LAM_FCOIS_MARK_ITEM_CHARAKTER_NAME      = "Charakter Name",
     WISHLIST_LAM_FCOIS_MARK_ITEM_ICON                = "Markierungssymbol",
 
