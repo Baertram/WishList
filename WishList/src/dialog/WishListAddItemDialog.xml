@@ -89,12 +89,12 @@
                     </Controls>
                 </Control>
                 <Button name="$(parent)ButtonAddWholeSet" inherits="ZO_ButtonBehaviorClickSound">
-                    <Dimensions x="30" y="20" />
+                    <Dimensions x="24" y="24" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX="7" offsetY="104" />
                     <Textures normal    = "esoui/art/chatwindow/chat_addtab_up.dds"
-                              pressed   = "esoui/art/chatwindow/chat_addtab_up.dds"
-                              mouseOver = "esoui/art/chatwindow/chat_addtab_up.dds"
-                              disabled  = "esoui/art/chatwindow/chat_addtab_up.dds" />
+                              pressed   = "esoui/art/chatwindow/chat_addtab_down.dds"
+                              mouseOver = "esoui/art/chatwindow/chat_addtab_over.dds"
+                              disabled  = "esoui/art/chatwindow/chat_addtab_disabled.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_TYPE_WHOLE_SET)
                     </OnClicked>
@@ -107,11 +107,11 @@
                 </Button>
                 <Button name="$(parent)ButtonAddWholeItemTypeOfSet" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="26" y="20" />
-                    <Anchor point="LEFT" relativeTo="$(parent)ArmorOrWeaponTypeText" relativePoint="LEFT" offsetX="7" offsetY="-80" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ArmorOrWeaponTypeText" relativePoint="LEFT" offsetX="7" offsetY="-76" />
                     <Textures normal    = "esoui/art/charactercreate/rotate_right_up.dds"
-                              pressed   = "esoui/art/charactercreate/rotate_right_up.dds"
-                              mouseOver = "esoui/art/charactercreate/rotate_right_up.dds"
-                              disabled  = "esoui/art/charactercreate/rotate_right_up.dds" />
+                              pressed   = "esoui/art/charactercreate/rotate_right_down.dds"
+                              mouseOver = "esoui/art/charactercreate/rotate_right_over.dds"
+                              disabled  = "esoui/art/charactercreate/rotate_right_disabled.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_TYPE_BY_ITEMTYPE)
                     </OnClicked>
@@ -130,7 +130,7 @@
                               mouseOver = "esoui/art/characterwindow/gearslot_quickslot.dds"
                               disabled  = "esoui/art/characterwindow/gearslot_quickslot.dds" />
                     <OnClicked>
-                        WishList.AddSetItems(WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_WEAPON_ARMOR_TYPE)
+                        WishList.AddSetItems(WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE)
                     </OnClicked>
                     <OnMouseEnter>
                         WishList.ShowTooltip(self, RIGHT, GetString(WISHLIST_DIALOG_ADD_ALL_TYPE_TYPE_OF_SET_TT), WishListAddItemDialogContentItemTypeCombo.m_comboBox.m_selectedItemText:GetText(), WishListAddItemDialogContentArmorOrWeaponTypeCombo.m_comboBox.m_selectedItemText:GetText())
