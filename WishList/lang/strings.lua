@@ -225,6 +225,8 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS_TT     = "Only notify if you are currently inside a dungeon.",
 
     WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sort grouping changed to: %s",
+
+    WISHLIST_SV_MIGRATED_TO_SERVER = "[|c00FF00WishList|r]SavedVariables migrated to server!",
 }
 WL.stringsEN = strings
 

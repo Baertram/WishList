@@ -1589,7 +1589,7 @@ function WL.init(_, addonName)
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
                     --Show an onscreen message + chat message
                     d("[WishList]Migration of SavedVariables of account \'" ..tostring(GetDisplayName()) .."\' to server \'" ..tostring(GetWorldName()) .. "\' finished!")
-                     WL.CSA("[|c00FF00WishList|r]SavedVariables migrated to server!")
+                     WL.CSA(GetString(WISHLIST_SV_MIGRATED_TO_SERVER))
                 end
             end
         end

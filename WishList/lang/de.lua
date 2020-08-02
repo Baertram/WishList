@@ -218,6 +218,8 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_ONLY_IN_DUNGEONS_TT     = "Nur benachrichtigen, wenn du dich aktuell in einem Verlies befindest.",
 
     WISHLIST_SORTHEADER_GROUP_CHANGED               = "[" .. GetString(WISHLIST_TITLE) .. "]Sortier Gruppe geändert zu: %s",
+
+    WISHLIST_SV_MIGRATED_TO_SERVER = "[|c00FF00WishList|r]SavedVariables wurden zum Server migriert!",
 }
 
 --Add missing translations from language "en" strings table as "fallback" (metatable)
