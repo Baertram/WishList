@@ -111,14 +111,14 @@ function WL.WishListWindowAddItemInitialize(control)
                         setId       = entryData.setId,
                         names       = libSets.GetSetNames(entryData.setId),
                     }
-                    delayBeforeChange = 150
+                    delayBeforeChange = 100
                     WL.showAddItem(setData, true)
                 end
                 --Call delayed if poup dialog was closed and re-opened
                 zo_callLater(function()
                     --Set the comboboxes to the rows of the last added entry data
                     --Quality
-                    comboQuality:SelectItemByIndex(entryData.quality, true)
+                    comboQuality:SelectItemByIndex(entryData.quality, false)
                     --ItemType
                     local itemTypeIdx
                     for idx, itemTypeData in ipairs(comboItemType.m_sortedItems) do
@@ -128,7 +128,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                     if itemTypeIdx and itemTypeIdx ~= nil and itemTypeIdx > 0 then
-                        comboItemType:SelectItemByIndex(itemTypeIdx, true)
+                        comboItemType:SelectItemByIndex(itemTypeIdx, false)
                     end
                     --ArmorOrWeaponTyp
                     local armorOrWeaponTypeIdx
@@ -139,7 +139,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                     if armorOrWeaponTypeIdx and armorOrWeaponTypeIdx ~= nil and armorOrWeaponTypeIdx > 0 then
-                        comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, true)
+                        comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, false)
                     end
                     --SlotType
                     local slotTypeIdx
@@ -150,7 +150,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                     if slotTypeIdx and slotTypeIdx ~= nil and slotTypeIdx > 0 then
-                        comboSlot:SelectItemByIndex(itemTypeIdx, true)
+                        comboSlot:SelectItemByIndex(itemTypeIdx, false)
                     end
                     --Trait
                     local traitTypeIdx
@@ -161,7 +161,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                     if traitTypeIdx and traitTypeIdx ~= nil and traitTypeIdx > 0 then
-                        comboTrait:SelectItemByIndex(traitTypeIdx, true)
+                        comboTrait:SelectItemByIndex(traitTypeIdx, false)
                     end
                     --Character
                     local charIdx
@@ -172,8 +172,10 @@ function WL.WishListWindowAddItemInitialize(control)
                         end
                     end
                     if charIdx and charIdx ~= nil and charIdx > 0 then
-                        comboChars:SelectItemByIndex(charIdx, true)
+                        comboChars:SelectItemByIndex(charIdx, false)
                     end
+                    --Show the tooltip now
+                    WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
                 end, delayBeforeChange)
 
             end
