@@ -112,43 +112,6 @@ WL.TraitTypes = {
 }
 table.insert(WL.TraitTypes, GetString(WISHLIST_DIALOG_ADD_ANY_TRAIT)) --Any/All traits of current chosen item
 
-WL.SlotTypes = {
-	[0] = GetString(SI_COLLECTIBLECATEGORYTYPE0), --Invalid
-	[1] = GetString(SI_EQUIPTYPE1), --Head
-	[2] = GetString(SI_EQUIPTYPE2), --Neck
-	[3] = GetString(SI_EQUIPTYPE3), --Chest
-	[4] = GetString(SI_EQUIPTYPE4), --Shoulders
-	[5] = GetString(SI_EQUIPTYPE5), --One hand
-	[6] = GetString(SI_EQUIPTYPE6), --Two Hand
-	[7] = GetString(SI_EQUIPTYPE7), --Off Hand
-	[8] = GetString(SI_EQUIPTYPE8), --Waist
-	[9] = GetString(SI_EQUIPTYPE9), --Legs
-	[10] = GetString(SI_EQUIPTYPE10), --Feet
-	[11] = GetString(SI_EQUIPTYPE11), --Costume
-	[12] = GetString(SI_EQUIPTYPE12), --Ring
-	[13] = GetString(SI_EQUIPTYPE13), --Hand
-	[14] = GetString(SI_EQUIPTYPE14), --Main Hand
-	[15] = GetString(SI_EQUIPTYPE15), --Poison
-}
-WL.SlotTextures = {
-	[0] = "", --Invalid
-	[1] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HEAD), --Head
-	[2] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_NECK), --Neck
-	[3] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_CHEST), --Chest
-	[4] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_SHOULDERS), --Shoulders
-	[5] = "esoui/art/crafting/progression_tabicon_1handed_up.dds", --One hand
-	[6] = "esoui/art/crafting/progression_tabicon_2handed_up.dds", --Two Hand
-	[7] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_OFF_HAND), --Off Hand
-	[8] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_WAIST), --Waist
-	[9] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_LEGS), --Legs
-	[10] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_FEET), --Feet
-	[11] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_COSTUME), --Costume
-	[12] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_RING1), --Ring
-	[13] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HAND), --Hand
-	[14] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_MAIN_HAND), --Main Hand
-	[15] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_POISON), --Poison
-}
-
 WL.traitTextures = {
     --belebend: esoui/art/icons/crafting_jewelry_base_garnet_r3.dds
     --Verstärkt: esoui/art/icons/crafting_enchantment_base_sardonyx_r2.dds
@@ -189,7 +152,47 @@ WL.traitTextures = {
     [ITEM_TRAIT_TYPE_WEAPON_PRECISE]		= "esoui/art/icons/crafting_jewelry_base_ruby_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]		= "esoui/art/icons/crafting_enchantment_base_fire_opal_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_TRAINING] 		= "esoui/art/icons/crafting_runecrafter_armor_component_004.dds",
+	[ITEM_TRAIT_TYPE_MAX_VALUE + 1]			= "esoui/art/campaign/campaignbrowser_indexicon_specialevents_up.dds", --Special
+	[ITEM_TRAIT_TYPE_MAX_VALUE + 2]			= "/esoui/art/crafting/gamepad/crafting_alchemy_trait_unknown.dds" --All traits!
 }
+
+WL.SlotTypes = {
+	[0] = GetString(SI_COLLECTIBLECATEGORYTYPE0), --Invalid
+	[1] = GetString(SI_EQUIPTYPE1), --Head
+	[2] = GetString(SI_EQUIPTYPE2), --Neck
+	[3] = GetString(SI_EQUIPTYPE3), --Chest
+	[4] = GetString(SI_EQUIPTYPE4), --Shoulders
+	[5] = GetString(SI_EQUIPTYPE5), --One hand
+	[6] = GetString(SI_EQUIPTYPE6), --Two Hand
+	[7] = GetString(SI_EQUIPTYPE7), --Off Hand
+	[8] = GetString(SI_EQUIPTYPE8), --Waist
+	[9] = GetString(SI_EQUIPTYPE9), --Legs
+	[10] = GetString(SI_EQUIPTYPE10), --Feet
+	[11] = GetString(SI_EQUIPTYPE11), --Costume
+	[12] = GetString(SI_EQUIPTYPE12), --Ring
+	[13] = GetString(SI_EQUIPTYPE13), --Hand
+	[14] = GetString(SI_EQUIPTYPE14), --Main Hand
+	[15] = GetString(SI_EQUIPTYPE15), --Poison
+}
+WL.SlotTextures = {
+	[0] = "", --Invalid
+	[1] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HEAD), --Head
+	[2] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_NECK), --Neck
+	[3] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_CHEST), --Chest
+	[4] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_SHOULDERS), --Shoulders
+	[5] = "/esoui/art/icons/progression_tabicon_1handed_up.dds", --One hand
+	[6] = "/esoui/art/icons/progression_tabicon_2handed_up.dds", --Two Hand
+	[7] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_OFF_HAND), --Off Hand
+	[8] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_WAIST), --Waist
+	[9] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_LEGS), --Legs
+	[10] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_FEET), --Feet
+	[11] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_COSTUME), --Costume
+	[12] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_RING1), --Ring
+	[13] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HAND), --Hand
+	[14] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_MAIN_HAND), --Main Hand
+	[15] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_POISON), --Poison
+}
+
 WL.quality = {
 	[WISHLIST_QUALITY_ALL]					= GetString(WISHLIST_ITEM_QUALITY_ALL), 					--Any quality
 	[WISHLIST_QUALITY_TRASH] 				= GetString(SI_ITEMQUALITY0), 								--Trash
@@ -209,8 +212,8 @@ WL.addDialogButtonTextures = {
 	[WISHLIST_ADD_TYPE_WHOLE_SET]                           = "esoui/art/charactercreate/rotate_right_up.dds",
 	[WISHLIST_ADD_TYPE_BY_ITEMTYPE]                         = "esoui/art/charactercreate/rotate_right_up.dds",
 	[WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE]   = "esoui/art/charactercreate/rotate_right_up.dds",
-	[WISHLIST_ADD_ONE_HANDED_WEAPONS] 						= "esoui/art/crafting/progression_tabicon_1handed_up.dds",
-	[WISHLIST_ADD_TWO_HANDED_WEAPONS] 						= "esoui/art/crafting/progression_tabicon_2handed_up.dds",
+	[WISHLIST_ADD_ONE_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_1handed_up.dds",
+	[WISHLIST_ADD_TWO_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_2handed_up.dds",
 	[WISHLIST_ADD_BODY_PARTS_ARMOR] 						= "esoui/art/crafting/smithing_tabicon_armorset_up.dds",
-	[WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR] 					= "esoui/art/crafting/inventory_tabicon_armor_up.dds",
+	[WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR] 					= "esoui/art/icons/gear_undauntedspider_head_a.dds",
 }

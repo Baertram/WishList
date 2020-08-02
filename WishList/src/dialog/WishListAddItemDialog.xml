@@ -158,10 +158,10 @@
                 <Button name="$(parent)ButtonAddMonsterSetPartsOfSet" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="26" y="26" />
                     <Anchor point="LEFT" relativeTo="$(parent)SlotCombo" relativePoint="LEFT" offsetX="136" offsetY="1" />
-                    <Textures normal    = "esoui/art/inventory/inventory_tabicon_armor_up.dds"
-                              pressed   = "esoui/art/inventory/inventory_tabicon_armor_down.dds"
-                              mouseOver = "esoui/art/inventory/inventory_tabicon_armor_over.dds"
-                              disabled  = "esoui/art/inventory/inventory_tabicon_armor_disabled.dds" />
+                    <Textures normal    = "esoui/art/icons/gear_undauntedspider_head_a.dds"
+                              pressed   = "esoui/art/icons/gear_undauntedspider_head_a.dds"
+                              mouseOver = "esoui/art/icons/gear_undauntedspider_head_a.dds"
+                              disabled  = "esoui/art/icons/gear_undauntedspider_head_a.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR)
                     </OnClicked>

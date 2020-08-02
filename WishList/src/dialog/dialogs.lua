@@ -27,8 +27,8 @@ local function buildLastAddedEntryText(lastAddedData)
     local charName = WL.accData.chars[charId].name
 
     local specialAddedType = lastAddedData.specialAddedType
-    local entryTextTemplate = "%s: %s\'%s\' %s, %s, %s, %s (%s)"
-    local entryTextTemplateNoSpecialAddedType = "%s: %s\'%s\' %s, %s, %s, %s"
+    local entryTextTemplate = "%s: %s %s %s%s%s%s(%s)"
+    local entryTextTemplateNoSpecialAddedType = "%s: %s %s %s%s%s%s"
     local entryTextTemplateToUse
     local specialAddedTypeText
     local entryText
@@ -36,7 +36,7 @@ local function buildLastAddedEntryText(lastAddedData)
         local addDialogButtonTextures = WL.addDialogButtonTextures
         local specialAddedTypeTexture = addDialogButtonTextures[specialAddedType]
         if specialAddedTypeTexture ~= nil then
-            specialAddedTypeText = zo_iconFormat(specialAddedTypeTexture,32,32)
+            specialAddedTypeText = zo_iconFormat(specialAddedTypeTexture,24,24)
             entryTextTemplateToUse = entryTextTemplate
             entryText = string.format(entryTextTemplateToUse, tostring(dateTimeString), tostring(charName), tostring(setQualityText),tostring(itemTypeIdIcon),tostring(weaponOrArmorTypeIcon),tostring(slotIcon),tostring(traitIcon), tostring(specialAddedTypeText))
         end
@@ -92,7 +92,90 @@ function WL.WishListWindowAddItemInitialize(control)
             --Last added historycallback
             local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
                 d("[WL]lastAddedHistoryCallback-"..entryText)
-                WL._SelectedlastAddedEntry = entry
+                --Get the lastAddedData via the id
+                if entry.id == nil then return end
+                local lastAddedViaDialogData = WL.accData.lastAddedViaDialog
+                if not lastAddedViaDialogData or not lastAddedViaDialogData[entry.id] then return end
+                local entryData = lastAddedViaDialogData[entry.id]
+
+                --Close the current dialog and reload a new one with the correct setData, if the current setId is not
+                --the same as of the chosen "lastAdded" combobox
+                local delayBeforeChange = 0
+                if WL.currentSetId ~= entryData.setId then
+                    --Close the dialog
+                    WishListAddItemDialogCancel:callback()
+                    local clientLang = WL.clientLang or WL.fallbackSetLang
+                    local libSets = WishList.LibSets
+                    --Reopen it with the correct setId
+                    local setData = {
+                        setId       = entryData.setId,
+                        names       = libSets.GetSetNames(entryData.setId),
+                    }
+                    delayBeforeChange = 150
+                    WL.showAddItem(setData, true)
+                end
+                --Call delayed if poup dialog was closed and re-opened
+                zo_callLater(function()
+                    --Set the comboboxes to the rows of the last added entry data
+                    --Quality
+                    comboQuality:SelectItemByIndex(entryData.quality, true)
+                    --ItemType
+                    local itemTypeIdx
+                    for idx, itemTypeData in ipairs(comboItemType.m_comboBox.m_sortedItems) do
+                        if itemTypeData and itemTypeData.id == entryData.itemTypeId then
+                            itemTypeIdx = idx
+                            break
+                        end
+                    end
+                    if itemTypeIdx and itemTypeIdx ~= nil and itemTypeIdx > 0 then
+                        comboItemType:SelectItemByIndex(itemTypeIdx, true)
+                    end
+                    --ArmorOrWeaponTyp
+                    local armorOrWeaponTypeIdx
+                    for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_comboBox.m_sortedItems) do
+                        if armorOrWeaponTypeData and armorOrWeaponTypeData.id == entryData.armorOrWeaponType then
+                            armorOrWeaponTypeIdx = idx
+                            break
+                        end
+                    end
+                    if armorOrWeaponTypeIdx and armorOrWeaponTypeIdx ~= nil and armorOrWeaponTypeIdx > 0 then
+                        comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, true)
+                    end
+                    --SlotType
+                    local slotTypeIdx
+                    for idx, slotTypeData in ipairs(comboSlot.m_comboBox.m_sortedItems) do
+                        if slotTypeData and slotTypeData.id == entryData.slotType then
+                            slotTypeIdx = idx
+                            break
+                        end
+                    end
+                    if slotTypeIdx and slotTypeIdx ~= nil and slotTypeIdx > 0 then
+                        comboSlot:SelectItemByIndex(itemTypeIdx, true)
+                    end
+                    --Trait
+                    local traitTypeIdx
+                    for idx, traitTypeData in ipairs(comboTrait.m_comboBox.m_sortedItems) do
+                        if traitTypeData and traitTypeData.id == entryData.trait then
+                            traitTypeIdx = idx
+                            break
+                        end
+                    end
+                    if traitTypeIdx and traitTypeIdx ~= nil and traitTypeIdx > 0 then
+                        comboTrait:SelectItemByIndex(traitTypeIdx, true)
+                    end
+                    --Character
+                    local charIdx
+                    for idx, charData in ipairs(comboChars.m_comboBox.m_sortedItems) do
+                        if charData and charData.id == entryData.charId then
+                            charIdx = idx
+                            break
+                        end
+                    end
+                    if charIdx and charIdx ~= nil and charIdx > 0 then
+                        comboChars:SelectItemByIndex(charIdx, true)
+                    end
+                end, delayBeforeChange)
+
             end
 
             --Last added history combobox
@@ -194,7 +277,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 comboTrait:SetSortsItems(true)
                 comboTrait:ClearItems()
 
-                --Add 1 entry to trait combobox with "- All traits -"
+                --Add 1st entry to trait combobox with "- All traits -"
                 local allTraitsTraitId = #WL.TraitTypes
                 entry = ZO_ComboBox:CreateItemEntry(WL.TraitTypes[allTraitsTraitId], callbackTraitsTypes)
                 entry.id = allTraitsTraitId --Any/All traits of current chosen item
