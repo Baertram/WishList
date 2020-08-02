@@ -111,7 +111,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         setId       = entryData.setId,
                         names       = libSets.GetSetNames(entryData.setId),
                     }
-                    delayBeforeChange = 100
+                    delayBeforeChange = 50
                     WL.showAddItem(setData, true)
                 end
                 --Call delayed if poup dialog was closed and re-opened
@@ -119,50 +119,6 @@ function WL.WishListWindowAddItemInitialize(control)
                     --Set the comboboxes to the rows of the last added entry data
                     --Quality
                     comboQuality:SelectItemByIndex(entryData.quality, false)
-                    --ItemType
-                    local itemTypeIdx
-                    for idx, itemTypeData in ipairs(comboItemType.m_sortedItems) do
-                        if itemTypeData and itemTypeData.id == entryData.itemTypeId then
-                            itemTypeIdx = idx
-                            break
-                        end
-                    end
-                    if itemTypeIdx and itemTypeIdx ~= nil and itemTypeIdx > 0 then
-                        comboItemType:SelectItemByIndex(itemTypeIdx, false)
-                    end
-                    --ArmorOrWeaponTyp
-                    local armorOrWeaponTypeIdx
-                    for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_sortedItems) do
-                        if armorOrWeaponTypeData and armorOrWeaponTypeData.id == entryData.armorOrWeaponType then
-                            armorOrWeaponTypeIdx = idx
-                            break
-                        end
-                    end
-                    if armorOrWeaponTypeIdx and armorOrWeaponTypeIdx ~= nil and armorOrWeaponTypeIdx > 0 then
-                        comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, false)
-                    end
-                    --SlotType
-                    local slotTypeIdx
-                    for idx, slotTypeData in ipairs(comboSlot.m_sortedItems) do
-                        if slotTypeData and slotTypeData.id == entryData.slotType then
-                            slotTypeIdx = idx
-                            break
-                        end
-                    end
-                    if slotTypeIdx and slotTypeIdx ~= nil and slotTypeIdx > 0 then
-                        comboSlot:SelectItemByIndex(itemTypeIdx, false)
-                    end
-                    --Trait
-                    local traitTypeIdx
-                    for idx, traitTypeData in ipairs(comboTrait.m_sortedItems) do
-                        if traitTypeData and traitTypeData.id == entryData.trait then
-                            traitTypeIdx = idx
-                            break
-                        end
-                    end
-                    if traitTypeIdx and traitTypeIdx ~= nil and traitTypeIdx > 0 then
-                        comboTrait:SelectItemByIndex(traitTypeIdx, false)
-                    end
                     --Character
                     local charIdx
                     for idx, charData in ipairs(comboChars.m_sortedItems) do
@@ -173,6 +129,56 @@ function WL.WishListWindowAddItemInitialize(control)
                     end
                     if charIdx and charIdx ~= nil and charIdx > 0 then
                         comboChars:SelectItemByIndex(charIdx, false)
+                    end
+                    --ItemType
+                    local itemTypeIdx
+                    for idx, itemTypeData in ipairs(comboItemType.m_sortedItems) do
+                        if itemTypeData and itemTypeData.id == entryData.itemTypeId then
+                            itemTypeIdx = idx
+                            break
+                        end
+                    end
+                    if itemTypeIdx and itemTypeIdx ~= nil and itemTypeIdx > 0 then
+                        comboItemType:SelectItemByIndex(itemTypeIdx, false)
+                        zo_callLater(function()
+                            --ArmorOrWeaponTyp
+                            local armorOrWeaponTypeIdx
+                            for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_sortedItems) do
+                                if armorOrWeaponTypeData and armorOrWeaponTypeData.id == entryData.armorOrWeaponType then
+                                    armorOrWeaponTypeIdx = idx
+                                    break
+                                end
+                            end
+                            if armorOrWeaponTypeIdx and armorOrWeaponTypeIdx ~= nil and armorOrWeaponTypeIdx > 0 then
+                                comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, false)
+                                zo_callLater(function()
+                                    --SlotType
+                                    local slotTypeIdx
+                                    for idx, slotTypeData in ipairs(comboSlot.m_sortedItems) do
+                                        if slotTypeData and slotTypeData.id == entryData.slotType then
+                                            slotTypeIdx = idx
+                                            break
+                                        end
+                                    end
+                                    if slotTypeIdx and slotTypeIdx ~= nil and slotTypeIdx > 0 then
+                                        comboSlot:SelectItemByIndex(slotTypeIdx, false)
+                                        zo_callLater(function()
+                                            --Trait
+                                            local traitTypeIdx
+                                            for idx, traitTypeData in ipairs(comboTrait.m_sortedItems) do
+                                                if traitTypeData and traitTypeData.id == entryData.trait then
+                                                    traitTypeIdx = idx
+                                                    break
+                                                end
+                                            end
+                                            if traitTypeIdx and traitTypeIdx ~= nil and traitTypeIdx > 0 then
+                                                comboTrait:SelectItemByIndex(traitTypeIdx, false)
+                                            end
+                                        end, 10)
+                                    end
+                                end, 10)
+                            end
+                        end, 10)
                     end
                     --Show the tooltip now
                     WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
