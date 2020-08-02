@@ -81,7 +81,7 @@ local strings = {
     WISHLIST_CONTEXTMENU_ADD         = "Add to " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_REMOVE      = "Remove from " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED = "Remove from last added",
-    WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED = "Clear last added",
+    WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED = "Clear last added (will close this dialog!)",
     WISHLIST_CLEAR_LAST_ADDED_TITLE = "Clear last added history?",
     WISHLIST_CLEAR_LAST_ADDED_TEXT = "Do you really want to clear all entries of the last added history?",
 

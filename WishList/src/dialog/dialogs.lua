@@ -238,19 +238,24 @@ function WL.WishListWindowAddItemInitialize(control)
                         end)
                         AddCustomMenuItem("-", function() end)
                     end
-                    AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
-                        WL.showQuestionDialog(GetString(WISHLIST_CLEAR_LAST_ADDED_TITLE), GetString(WISHLIST_CLEAR_LAST_ADDED_TEXT),
-                            function(dialog)
-                                --Clear combobox
-                                comboLastAddedHistory:ClearItems()
-                                --SavedVariables nun noch leeren
-                                WL.accData.lastAddedViaDialog = nil
-                                WL.accData.lastAddedViaDialog = {}
-                            end,
-                            function(dialog) end,
-                            {}
-                        )
-                    end)
+                    if comboLastAddedHistory.m_sortedItems and #comboLastAddedHistory.m_sortedItems > 0 then
+                        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
+                            --Show ask before clear dialog
+                            --But close the current dialog before as no dialog can be shown "above the other opened dialog" :-(
+                            WishListAddItemDialogCancel:callback()
+                            WL.showQuestionDialog(GetString(WISHLIST_CLEAR_LAST_ADDED_TITLE), GetString(WISHLIST_CLEAR_LAST_ADDED_TEXT),
+                                    function(dialog)
+                                        --Clear combobox
+                                        comboLastAddedHistory:ClearItems()
+                                        --SavedVariables nun noch leeren
+                                        WL.accData.lastAddedViaDialog = nil
+                                        WL.accData.lastAddedViaDialog = {}
+                                    end,
+                                    function(dialog) end,
+                                    {}
+                            )
+                        end)
+                    end
                     ShowMenu(comboBoxCtrl)
 
                     return true --do not open the combobox if right clicked
