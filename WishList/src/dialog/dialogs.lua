@@ -121,7 +121,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     comboQuality:SelectItemByIndex(entryData.quality, true)
                     --ItemType
                     local itemTypeIdx
-                    for idx, itemTypeData in ipairs(comboItemType.m_comboBox.m_sortedItems) do
+                    for idx, itemTypeData in ipairs(comboItemType.m_sortedItems) do
                         if itemTypeData and itemTypeData.id == entryData.itemTypeId then
                             itemTypeIdx = idx
                             break
@@ -132,7 +132,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     end
                     --ArmorOrWeaponTyp
                     local armorOrWeaponTypeIdx
-                    for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_comboBox.m_sortedItems) do
+                    for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_sortedItems) do
                         if armorOrWeaponTypeData and armorOrWeaponTypeData.id == entryData.armorOrWeaponType then
                             armorOrWeaponTypeIdx = idx
                             break
@@ -143,7 +143,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     end
                     --SlotType
                     local slotTypeIdx
-                    for idx, slotTypeData in ipairs(comboSlot.m_comboBox.m_sortedItems) do
+                    for idx, slotTypeData in ipairs(comboSlot.m_sortedItems) do
                         if slotTypeData and slotTypeData.id == entryData.slotType then
                             slotTypeIdx = idx
                             break
@@ -154,7 +154,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     end
                     --Trait
                     local traitTypeIdx
-                    for idx, traitTypeData in ipairs(comboTrait.m_comboBox.m_sortedItems) do
+                    for idx, traitTypeData in ipairs(comboTrait.m_sortedItems) do
                         if traitTypeData and traitTypeData.id == entryData.trait then
                             traitTypeIdx = idx
                             break
@@ -165,7 +165,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     end
                     --Character
                     local charIdx
-                    for idx, charData in ipairs(comboChars.m_comboBox.m_sortedItems) do
+                    for idx, charData in ipairs(comboChars.m_sortedItems) do
                         if charData and charData.id == entryData.charId then
                             charIdx = idx
                             break
