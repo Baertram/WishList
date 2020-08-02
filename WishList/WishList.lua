@@ -39,6 +39,9 @@ WL.preventerVars.writCreatorAutoLootBoxesActive = false
 WL.preventerVars.runSetNameLanguageChecks = false
 WL.maxNameColumnWidth = nil
 
+--Local speed-up function pointer
+local getSavedVarsServer = WL.getSavedVarsServer
+
 ------------------------------------------------
 --- Event Handlers
 ------------------------------------------------
@@ -711,6 +714,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
 --d("[WL]AddItem, SV found for charName " .. tostring(charData.name) .. ", CharId: " .. tostring(charData.id))
     local charNameChat = charData.name
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     for i = 1, #items do
 		local item = items[i]
         --Is the item already on the WishList?
@@ -729,10 +733,10 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
             if item.timestamp == nil then
                 item = WL.addTimeStampToItem(item)
             end
-            --Insert the item to the character dependent WishList SavedVars global table WishList_Data["Default"][GetDisplayName()][charId]["Data"]["wishList"]
+            --Insert the item to the character dependent WishList SavedVars global table WishList_Data[savedVarsServer][GetDisplayName()][charId]["Data"]["wishList"]
             --table.insert(wishList, item)
 --d("[WishList]AddItem, item quality: " ..tostring(item.quality))
-            table.insert(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], item)
+            table.insert(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"], item)
             count = count + 1
             local traitId = item.trait
             local traitText = ""
@@ -804,7 +808,7 @@ function WL.AddSetItems(addType)
     items = WL.getSetItemsByData(WL.currentSetId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --Add the items now, if some were found
     if #items > 0 then
-        --Add the currently selected values to the "Last added" history data of the SavedVariables
+        --Add the currently selected values to the "Last added" history data of the SavedVariables and use the special add type
         WL.addLastAddedHistoryFromAddItemDialog(WL.currentSetId, itemTypeComboBox, armorOrWeaponComboBox, traitComboBox, slotComboBox, charsComboBox, qualityComboBox, addType)
         --Add the found set items to the WishList of the selected user now
         WishList:AddItem(items, selectedCharData)
@@ -823,6 +827,7 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local charNameChat = charData.name
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     for i = 1, #items do
         local item = items[i]
         --Is the item already on the WishList?
@@ -837,7 +842,7 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
             item = WL.addTimeStampToItem(item)
         end
         --table.insert(history, item)
-        table.insert(WishList_Data["Default"][displayName][charData.id]["Data"]["history"], item)
+        table.insert(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"], item)
         count = count + 1
         local traitId = item.trait
         local traitText = ""
@@ -866,6 +871,7 @@ function WishList:RemoveItem(item, charData)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
 	for i = 1, #wishList do
 		local itm = wishList[i]
@@ -876,7 +882,7 @@ function WishList:RemoveItem(item, charData)
 	end
 	if index ~= -1 then
 		--table.remove(wishList, index)
-        table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], index)
+        table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"], index)
         local itemLink
         if item.itemLink ~= nil then
             itemLink = item.itemLink
@@ -897,6 +903,7 @@ function WishList:RemoveHistoryItem(item, charData)
     local history = WL.getHistorySaveVars(charData)
     if history == nil then return true end
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local charNameChat = charData.name
     for i = 1, #history do
@@ -908,7 +915,7 @@ function WishList:RemoveHistoryItem(item, charData)
     end
     if index ~= -1 then
         --table.remove(history, index)
-        table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["history"], index)
+        table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"], index)
         local itemLink
         if item.itemLink ~= nil then
             itemLink = item.itemLink
@@ -931,6 +938,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -990,7 +998,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
             local itemTraitText = WL.TraitTypes[traitId]
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
             --Remove the WishList entry of the current, or the selected char
-            table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], i)
+            table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"], i)
             d(itemLink..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
@@ -1007,6 +1015,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1024,7 +1033,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
             --Remove the WishList entry of the current, or the selected char
             --table.remove(wishList, i)
-            table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"], i)
+            table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"], i)
             d(itemLink..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
@@ -1040,6 +1049,7 @@ function WishList:ChangeQualityOfItem(item, charData, newQuality)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     for i = 1, #wishList do
         local itm = wishList[i]
@@ -1049,7 +1059,7 @@ function WishList:ChangeQualityOfItem(item, charData, newQuality)
         end
     end
     if index ~= -1 then
-        local currentWishListSVEntry = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][index]
+        local currentWishListSVEntry = WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"][index]
         if currentWishListSVEntry ~= nil then
             currentWishListSVEntry["quality"] = newQuality
         end
@@ -1073,6 +1083,7 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1089,7 +1100,7 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
             local itemTraitText = WL.TraitTypes[traitId]
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
             --Update the WishList entry of the current, or the selected char
-            local currentWishListEntryOfSetItem = WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][i]
+            local currentWishListEntryOfSetItem = WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"][i]
             if currentWishListEntryOfSetItem ~= nil then
                 currentWishListEntryOfSetItem["quality"] = newQuality
                 d(itemLink..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
@@ -1108,6 +1119,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
     if history == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1167,7 +1179,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             local itemTraitText = WL.TraitTypes[traitId]
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
             --Remove the history entry of the current, or the selected char
-            table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["history"], i)
+            table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"], i)
             d(itemLink..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
@@ -1183,6 +1195,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
     if history == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1200,7 +1213,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
             --Remove the WishList entry of the current, or the selected char
             --table.remove(history, i)
-            table.remove(WishList_Data["Default"][displayName][charData.id]["Data"]["history"], i)
+            table.remove(WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"], i)
             d(itemLink..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt + 1
         end
@@ -1215,6 +1228,7 @@ function WishList:RemoveAllItems(charData)
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local cnt = 0
     for i = #wishList, 1, -1 do
@@ -1225,13 +1239,13 @@ function WishList:RemoveAllItems(charData)
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
         --Remove the WishList entry of the current, or the selected char
         --wishList[i] = nil
-        WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"][i] = nil
+        WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"][i] = nil
         d(itemLink..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
         cnt = cnt + 1
     end
     --Clear the wishlist of the current, or the selected char
     --wishList = {}
-    WishList_Data["Default"][displayName][charData.id]["Data"]["wishList"] = nil
+    WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["wishList"] = nil
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
@@ -1242,6 +1256,7 @@ function WishList:ClearHistory(charData)
     if history == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     local charNameChat = charData.name
     local cnt = 0
 --d("[WishList:ClearHistory]char: " .. tostring(charNameChat))
@@ -1253,13 +1268,13 @@ function WishList:ClearHistory(charData)
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
         --Remove the History entry of the current, or the selected char
         --history[i] = nil
-        WishList_Data["Default"][displayName][charData.id]["Data"]["history"][i] = nil
+        WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"][i] = nil
         d(itemLink..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
         cnt = cnt + 1
     end
     --Clear the wishlist of the current, or the selected char
     --history = {}
-    WishList_Data["Default"][displayName][charData.id]["Data"]["history"] = nil
+    WishList_Data[savedVarsServer][displayName][charData.id]["Data"]["history"] = nil
     d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_REMOVED) .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from history"
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
@@ -1274,8 +1289,8 @@ function WishList:AddLastAddedHistory(newAddedData)
     if not newAddedData then return end
     newAddedData.dateTime = newAddedData.dateTime or GetTimeStamp()
     local lastAddedHistoryData = WL.accData.lastAddedViaDialog
-    if not lastAddedHistoryData then return end
-   lastAddedHistoryData[newAddedData.dateTime] = newAddedData
+    WL.accData.lastAddedViaDialog = WL.accData.lastAddedViaDialog or {}
+    WL.accData.lastAddedViaDialog[newAddedData.dateTime] = newAddedData
 end
 
 --Get the last added setItems history (added via the "Add item dialog")
@@ -1357,13 +1372,13 @@ function WL.loadSettings()
     local worldName = nil
     --Get non-server dependent general settings
     local accDataServerIndependent = ZO_SavedVars:NewAccountWide(addonVars.addonSavedVarsAllServers, 999, "AccountwideDataServerIndependent", {}, nil, nil)
-    if accDataServerIndependent.savedVarsWereMigratedToServerDependent then
+    if accDataServerIndependent.savedVarsWereMigratedToServerDependent == true then
         --SV were migrated to the table containing the worldname e.g. "EU Megaserver"
         worldName = GetWorldName()
         if WishList_Data[worldName] ~= nil then
             --Invalidate the old non-server dependent SavedVariables
             if WishList_Data["Default"] ~= nil then
-                d("[WishList]OLD Non-server dependent WishList SavedVariables still exist -> Removing them now")
+                d("[WishList]OLD non-server dependent WishList SavedVariables still exist -> Removing them now")
                 WishList_Data["Default"] = nil
                 WL.SVrelated_doReloadUINow = true
             end
@@ -1564,20 +1579,17 @@ function WL.init(_, addonName)
                 if WishList_Data["Default"] == nil then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = true
                 end
-                ReloadUI("ingame") end,
-            50)
+                ReloadUI("ingame")
+            end, 50)
         else
             --Check if WishList SVs were migrated and finished the reloaduis
-            if WishList_Data["Default"] == nil and WL.accDataServerIndependent then
-                if WL.accDataServerIndependent.savedVarsWereMigratedToServerDependent == true and WL.accDataServerIndependent.savedVarsWereMigratedFinished == true then
+            if WishList_Data["Default"] == nil and WL.accDataServerIndependent ~= nil then
+                local accDataServerIndependent = WL.accDataServerIndependent
+                if accDataServerIndependent.savedVarsWereMigratedToServerDependent == true and accDataServerIndependent.savedVarsWereMigratedFinished == true then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
                     --Show an onscreen message + chat message
                     d("[WishList]Migration of SavedVariables of account \'" ..tostring(GetDisplayName()) .."\' to server \'" ..tostring(GetWorldName()) .. "\' finished!")
-                    --TODO: OnScreen message
-                    local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.CHAMPION_POINTS_COMMITTED)
-                    params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
-                    params:SetText("[|c00FF00WishList|r]SavedVariables migrated to server!")
-                    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+                     WL.CSA("[|c00FF00WishList|r]SavedVariables migrated to server!")
                 end
             end
         end

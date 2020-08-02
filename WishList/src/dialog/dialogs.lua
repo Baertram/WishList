@@ -9,28 +9,41 @@ local WL = WishList
 local function buildLastAddedEntryText(lastAddedData)
     if not lastAddedData then return end
     local dateTime = lastAddedData.dateTime
+    local dateTimeString = os.date("%c", dateTime)
     local setId = lastAddedData.setId
     local libSets = WL.LibSets
     local setName = libSets.GetSetName(setId)
     local itemTypeId = lastAddedData.itemTypeId
+    local itemTypeIdIcon = WL.buildItemItemTypeIconText("", itemTypeId, 24)
     local weaponOrArmorType = lastAddedData.armorOrWeaponType
+    local weaponOrArmorTypeIcon = WL.buildItemWeaponOrArmorTypeIconText("", weaponOrArmorType, itemTypeId, 24)
     local slotType = lastAddedData.slotType
+    local slotIcon = WL.buildItemSlotIconText("", slotType, 24)
     local trait = lastAddedData.trait
+    local traitIcon = WL.buildItemTraitIconText("", trait, 24)
     local quality = lastAddedData.quality
+    local setQualityText = WL.ColorizeByQualityColor(setName, quality)
     local charId = lastAddedData.charId
     local charName = WL.accData.chars[charId].name
 
     local specialAddedType = lastAddedData.specialAddedType
-    local entryTextTemplate = "dateTime: %s, setName: %s, itemType: %s, weaponOrArmorType: %s, slotType: %s, trait: %s, quality: %s, charName: %s, specialAddedType: %s"
+    local entryTextTemplate = "%s: %s\'%s\' %s, %s, %s, %s (%s)"
+    local entryTextTemplateNoSpecialAddedType = "%s: %s\'%s\' %s, %s, %s, %s"
+    local entryTextTemplateToUse
     local specialAddedTypeText
+    local entryText
     if specialAddedType ~= nil then
         local addDialogButtonTextures = WL.addDialogButtonTextures
         local specialAddedTypeTexture = addDialogButtonTextures[specialAddedType]
         if specialAddedTypeTexture ~= nil then
             specialAddedTypeText = zo_iconFormat(specialAddedTypeTexture,32,32)
+            entryTextTemplateToUse = entryTextTemplate
+            entryText = string.format(entryTextTemplateToUse, tostring(dateTimeString), tostring(charName), tostring(setQualityText),tostring(itemTypeIdIcon),tostring(weaponOrArmorTypeIcon),tostring(slotIcon),tostring(traitIcon), tostring(specialAddedTypeText))
         end
+    else
+        entryTextTemplateToUse = entryTextTemplateNoSpecialAddedType
+        entryText = string.format(entryTextTemplateToUse, tostring(dateTimeString), tostring(charName), tostring(setQualityText),tostring(itemTypeIdIcon),tostring(weaponOrArmorTypeIcon),tostring(slotIcon),tostring(traitIcon))
     end
-    local entryText = string.format(entryTextTemplate, tostring(dateTime), tostring(setName),tostring(itemTypeId),tostring(weaponOrArmorType),tostring(slotType),tostring(trait),tostring(quality),tostring(charName), tostring(specialAddedTypeText))
     return entryText
 end
 
@@ -78,6 +91,8 @@ function WL.WishListWindowAddItemInitialize(control)
 
             --Last added historycallback
             local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
+                d("[WL]lastAddedHistoryCallback-"..entryText)
+                WL._SelectedlastAddedEntry = entry
             end
 
             --Last added history combobox
@@ -92,9 +107,13 @@ function WL.WishListWindowAddItemInitialize(control)
             table.sort(lastAddedHistoryDataSortedByTimeStamp, function(a, b)
                 return a.dateTime < b.dateTime
             end)
+            --Add 1 empty entry
+            local entry = ZO_ComboBox:CreateItemEntry(" ", function()  end)
+            entry.id = -1
+            comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
             for idx, lastAddedData in ipairs(lastAddedHistoryDataSortedByTimeStamp) do
                 local entryText = buildLastAddedEntryText(lastAddedData)
-                if entryText ~= nil then
+                if entryText ~= nil and entryText ~= "" then
                     local entry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
                     entry.id = lastAddedData.dateTime
                     comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
@@ -332,7 +351,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     WL.hideItemLinkTooltip()
                     local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
                     if items ~= nil and #items > 0 then
-                        --Add the currently selected values to the "Last added" history data of the SavedVariables
+                        --Add the currently selected values to the "Last added" history data of the SavedVariables, no special added type!
                         WL.addLastAddedHistoryFromAddItemDialog(WL.currentSetId, comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality, nil)
                         WishList:AddItem(items, selectedCharData)
                     end
@@ -1000,8 +1019,8 @@ function WL.addLastAddedHistoryFromAddItemDialog(setId, comboItemType, comboArmo
     newAddedData.quality = qualityId
     newAddedData.charId = charId
 
-    local entryText = string.format(entryTextTemplate, tostring(newAddedData.dateTime), tostring(setId),tostring(itemTypeId),tostring(typeId),tostring(slotId),tostring(traitId),tostring(qualityId),tostring(charId),tostring(specialAddedType))
---d("[WL.addLastAddedHistoryFromAddItemDialog] " .. entryText)
+    local entryText = string.format(entryTextTemplate, tostring(os.date("%c", newAddedData.dateTime)), tostring(setId),tostring(itemTypeId),tostring(typeId),tostring(slotId),tostring(traitId),tostring(qualityId),tostring(charId),tostring(specialAddedType))
+d("[WL.addLastAddedHistoryFromAddItemDialog] " .. entryText)
     WL:AddLastAddedHistory(newAddedData)
 end
 

@@ -10,12 +10,22 @@ WL.ItemTypes = {
 	[ITEMTYPE_WEAPON] = GetString(SI_EQUIPSLOTVISUALCATEGORY1), --Weapon
 	[ITEMTYPE_ARMOR]  = GetString(SI_EQUIPSLOTVISUALCATEGORY2), --Armor
 }
+WL.ItemTypeTextures = {
+	[ITEMTYPE_WEAPON] = "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", --Weapon
+	[ITEMTYPE_ARMOR]  = "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", --Armor
+}
 
 WL.ArmorTypes = {
 	[0] = GetString(SI_EQUIPSLOTVISUALCATEGORY3), --Accessory
 	[1] = GetString(SI_ARMORTYPE1), --Light
 	[2] = GetString(SI_ARMORTYPE2), --Medium
 	[3] = GetString(SI_ARMORTYPE3), --Heavy
+}
+WL.ArmorTypeTextures = {
+	[0] = "WishList/assets/apparel/clothing_up.dds", 				--Accessory
+	[1] = "esoui/art/icons/progression_tabicon_armorlight_up.dds", 	--Light
+	[2] = "esoui/art/icons/progression_tabicon_armormedium_up.dds", --Medium
+	[3] = "esoui/art/icons/progression_tabicon_armorheavy_up.dds", 	--Heavy
 }
 
 WL.WeaponTypes = {
@@ -37,6 +47,25 @@ WL.WeaponTypes = {
 	[13] = GetString(SI_WEAPONTYPE13), --Frost Staff
 	[14] = GetString(SI_WEAPONTYPE14), --Shield
 	[15] = GetString(SI_WEAPONTYPE15), --Lightning Staff
+}
+WL.WeaponTypeTextures = {
+	[0] = "", --None
+	[1] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Axe_up.dds", --Axe
+	[2] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Mace_up.dds", --Hammer
+	[3] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Sword_up.dds", --Sword
+	[4] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Sword_up.dds", --2h Sword
+	[5] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Axe_up.dds", --2h Axe
+	[6] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_2h_Mace_up.dds", --2h Hammer
+	--TODO: Is translated with "Do not translate" ??? -> Change to fixed text "Prop"  instead?
+	[7] = "", --Prop  ???
+	[8] = "WishList/assets/weapons/bow_up.dds", --Bow
+	[9] = "WishList/assets/weapons/healing_up.dds", --Restoration Staff
+	[10] = "esoui/art/icons/rune_a.dds", --Rune
+	[11] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_1h_Dagger_up.dds", --Dagger
+	[12] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Flame_up.dds", --Fire Staff
+	[13] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_up.dds", --Frost Staff
+	[14] = "WishList/assets/weapons/shiedl_up.dds", --Shield
+	[15] = "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Lightning_up.dds", --Lightning Staff
 }
 
 WL.TraitTypes = {
@@ -100,6 +129,24 @@ WL.SlotTypes = {
 	[13] = GetString(SI_EQUIPTYPE13), --Hand
 	[14] = GetString(SI_EQUIPTYPE14), --Main Hand
 	[15] = GetString(SI_EQUIPTYPE15), --Poison
+}
+WL.SlotTextures = {
+	[0] = "", --Invalid
+	[1] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HEAD), --Head
+	[2] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_NECK), --Neck
+	[3] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_CHEST), --Chest
+	[4] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_SHOULDERS), --Shoulders
+	[5] = "esoui/art/crafting/progression_tabicon_1handed_up.dds", --One hand
+	[6] = "esoui/art/crafting/progression_tabicon_2handed_up.dds", --Two Hand
+	[7] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_OFF_HAND), --Off Hand
+	[8] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_WAIST), --Waist
+	[9] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_LEGS), --Legs
+	[10] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_FEET), --Feet
+	[11] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_COSTUME), --Costume
+	[12] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_RING1), --Ring
+	[13] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_HAND), --Hand
+	[14] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_MAIN_HAND), --Main Hand
+	[15] = ZO_Character_GetEmptyEquipSlotTexture(EQUIP_SLOT_POISON), --Poison
 }
 
 WL.traitTextures = {

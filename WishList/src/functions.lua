@@ -59,19 +59,43 @@ local is2hdWeapon = {
     [WEAPONTYPE_TWO_HANDED_SWORD]   =      true,
 }
 
+--Center Screen Announcement
+function WL.CSA(text, soundToPlay)
+    if not text or text == "" then return end
+    local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, soundToPlay or SOUNDS.CHAMPION_POINTS_COMMITTED)
+    params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+    params:SetText(text)
+    CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+end
+
+
 ------------------------------------------------
 --- SavedVariables functions
 ------------------------------------------------
+--As long as SV were not migrated to server dependent ones: Use the "Default" SV profile.
+--Else return the profile with the server name
+function WL.getSavedVarsServer()
+    local accDataServerIndependent = WL.accDataServerIndependent
+    if not accDataServerIndependent or
+        ( accDataServerIndependent ~= nil and not accDataServerIndependent.savedVarsWereMigratedToServerDependent ) then
+        return "Default"
+    end
+    return GetWorldName()
+end
+local getSavedVarsServer = WL.getSavedVarsServer
+
+
 local function buildSVLastCharacterNameEntry(charId, accName)
     if charId == nil then return false end
     accName = accName or GetDisplayName()
-    if WishList_Data and WishList_Data["Default"] and WishList_Data["Default"][accName] and WishList_Data["Default"][accName][charId] and
-        WishList_Data["Default"][accName][charId]["Data"] and WishList_Data["Default"][accName][charId]["Data"]["$LastCharacterName"] == nil then
+    local savedVarsServer = getSavedVarsServer()
+    if WishList_Data and WishList_Data[savedVarsServer] and WishList_Data[savedVarsServer][accName] and WishList_Data[savedVarsServer][accName][charId] and
+        WishList_Data[savedVarsServer][accName][charId]["Data"] and WishList_Data[savedVarsServer][accName][charId]["Data"]["$LastCharacterName"] == nil then
         local charData = WL.getCharDataById(charId)
         if charData == nil then return false end
         local lastCharacterName = charData.nameClean
         if lastCharacterName ~= nil and lastCharacterName ~= "" then
-            WishList_Data["Default"][accName][charId]["Data"]["$LastCharacterName"] = lastCharacterName
+            WishList_Data[savedVarsServer][accName][charId]["Data"]["$LastCharacterName"] = lastCharacterName
             return true
         end
     end
@@ -82,19 +106,20 @@ end
 function WL.checkIfWLSavedVarsExist(charId)
     if charId == nil then return false end
     local accName = GetDisplayName()
-    if    WishList_Data ~= nil and WishList_Data["Default"] ~= nil and WishList_Data["Default"][accName] ~= nil
-      and WishList_Data["Default"][accName][charId] ~= nil and WishList_Data["Default"][accName][charId]["Data"] ~= nil
-      and WishList_Data["Default"][accName][charId]["Data"]["wishList"] ~= nil
-      and #WishList_Data["Default"][accName][charId]["Data"]["wishList"] > 0 then
+    local savedVarsServer = getSavedVarsServer()
+    if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
+      and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId]["Data"] ~= nil
+      and WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] ~= nil
+      and #WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] > 0 then
         return true
     else
         --Create the WishList SavedVars entry for the missing charData, but as no entries are given return false in the end!
         if WishList_Data ~= nil then
-            WishList_Data["Default"] = WishList_Data["Default"] or {}
-            WishList_Data["Default"][accName] = WishList_Data["Default"][accName] or {}
-            WishList_Data["Default"][accName][charId] = WishList_Data["Default"][accName][charId] or {}
-            WishList_Data["Default"][accName][charId]["Data"] = WishList_Data["Default"][accName][charId]["Data"] or {}
-            WishList_Data["Default"][accName][charId]["Data"]["wishList"] = WishList_Data["Default"][accName][charId]["Data"]["wishList"] or {}
+            WishList_Data[savedVarsServer] = WishList_Data[savedVarsServer] or {}
+            WishList_Data[savedVarsServer][accName] = WishList_Data[savedVarsServer][accName] or {}
+            WishList_Data[savedVarsServer][accName][charId] = WishList_Data[savedVarsServer][accName][charId] or {}
+            WishList_Data[savedVarsServer][accName][charId]["Data"] = WishList_Data[savedVarsServer][accName][charId]["Data"] or {}
+            WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] = WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] or {}
             --Build the $LastCharacterName entry if missing
             buildSVLastCharacterNameEntry(charId, accName)
         end
@@ -108,10 +133,11 @@ function WL.getWishListSaveVars(charData, calledBy, noFallBackToLoggedIn)
 --d("[WL]getWishListSaveVars | Called by: " ..tostring(calledBy))
     local wishListSavedVars = {}
     local accName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
         if WL.checkIfWLSavedVarsExist(charData.id) then
 --d(">WL data of char exists")
-            wishListSavedVars = WishList_Data["Default"][accName][charData.id]["Data"]["wishList"]
+            wishListSavedVars = WishList_Data[savedVarsServer][accName][charData.id]["Data"]["wishList"]
         end
     else
         --CharData is not given so use the currently logged in char's WishList!
@@ -123,12 +149,12 @@ function WL.getWishListSaveVars(charData, calledBy, noFallBackToLoggedIn)
 --d("<<<ABORT!")
                 return nil
             end
-        else
+        --else
 --d(">using logged in charData")
         end
         local loggedInCharId = WL.LoggedInCharData.id
         WL.checkIfWLSavedVarsExist(loggedInCharId)
-        wishListSavedVars = WishList_Data["Default"][accName][loggedInCharId]["Data"]["wishList"]
+        wishListSavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId]["Data"]["wishList"]
     end
     return wishListSavedVars
 end
@@ -144,19 +170,20 @@ end
 function WL.checkIfHistorySavedVarsExist(charId)
     if charId == nil then return false end
     local accName = GetDisplayName()
-    if    WishList_Data ~= nil and WishList_Data["Default"] ~= nil and WishList_Data["Default"][accName] ~= nil
-            and WishList_Data["Default"][accName][charId] ~= nil and WishList_Data["Default"][accName][charId]["Data"] ~= nil
-            and WishList_Data["Default"][accName][charId]["Data"]["history"] ~= nil
-            and #WishList_Data["Default"][accName][charId]["Data"]["history"] > 0 then
+    local savedVarsServer = getSavedVarsServer()
+    if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
+            and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId]["Data"] ~= nil
+            and WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] ~= nil
+            and #WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] > 0 then
             return true
     else
         --Create the history SavedVars entry for the missing charData, but as no entries are given return false in the end!
         if WishList_Data ~= nil then
-            WishList_Data["Default"] = WishList_Data["Default"] or {}
-            WishList_Data["Default"][accName] = WishList_Data["Default"][accName] or {}
-            WishList_Data["Default"][accName][charId] = WishList_Data["Default"][accName][charId] or {}
-            WishList_Data["Default"][accName][charId]["Data"] = WishList_Data["Default"][accName][charId]["Data"] or {}
-            WishList_Data["Default"][accName][charId]["Data"]["history"] = WishList_Data["Default"][accName][charId]["Data"]["history"] or {}
+            WishList_Data[savedVarsServer] = WishList_Data[savedVarsServer] or {}
+            WishList_Data[savedVarsServer][accName] = WishList_Data[savedVarsServer][accName] or {}
+            WishList_Data[savedVarsServer][accName][charId] = WishList_Data[savedVarsServer][accName][charId] or {}
+            WishList_Data[savedVarsServer][accName][charId]["Data"] = WishList_Data[savedVarsServer][accName][charId]["Data"] or {}
+            WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] = WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] or {}
             --Build the $LastCharacterName entry if missing
             buildSVLastCharacterNameEntry(charId, accName)
         end
@@ -170,10 +197,11 @@ function WL.getHistorySaveVars(charData, calledBy, noFallBackToLoggedIn)
 --d("[WL]getHistorySaveVars | Called by: " ..tostring(calledBy))
     local historySavedVars = {}
     local accName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
         if WL.checkIfHistorySavedVarsExist(charData.id) then
 --d(">History data of char exists")
-            historySavedVars = WishList_Data["Default"][accName][charData.id]["Data"]["history"]
+            historySavedVars = WishList_Data[savedVarsServer][accName][charData.id]["Data"]["history"]
         end
     else
         --CharData is not given so use the currently logged in char's history!
@@ -189,7 +217,7 @@ function WL.getHistorySaveVars(charData, calledBy, noFallBackToLoggedIn)
         end
         local loggedInCharId = WL.LoggedInCharData.id
         WL.checkIfHistorySavedVarsExist(loggedInCharId)
-        historySavedVars = WishList_Data["Default"][accName][loggedInCharId]["Data"]["history"]
+        historySavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId]["Data"]["history"]
     end
     return historySavedVars
 end
@@ -203,16 +231,76 @@ function WL.getHistoryItemCount(charData)
 end
 
 ------------------------------------------------
---- Item trait functions
+--- Item icon functions
 ------------------------------------------------
-function WL.buildItemTraitIconText(text, traitId)
+function WL.buildItemTraitIconText(text, traitId, size)
+    if not traitId then return text end
     local itemTraitIconText = text
+    size = size or 20
     if traitId ~= ITEM_TRAIT_TYPE_NONE then
         --itemTraitIconText = zo_iconTextFormat(WL.traitTextures[traitId], 20, 20, itemTraitIconText)
-        itemTraitIconText = zo_strformat(text .. " <<1>>", zo_iconFormat(WL.traitTextures[traitId], 20, 20))
+        local texturePath = WL.traitTextures[traitId]
+        if not texturePath then return "" end
+        itemTraitIconText = zo_iconFormat(texturePath, size, size)
+        if text then
+            itemTraitIconText = text .. " " .. itemTraitIconText
+        end
     end
     return itemTraitIconText
 end
+
+function WL.buildItemItemTypeIconText(text, itemTypeId, size)
+    if not itemTypeId then return text end
+    size = size or 20
+    local itemTypeIconText = text
+    if itemTypeId ~= 0 then
+        --itemTraitIconText = zo_iconTextFormat(WL.traitTextures[traitId], 20, 20, itemTraitIconText)
+        local texturePath = WL.ItemTypeTextures[itemTypeId]
+        if not texturePath then return "" end
+        itemTypeIconText = zo_iconFormat(texturePath, size, size)
+        if text then
+            itemTypeIconText = text .. " " .. itemTypeIconText
+        end
+    end
+    return itemTypeIconText
+end
+
+function WL.buildItemWeaponOrArmorTypeIconText(text, weaponOrArmorType, itemType, size)
+    if not itemType then return text end
+    size = size or 20
+    local itemWeaponrOrArmorTypeIconText = text
+    local textureTable
+    if itemType == ITEMTYPE_WEAPON then
+        textureTable = WL.WeaponTypeTextures
+    elseif itemType == ITEMTYPE_ARMOR then
+        textureTable = WL.ArmorTypeTextures
+    end
+    if weaponOrArmorType ~= 0 then
+        local texturePath = textureTable[weaponOrArmorType]
+        if not texturePath then return "" end
+        itemWeaponrOrArmorTypeIconText = zo_iconFormat(texturePath, size, size)
+        if text then
+            itemWeaponrOrArmorTypeIconText = text .. " " .. itemWeaponrOrArmorTypeIconText
+        end
+    end
+    return itemWeaponrOrArmorTypeIconText
+end
+
+function WL.buildItemSlotIconText(text, slotType, size)
+    if not slotType then return text end
+    size = size or 20
+    local itemSlotIconText = text
+    if slotType ~= 0 then
+        local texturePath = WL.SlotTextures[slotType]
+        if not texturePath then return "" end
+        itemSlotIconText = zo_iconFormat(texturePath, size, size)
+        if text then
+            itemSlotIconText = text .. " " .. itemSlotIconText
+        end
+    end
+    return itemSlotIconText
+end
+
 
 
 ------------------------------------------------
@@ -917,11 +1005,8 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
         --Output the message text to chat
         d(text)
         --Output the message text to center screen announcement
-        if settings.useItemFoundCSA then
-            local params = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.CHAMPION_POINTS_COMMITTED)
-            params:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
-            params:SetText(text)
-            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(params)
+        if settings.useItemFoundCSA == true then
+            WL.CSA(text)
         end
     end
 end
@@ -1871,3 +1956,68 @@ function WL.searchTableWithSearchString(tableToSearch, searchString, tableKey)
     return false
 end
 ]]
+
+
+------------------------------------------------
+--- Color functions
+------------------------------------------------
+-- Map the qualityId of WishList to one ZOs qualityId
+function WL.mapWLQualityToZOsQuality(qualityIdWishList)
+    local qualityIdStart = ITEM_QUALITY_NORMAL
+    local qualityIdEnd   = ITEM_QUALITY_LEGENDARY
+    local mapQualitiesStart = {
+        [WISHLIST_QUALITY_ALL]		                = ITEM_QUALITY_TRASH,       --Any quality
+        [WISHLIST_QUALITY_TRASH] 	                = ITEM_QUALITY_TRASH, 		--Trash
+        [WISHLIST_QUALITY_NORMAL] 	                = ITEM_QUALITY_NORMAL, 		--Normal (white)
+        [WISHLIST_QUALITY_MAGIC] 	                = ITEM_QUALITY_MAGIC, 		--Magic (green)
+        [WISHLIST_QUALITY_ARCANE] 	                = ITEM_QUALITY_ARCANE, 		--Arcane (blue)
+        [WISHLIST_QUALITY_ARTIFACT] 	            = ITEM_QUALITY_ARTIFACT, 	--Artifact (purple)
+        [WISHLIST_QUALITY_LEGENDARY]		        = ITEM_QUALITY_LEGENDARY, 	--Legendary (golden)
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	        = ITEM_QUALITY_MAGIC, 		--Magic or arcane
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= ITEM_QUALITY_ARCANE, 		--Arcane or artifact
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= ITEM_QUALITY_ARTIFACT, 	--Artifact or legendary
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	    = ITEM_QUALITY_MAGIC, 		--Magic to legendary
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	    = ITEM_QUALITY_ARCANE, 		--Arcane to legendary
+    }
+    local mapQualitiesEnd = {
+        [WISHLIST_QUALITY_ALL]		                = ITEM_QUALITY_LEGENDARY,   --Any quality
+        [WISHLIST_QUALITY_TRASH] 	                = ITEM_QUALITY_TRASH, 		--Trash
+        [WISHLIST_QUALITY_NORMAL] 	                = ITEM_QUALITY_NORMAL, 		--Normal (white)
+        [WISHLIST_QUALITY_MAGIC] 	                = ITEM_QUALITY_MAGIC, 		--Magic (green)
+        [WISHLIST_QUALITY_ARCANE] 	                = ITEM_QUALITY_ARCANE, 		--Arcane (blue)
+        [WISHLIST_QUALITY_ARTIFACT] 	            = ITEM_QUALITY_ARTIFACT, 	--Artifact (purple)
+        [WISHLIST_QUALITY_LEGENDARY]		        = ITEM_QUALITY_LEGENDARY, 	--Legendary (golden)
+        [WISHLIST_QUALITY_MAGIC_OR_ARCANE] 	        = ITEM_QUALITY_ARCANE, 		--Magic or arcane
+        [WISHLIST_QUALITY_ARCANE_OR_ARTIFACT]		= ITEM_QUALITY_ARTIFACT, 	--Arcane or artifact
+        [WISHLIST_QUALITY_ARTIFACT_OR_LEGENDARY]	= ITEM_QUALITY_LEGENDARY, 	--Artifact or legendary
+        [WISHLIST_QUALITY_MAGIC_TO_LEGENDARY]	    = ITEM_QUALITY_LEGENDARY, 	--Magic to legendary
+        [WISHLIST_QUALITY_ARCANE_TO_LEGENDARY]	    = ITEM_QUALITY_LEGENDARY, 	--Arcane to legendary
+    }
+    if mapQualitiesStart[qualityIdWishList] ~= nil then
+        qualityIdStart = mapQualitiesStart[qualityIdWishList]
+    end
+    if mapQualitiesEnd[qualityIdWishList] ~= nil then
+        qualityIdEnd = mapQualitiesEnd[qualityIdWishList]
+    end
+    return qualityIdStart, qualityIdEnd
+end
+
+function WL.ColorizeByQualityColor(text, WLquality)
+    if not text or text == "" or not WLquality then return "" end
+    local ZOsQualityIdFrom, ZOsQualityIdTo = WL.mapWLQualityToZOsQuality(WLquality)
+    local qualityColorFrom  = GetItemQualityColor(ZOsQualityIdFrom)
+    local colorizedText = text
+    --More than 1 color to apply to the text (from -> to values)
+    if ZOsQualityIdFrom ~= ZOsQualityIdTo then
+        local qualityColorTo = GetItemQualityColor(ZOsQualityIdTo)
+        --Split the string at the half and colorize the "left with from" and the "right part with to" quality colors
+        local strLen = string.len(text)
+        local endleft = zo_roundToNearest(strLen/2, 1)
+        local strLeft = string.sub(text, 1, endleft)
+        local strRight = string.sub(text, endleft+1)
+        colorizedText = qualityColorFrom:Colorize(strLeft) .. qualityColorTo:Colorize(strRight)
+    else
+        colorizedText = qualityColorFrom:Colorize(text)
+    end
+    return colorizedText
+end
