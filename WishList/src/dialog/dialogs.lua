@@ -57,7 +57,8 @@ function WL.WishListWindowAddItemInitialize(control)
     local cancelBtn = GetControl(control, "Cancel")
     local descLabel = GetControl(content, "Text")
     local labelLastAddedHistory = GetControl(content, "LastAddedHistoryLabel")
-    local comboLastAddedHistory = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("LastAddedHistoryCombo"))
+    local comboBoxBaseControlLastAddedHistory = content:GetNamedChild("LastAddedHistoryCombo")
+    local comboLastAddedHistory = ZO_ComboBox_ObjectFromContainer(comboBoxBaseControlLastAddedHistory)
     local labelItemType = GetControl(content, "ItemTypeText")
     local comboItemType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ItemTypeCombo")) --GetControl(content, "ItemTypeCombo")
     local labelArmorOrWeaponType = GetControl(content, "ArmorOrWeaponTypeText")
@@ -111,7 +112,7 @@ function WL.WishListWindowAddItemInitialize(control)
                         setId       = entryData.setId,
                         names       = libSets.GetSetNames(entryData.setId),
                     }
-                    delayBeforeChange = 50
+                    delayBeforeChange = 10
                     WL.showAddItem(setData, true)
                 end
                 --Call delayed if poup dialog was closed and re-opened
@@ -206,11 +207,39 @@ function WL.WishListWindowAddItemInitialize(control)
                 local entryText = buildLastAddedEntryText(lastAddedData)
                 if entryText ~= nil and entryText ~= "" then
                     local entry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
+                    --todo: Not working as the entry is a ZO_Menu entry
                     entry.id = lastAddedData.dateTime
+                    --[[
+                    entry:SetHandler("OnMouseUp", function(itemEntry, mouseButton, upInside, alt, shift, ctrl)
+                        if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+                            AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
+                                d("Removing item: " ..tostring(entry.id))
+                            end)
+                            ShowMenu(entry)
+                        end
+                    end)
+                    ]]
                     comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
                 end
             end
             comboLastAddedHistory:SelectItemByIndex(1, true)
+            --Add right click context menu to the lastAdded combobox
+            ZO_PreHookHandler(comboBoxBaseControlLastAddedHistory, "OnMouseUp", function(comboBoxCtrl, mouseButton, upInside, alt, shift, ctrl)
+                if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+                    --LibCustomMenu
+                    AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
+                        --Combobox leeren
+                        comboLastAddedHistory:ClearItems()
+                        --SavedVariables nun noch leeren
+                        WL.accData.lastAddedViaDialog = nil
+                        WL.accData.lastAddedViaDialog = {}
+                    end)
+                    ShowMenu(comboBoxCtrl)
+
+                    return true --do not open the combobox if right clicked
+                end
+            end)
+
 
             --Quality Callback
             local callbackQuality = function( comboBox, entryText, entry, selectionChanged )

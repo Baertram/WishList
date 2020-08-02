@@ -72,6 +72,8 @@ local strings = {
 
     WISHLIST_CONTEXTMENU_ADD = "Zur " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_CONTEXTMENU_REMOVE = "Von " .. GetString(WISHLIST_TITLE) .. " entfernen",
+    WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED = "Von zuletzt hinzugefügten entfernen",
+    WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED = "Zuletzt hinzugefügte leeren",
 
     WISHLIST_ADDED = " zur " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_REMOVED = " von der " .. GetString(WISHLIST_TITLE) .. " entfernt",
