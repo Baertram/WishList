@@ -117,8 +117,6 @@ function WL.WishListWindowAddItemInitialize(control)
                 local delayBeforeChange = 0
                 if WL.currentSetId ~= entryData.setId then
                     --Close the dialog, as it needs to be re-opened for a new setId
-                    textureLastAddedHistory:SetTexture("")
-                    textureLastAddedHistory:SetHidden(true)
                     WishListAddItemDialogCancel:callback()
                     local clientLang = WL.clientLang or WL.fallbackSetLang
                     local libSets = WishList.LibSets
@@ -204,8 +202,6 @@ function WL.WishListWindowAddItemInitialize(control)
             end
 
             local function createdLastAddedHistoryComboBoxEntries()
-                textureLastAddedHistory:SetTexture("")
-                textureLastAddedHistory:SetHidden(true)
                 --Last added history combobox
                 comboLastAddedHistory:SetSortsItems(false)
                 comboLastAddedHistory:ClearItems()
@@ -251,6 +247,8 @@ function WL.WishListWindowAddItemInitialize(control)
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
                             local entry = comboLastAddedHistory.m_selectedItemData
                             if WL.accData.lastAddedViaDialog and WL.accData.lastAddedViaDialog[entry.id] then
+                                textureLastAddedHistory:SetTexture("")
+                                textureLastAddedHistory:SetHidden(true)
                                 WL.accData.lastAddedViaDialog[entry.id] = nil
                                 --As there is no proper "remove item" function we totally need to rebuild the combobox entries...
                                 createdLastAddedHistoryComboBoxEntries()
@@ -262,11 +260,11 @@ function WL.WishListWindowAddItemInitialize(control)
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
                             --Show ask before clear dialog
                             --But close the current dialog before as no dialog can be shown "above the other opened dialog" :-(
+                            textureLastAddedHistory:SetTexture("")
+                            textureLastAddedHistory:SetHidden(true)
                             WishListAddItemDialogCancel:callback()
                             WL.showQuestionDialog(GetString(WISHLIST_CLEAR_LAST_ADDED_TITLE), GetString(WISHLIST_CLEAR_LAST_ADDED_TEXT),
                                     function(dialog)
-                                        textureLastAddedHistory:SetTexture("")
-                                        textureLastAddedHistory:SetHidden(true)
                                         --Clear combobox
                                         comboLastAddedHistory:ClearItems()
                                         --SavedVariables nun noch leeren
