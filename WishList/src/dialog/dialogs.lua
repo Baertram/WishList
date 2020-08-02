@@ -209,7 +209,6 @@ function WL.WishListWindowAddItemInitialize(control)
                     local entryText = buildLastAddedEntryText(lastAddedData)
                     if entryText ~= nil and entryText ~= "" then
                         local entry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
-                        --todo: Not working as the entry is a ZO_Menu entry
                         entry.id = lastAddedData.dateTime
                         comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
                     end
@@ -226,6 +225,7 @@ function WL.WishListWindowAddItemInitialize(control)
             --Add right click context menu to the lastAdded combobox
             ZO_PreHookHandler(comboBoxBaseControlLastAddedHistory, "OnMouseUp", function(comboBoxCtrl, mouseButton, upInside, alt, shift, ctrl)
                 if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+                    ClearMenu()
                     --LibCustomMenu
                     if comboLastAddedHistory.m_selectedItemData ~= nil and comboLastAddedHistory.m_selectedItemData.id ~= -1 then
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
@@ -239,12 +239,17 @@ function WL.WishListWindowAddItemInitialize(control)
                         AddCustomMenuItem("-", function() end)
                     end
                     AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
-                        --TODO Dialog to ask if all should be cleared!
-                        --Clear combobox
-                        comboLastAddedHistory:ClearItems()
-                        --SavedVariables nun noch leeren
-                        WL.accData.lastAddedViaDialog = nil
-                        WL.accData.lastAddedViaDialog = {}
+                        WL.showQuestionDialog(GetString(WISHLIST_CLEAR_LAST_ADDED_TITLE), GetString(WISHLIST_CLEAR_LAST_ADDED_TEXT),
+                            function(dialog)
+                                --Clear combobox
+                                comboLastAddedHistory:ClearItems()
+                                --SavedVariables nun noch leeren
+                                WL.accData.lastAddedViaDialog = nil
+                                WL.accData.lastAddedViaDialog = {}
+                            end,
+                            function(dialog) end,
+                            {}
+                        )
                     end)
                     ShowMenu(comboBoxCtrl)
 
@@ -1278,4 +1283,33 @@ function WL.showChangeQuality(item, changeWholeSet, comingFromWishListWindow)
     WL.CurrentItem = item
     WL.checkCurrentCharData()
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CHANGE_QUALITY_DIALOG", {itemData=item, wholeSet=changeWholeSet, wlWindow=comingFromWishListWindow})
+end
+
+function WL.showQuestionDialog(questionTitle, questionText, callbackYesFnc, callbackNoFnc, data)
+    if questionTitle == nil or questionTitle == "" or questionText == nil or questionText == ""
+            or callbackYesFnc == nil or type(callbackYesFnc) ~= "function" or callbackNoFnc == nil or type(callbackNoFnc) ~= "function" then
+        return
+    end
+    data = data or {}
+    ZO_Dialogs_RegisterCustomDialog("WISHLIST_QUESTION_DIALOG", {
+        canQueue = true,
+        title = {
+            text = questionTitle,
+        },
+        mainText = {
+            text = questionText,
+        },
+        buttons =  {
+            [1] = {
+                text = SI_DIALOG_CONFIRM,
+                callback = callbackYesFnc,
+            },
+            [2] = {
+                text = SI_DIALOG_CANCEL,
+                callback = callbackNoFnc,
+            }
+        },
+        --setup = function(dialog, data) end,
+    })
+    ZO_Dialogs_ShowDialog("WISHLIST_QUESTION_DIALOG", data)
 end
