@@ -90,7 +90,7 @@ function WL.WishListWindowAddItemInitialize(control)
 
             WL.checkCharsData()
 
-            --Last added historycallback
+            --Last added history combobox: Selected entry callback
             local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
                 --d("[WL]lastAddedHistoryCallback-"..entryText)
                 --Get the lastAddedData via the id
@@ -227,7 +227,7 @@ function WL.WishListWindowAddItemInitialize(control)
             ZO_PreHookHandler(comboBoxBaseControlLastAddedHistory, "OnMouseUp", function(comboBoxCtrl, mouseButton, upInside, alt, shift, ctrl)
                 if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
                     --LibCustomMenu
-                    if comboLastAddedHistory.m_selectedItemData ~= nil then
+                    if comboLastAddedHistory.m_selectedItemData ~= nil and comboLastAddedHistory.m_selectedItemData.id ~= -1 then
                         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
                             local entry = comboLastAddedHistory.m_selectedItemData
                             if WL.accData.lastAddedViaDialog and WL.accData.lastAddedViaDialog[entry.id] then
@@ -1130,7 +1130,7 @@ end
 
 --Add the currently selected data of the add item dialog to last added history in the SavedVariables
 function WL.addLastAddedHistoryFromAddItemDialog(setId, comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality, specialAddedType)
-    local entryTextTemplate = "dateTime: %s, SetId: %s, itemType: %s, weaponOrArmorType: %s, slotType: %s, trait: %s, quality: %s, charId: %s, specialAddedType: %s"
+    --local entryTextTemplate = "dateTime: %s, SetId: %s, itemType: %s, weaponOrArmorType: %s, slotType: %s, trait: %s, quality: %s, charId: %s, specialAddedType: %s"
     local itemTypeId = comboItemType:GetSelectedItemData().id
     local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
     local traitId = comboTrait:GetSelectedItemData().id
@@ -1151,7 +1151,7 @@ function WL.addLastAddedHistoryFromAddItemDialog(setId, comboItemType, comboArmo
     newAddedData.quality = qualityId
     newAddedData.charId = charId
 
-    local entryText = string.format(entryTextTemplate, tostring(os.date("%c", newAddedData.dateTime)), tostring(setId),tostring(itemTypeId),tostring(typeId),tostring(slotId),tostring(traitId),tostring(qualityId),tostring(charId),tostring(specialAddedType))
+    --local entryText = string.format(entryTextTemplate, tostring(os.date("%c", newAddedData.dateTime)), tostring(setId),tostring(itemTypeId),tostring(typeId),tostring(slotId),tostring(traitId),tostring(qualityId),tostring(charId),tostring(specialAddedType))
 --d("[WL.addLastAddedHistoryFromAddItemDialog] " .. entryText)
     WL:AddLastAddedHistory(newAddedData)
 end
