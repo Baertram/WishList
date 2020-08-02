@@ -209,11 +209,13 @@ WL.quality = {
 }
 
 WL.addDialogButtonTextures = {
-	[WISHLIST_ADD_TYPE_WHOLE_SET]                           = "esoui/art/charactercreate/rotate_right_up.dds",
-	[WISHLIST_ADD_TYPE_BY_ITEMTYPE]                         = "esoui/art/charactercreate/rotate_right_up.dds",
-	[WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE]   = "esoui/art/charactercreate/rotate_right_up.dds",
-	[WISHLIST_ADD_ONE_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_1handed_up.dds",
-	[WISHLIST_ADD_TWO_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_2handed_up.dds",
-	[WISHLIST_ADD_BODY_PARTS_ARMOR] 						= "esoui/art/crafting/smithing_tabicon_armorset_up.dds",
+	--Vertical buttons at the left side of the dialog
+	[WISHLIST_ADD_TYPE_WHOLE_SET]                           = "esoui/art/chatwindow/chat_addtab_%s.dds",
+	[WISHLIST_ADD_TYPE_BY_ITEMTYPE]                         = "esoui/art/charactercreate/rotate_right_%s.dds",
+	[WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_ARMOR_WEAPON_TYPE]   = "esoui/art/characterwindow/gearslot_quickslot.dds",
+	--Horizontal buttons next to "slot"
+	[WISHLIST_ADD_ONE_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_1handed_%s.dds",
+	[WISHLIST_ADD_TWO_HANDED_WEAPONS] 						= "esoui/art/icons/progression_tabicon_2handed_%s.dds",
+	[WISHLIST_ADD_BODY_PARTS_ARMOR] 						= "esoui/art/crafting/smithing_tabicon_armorset_%s.dds",
 	[WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR] 					= "esoui/art/icons/gear_undauntedspider_head_a.dds",
 }

@@ -36,7 +36,7 @@ local function buildLastAddedEntryText(lastAddedData)
         local addDialogButtonTextures = WL.addDialogButtonTextures
         local specialAddedTypeTexture = addDialogButtonTextures[specialAddedType]
         if specialAddedTypeTexture ~= nil then
-            specialAddedTypeText = zo_iconFormat(specialAddedTypeTexture,24,24)
+            specialAddedTypeText = zo_iconFormat(string.format(specialAddedTypeTexture, "up"),24,24)
             entryTextTemplateToUse = entryTextTemplate
             entryText = string.format(entryTextTemplateToUse, tostring(dateTimeString), tostring(charName), tostring(setQualityText),tostring(itemTypeIdIcon),tostring(weaponOrArmorTypeIcon),tostring(slotIcon),tostring(traitIcon), tostring(specialAddedTypeText))
         end
@@ -59,6 +59,7 @@ function WL.WishListWindowAddItemInitialize(control)
     local labelLastAddedHistory = GetControl(content, "LastAddedHistoryLabel")
     local comboBoxBaseControlLastAddedHistory = content:GetNamedChild("LastAddedHistoryCombo")
     local comboLastAddedHistory = ZO_ComboBox_ObjectFromContainer(comboBoxBaseControlLastAddedHistory)
+    local textureLastAddedHistory = content:GetNamedChild("LastAddedHistoryTexture")
     local labelItemType = GetControl(content, "ItemTypeText")
     local comboItemType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ItemTypeCombo")) --GetControl(content, "ItemTypeCombo")
     local labelArmorOrWeaponType = GetControl(content, "ArmorOrWeaponTypeText")
@@ -90,20 +91,32 @@ function WL.WishListWindowAddItemInitialize(control)
 
             WL.checkCharsData()
 
+
             --Last added history combobox: Selected entry callback
             local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
                 --d("[WL]lastAddedHistoryCallback-"..entryText)
                 --Get the lastAddedData via the id
+                textureLastAddedHistory:SetTexture("")
+                textureLastAddedHistory:SetHidden(true)
                 if entry.id == nil then return end
                 local lastAddedViaDialogData = WL.accData.lastAddedViaDialog
                 if not lastAddedViaDialogData or not lastAddedViaDialogData[entry.id] then return end
                 local entryData = lastAddedViaDialogData[entry.id]
+                local specialAddedType = entryData.specialAddedType
+                if specialAddedType ~= nil then
+                    local specialAddedTypeToTextureFile = WL.addDialogButtonTextures
+                    if specialAddedTypeToTextureFile[specialAddedType] ~= nil then
+                        textureLastAddedHistory:SetTexture(string.format(specialAddedTypeToTextureFile[specialAddedType], "up"))
+                        textureLastAddedHistory:SetHidden(false)
+                        textureLastAddedHistory:SetDimensions(28, 28)
+                    end
+                end
 
                 --Close the current dialog and reload a new one with the correct setData, if the current setId is not
                 --the same as of the chosen "lastAdded" combobox
                 local delayBeforeChange = 0
                 if WL.currentSetId ~= entryData.setId then
-                    --Close the dialog
+                    --Close the dialog, as it needs to be re-opened for a new setId
                     WishListAddItemDialogCancel:callback()
                     local clientLang = WL.clientLang or WL.fallbackSetLang
                     local libSets = WishList.LibSets
@@ -116,7 +129,7 @@ function WL.WishListWindowAddItemInitialize(control)
                     WL.lastSelectedLastAddedHistoryEntry = entry
                     WL.showAddItem(setData, true)
                 end
-                --Call delayed if poup dialog was closed and re-opened
+                --Call delayed if poup dialog was closed, and re-opened for another setId
                 zo_callLater(function()
                     --Set the comboboxes to the rows of the last added entry data
                     --Quality
@@ -202,7 +215,10 @@ function WL.WishListWindowAddItemInitialize(control)
                     return a.dateTime < b.dateTime
                 end)
                 --Add 1 empty entry
-                local entry = ZO_ComboBox:CreateItemEntry(" ", function()  end)
+                local entry = ZO_ComboBox:CreateItemEntry(" ", function()
+                    textureLastAddedHistory:SetTexture("")
+                    textureLastAddedHistory:SetHidden(true)
+                end)
                 entry.id = -1
                 comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
                 for idx, lastAddedData in ipairs(lastAddedHistoryDataSortedByTimeStamp) do
@@ -1317,4 +1333,16 @@ function WL.showQuestionDialog(questionTitle, questionText, callbackYesFnc, call
         --setup = function(dialog, data) end,
     })
     ZO_Dialogs_ShowDialog("WISHLIST_QUESTION_DIALOG", data)
+end
+
+function WL.getAddItemDialogButtonTexture(specialAddType, buttonType)
+    if specialAddType == nil or specialAddType == "" then return "" end
+    local specialAddTypeToButtontexture = WL.addDialogButtonTextures
+    local textureFileName = ""
+    if buttonType ~= nil and buttonType ~= "" then
+        textureFileName = string.format(specialAddTypeToButtontexture[specialAddType], buttonType) or ""
+    else
+        textureFileName = specialAddTypeToButtontexture[specialAddType] or ""
+    end
+    return textureFileName
 end

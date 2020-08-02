@@ -17,7 +17,10 @@
                             <Dimensions x="180" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT" offsetY="-10" />
                         </Control>
-
+                        <Texture name="$(parent)LastAddedHistoryTexture" textureFile="" hidden="true">
+                            <Dimensions x="28" y="28"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)LastAddedHistoryCombo" relativePoint="TOPRIGHT" offsetX="2" />
+                        </Texture>
                         <Label name="$(parent)Text" font="ZoFontGame"
                                color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
                                horizontalAlignment="CENTER" text="xxx">
@@ -88,10 +91,10 @@
                 <Button name="$(parent)ButtonAddWholeSet" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="30" y="20" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX="7" offsetY="104" />
-                    <Textures normal    = "esoui/art/charactercreate/rotate_right_up.dds"
-                              pressed   = "esoui/art/charactercreate/rotate_right_down.dds"
-                              mouseOver = "esoui/art/charactercreate/rotate_right_over.dds"
-                              disabled  = "esoui/art/charactercreate/rotate_right_disabled.dds" />
+                    <Textures normal    = "esoui/art/chatwindow/chat_addtab_up.dds"
+                              pressed   = "esoui/art/chatwindow/chat_addtab_up.dds"
+                              mouseOver = "esoui/art/chatwindow/chat_addtab_up.dds"
+                              disabled  = "esoui/art/chatwindow/chat_addtab_up.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_TYPE_WHOLE_SET)
                     </OnClicked>
@@ -106,9 +109,9 @@
                     <Dimensions x="26" y="20" />
                     <Anchor point="LEFT" relativeTo="$(parent)ArmorOrWeaponTypeText" relativePoint="LEFT" offsetX="7" offsetY="-80" />
                     <Textures normal    = "esoui/art/charactercreate/rotate_right_up.dds"
-                              pressed   = "esoui/art/charactercreate/rotate_right_down.dds"
-                              mouseOver = "esoui/art/charactercreate/rotate_right_over.dds"
-                              disabled  = "esoui/art/charactercreate/rotate_right_disabled.dds" />
+                              pressed   = "esoui/art/charactercreate/rotate_right_up.dds"
+                              mouseOver = "esoui/art/charactercreate/rotate_right_up.dds"
+                              disabled  = "esoui/art/charactercreate/rotate_right_up.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_TYPE_BY_ITEMTYPE)
                     </OnClicked>
@@ -122,10 +125,10 @@
                 <Button name="$(parent)ButtonAddWholeItemTypeTypeOfSet" inherits="ZO_ButtonBehaviorClickSound">
                     <Dimensions x="26" y="20" />
                     <Anchor point="LEFT" relativeTo="$(parent)SlotText" relativePoint="LEFT" offsetX="7" offsetY="-40" />
-                    <Textures normal    = "esoui/art/charactercreate/rotate_right_up.dds"
-                              pressed   = "esoui/art/charactercreate/rotate_right_down.dds"
-                              mouseOver = "esoui/art/charactercreate/rotate_right_over.dds"
-                              disabled  = "esoui/art/charactercreate/rotate_right_disabled.dds" />
+                    <Textures normal    = "esoui/art/characterwindow/gearslot_quickslot.dds"
+                              pressed   = "esoui/art/characterwindow/gearslot_quickslot.dds"
+                              mouseOver = "esoui/art/characterwindow/gearslot_quickslot.dds"
+                              disabled  = "esoui/art/characterwindow/gearslot_quickslot.dds" />
                     <OnClicked>
                         WishList.AddSetItems(WISHLIST_ADD_TYPE_BY_ITEMTYPE_AND_WEAPON_ARMOR_TYPE)
                     </OnClicked>
