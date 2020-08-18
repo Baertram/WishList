@@ -78,7 +78,7 @@ function WL.getSavedVarsServer()
     local accDataServerIndependent = WL.accDataServerIndependent
     if not accDataServerIndependent or
         ( accDataServerIndependent ~= nil and not accDataServerIndependent.savedVarsWereMigratedToServerDependent ) then
-        return "Default"
+        return WL.addonVars.addonSavedVarsDefault --"Default"
     end
     return GetWorldName()
 end
@@ -89,13 +89,16 @@ local function buildSVLastCharacterNameEntry(charId, accName)
     if charId == nil then return false end
     accName = accName or GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    if WishList_Data and WishList_Data[savedVarsServer] and WishList_Data[savedVarsServer][accName] and WishList_Data[savedVarsServer][accName][charId] and
-        WishList_Data[savedVarsServer][accName][charId]["Data"] and WishList_Data[savedVarsServer][accName][charId]["Data"]["$LastCharacterName"] == nil then
+    local addonVars = WL.addonVars
+    if WishList_Data and WishList_Data[savedVarsServer] and WishList_Data[savedVarsServer][accName]
+        and WishList_Data[savedVarsServer][accName][charId]
+        and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab]
+        and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsLastCharacterIdentifier] == nil then
         local charData = WL.getCharDataById(charId)
         if charData == nil then return false end
         local lastCharacterName = charData.nameClean
         if lastCharacterName ~= nil and lastCharacterName ~= "" then
-            WishList_Data[savedVarsServer][accName][charId]["Data"]["$LastCharacterName"] = lastCharacterName
+            WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsLastCharacterIdentifier] = lastCharacterName
             return true
         end
     end
@@ -107,10 +110,11 @@ function WL.checkIfWLSavedVarsExist(charId)
     if charId == nil then return false end
     local accName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
     if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
-      and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId]["Data"] ~= nil
-      and WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] ~= nil
-      and #WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] > 0 then
+      and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] ~= nil
+      and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab] ~= nil
+      and #WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab] > 0 then
         return true
     else
         --Create the WishList SavedVars entry for the missing charData, but as no entries are given return false in the end!
@@ -118,8 +122,8 @@ function WL.checkIfWLSavedVarsExist(charId)
             WishList_Data[savedVarsServer] = WishList_Data[savedVarsServer] or {}
             WishList_Data[savedVarsServer][accName] = WishList_Data[savedVarsServer][accName] or {}
             WishList_Data[savedVarsServer][accName][charId] = WishList_Data[savedVarsServer][accName][charId] or {}
-            WishList_Data[savedVarsServer][accName][charId]["Data"] = WishList_Data[savedVarsServer][accName][charId]["Data"] or {}
-            WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] = WishList_Data[savedVarsServer][accName][charId]["Data"]["wishList"] or {}
+            WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] = WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] or {}
+            WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab] = WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab] or {}
             --Build the $LastCharacterName entry if missing
             buildSVLastCharacterNameEntry(charId, accName)
         end
@@ -134,10 +138,11 @@ function WL.getWishListSaveVars(charData, calledBy, noFallBackToLoggedIn)
     local wishListSavedVars = {}
     local accName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
         if WL.checkIfWLSavedVarsExist(charData.id) then
 --d(">WL data of char exists")
-            wishListSavedVars = WishList_Data[savedVarsServer][accName][charData.id]["Data"]["wishList"]
+            wishListSavedVars = WishList_Data[savedVarsServer][accName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab]
         end
     else
         --CharData is not given so use the currently logged in char's WishList!
@@ -154,7 +159,7 @@ function WL.getWishListSaveVars(charData, calledBy, noFallBackToLoggedIn)
         end
         local loggedInCharId = WL.LoggedInCharData.id
         WL.checkIfWLSavedVarsExist(loggedInCharId)
-        wishListSavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId]["Data"]["wishList"]
+        wishListSavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab]
     end
     return wishListSavedVars
 end
@@ -171,10 +176,11 @@ function WL.checkIfHistorySavedVarsExist(charId)
     if charId == nil then return false end
     local accName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
     if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
-            and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId]["Data"] ~= nil
-            and WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] ~= nil
-            and #WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] > 0 then
+            and WishList_Data[savedVarsServer][accName][charId] ~= nil and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] ~= nil
+            and WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab] ~= nil
+            and #WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab] > 0 then
             return true
     else
         --Create the history SavedVars entry for the missing charData, but as no entries are given return false in the end!
@@ -182,8 +188,8 @@ function WL.checkIfHistorySavedVarsExist(charId)
             WishList_Data[savedVarsServer] = WishList_Data[savedVarsServer] or {}
             WishList_Data[savedVarsServer][accName] = WishList_Data[savedVarsServer][accName] or {}
             WishList_Data[savedVarsServer][accName][charId] = WishList_Data[savedVarsServer][accName][charId] or {}
-            WishList_Data[savedVarsServer][accName][charId]["Data"] = WishList_Data[savedVarsServer][accName][charId]["Data"] or {}
-            WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] = WishList_Data[savedVarsServer][accName][charId]["Data"]["history"] or {}
+            WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] = WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab] or {}
+            WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab] = WishList_Data[savedVarsServer][accName][charId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab] or {}
             --Build the $LastCharacterName entry if missing
             buildSVLastCharacterNameEntry(charId, accName)
         end
@@ -198,10 +204,11 @@ function WL.getHistorySaveVars(charData, calledBy, noFallBackToLoggedIn)
     local historySavedVars = {}
     local accName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
         if WL.checkIfHistorySavedVarsExist(charData.id) then
 --d(">History data of char exists")
-            historySavedVars = WishList_Data[savedVarsServer][accName][charData.id]["Data"]["history"]
+            historySavedVars = WishList_Data[savedVarsServer][accName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab]
         end
     else
         --CharData is not given so use the currently logged in char's history!
@@ -217,7 +224,7 @@ function WL.getHistorySaveVars(charData, calledBy, noFallBackToLoggedIn)
         end
         local loggedInCharId = WL.LoggedInCharData.id
         WL.checkIfHistorySavedVarsExist(loggedInCharId)
-        historySavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId]["Data"]["history"]
+        historySavedVars = WishList_Data[savedVarsServer][accName][loggedInCharId][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab]
     end
     return historySavedVars
 end

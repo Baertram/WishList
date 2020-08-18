@@ -5,17 +5,25 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		= 2.96
-WL.addonVars.addonSavedVarsVersion	= 2.0 --Changing this will reset the SavedVariables!!!
-WL.addonVars.addonName				= "WishList"
-WL.addonVars.addonSavedVars			= "WishList_Data"
-WL.addonVars.addonSavedVarsAllServers = "WishList_Data_All_Servers"
-WL.addonVars.settingsName   		= "WishList"
-WL.addonVars.settingsDisplayName   	= WL.addonVars.settingsName
-WL.addonVars.addonAuthor			= "Meai & Baertram"
-WL.addonVars.addonWebsite			= "http://www.esoui.com/downloads/info1641-WishList.html"
-WL.addonVars.addonDonation			= "https://www.esoui.com/portal.php?id=136&a=faq&faqid=131"
-WL.addonVars.addonFeedback			= "https://www.esoui.com/downloads/info1641-WishList.html#comments"
+WL.addonVars.addonRealVersion		    = 2.96
+WL.addonVars.addonSavedVarsVersion	    = 2.0 --Changing this will reset the SavedVariables!!!
+WL.addonVars.addonName				    = "WishList"
+WL.addonVars.addonSavedVars			    = "WishList_Data"
+WL.addonVars.addonSavedVarsAllServers   = "WishList_Data_All_Servers"
+WL.addonVars.addonSavedVarsDefault      = "Default"
+WL.addonVars.addonSavedVarsAccountWide  = "$AccountWide"
+WL.addonVars.addonSavedVarsAccountWideDataTab = "AccountwideData"
+WL.addonVars.addonSavedVarsDataTab      = "Data"
+WL.addonVars.addonSavedVarsWishListTab  = "wishList"
+WL.addonVars.addonSavedVarsHistoryTab   = "history"
+WL.addonVars.addonSavedVarsLastCharacterIdentifier = "$LastCharacterName"
+WL.addonVars.addonSavedVarsAccountWideServerIndependent = "AccountwideDataServerIndependent"
+WL.addonVars.settingsName   		    = "WishList"
+WL.addonVars.settingsDisplayName   	    = WL.addonVars.settingsName
+WL.addonVars.addonAuthor			    = "Meai & Baertram"
+WL.addonVars.addonWebsite			    = "http://www.esoui.com/downloads/info1641-WishList.html"
+WL.addonVars.addonDonation			    = "https://www.esoui.com/portal.php?id=136&a=faq&faqid=131"
+WL.addonVars.addonFeedback			    = "https://www.esoui.com/downloads/info1641-WishList.html#comments"
 
 WL.SVrelated_doReloadUINow = false
 
