@@ -470,12 +470,26 @@ function WL.CreateEntryForSet( setId, setData )
         --client language or English)
         for languageToAddToSetName, isEnabled in pairs(setNameOutputSettings) do
             if isEnabled and not langsAlreadyAdded[languageToAddToSetName] then
+                local setNameInLanguageToAdd = setData.names[languageToAddToSetName]
+                --Is the setName missing in the language it should be added for?
+                --Then set the name to "n/a"
+                if not setNameInLanguageToAdd or setNameInLanguageToAdd == "" then
+                    setNameInLanguageToAdd = "n/a"
+                end
                 if langsAdded == 0 then
-                    --Add the set name in this language without a seperator character
-                    nameColumnValue = nameColumnValue .. setData.names[languageToAddToSetName]
+                    if nameColumnValue and nameColumnValue ~= "" then
+                        --Add the set name in this language without a seperator character
+                        nameColumnValue = nameColumnValue .. setNameInLanguageToAdd
+                    else
+                        nameColumnValue = setNameInLanguageToAdd
+                    end
                 else
-                    --Add the set name in this language with a seperator character /
-                    nameColumnValue = nameColumnValue .. " / " .. setData.names[languageToAddToSetName]
+                    if nameColumnValue and nameColumnValue ~= "" then
+                        --Add the set name in this language with a seperator character /
+                        nameColumnValue = nameColumnValue .. " / " .. setNameInLanguageToAdd
+                    else
+                        nameColumnValue = setNameInLanguageToAdd
+                    end
                 end
                 --Increase the counter
                 langsAdded = langsAdded +1

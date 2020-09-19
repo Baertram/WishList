@@ -1676,6 +1676,7 @@ function WL.GetAllSetData(silent)
         local setsData = WL.accData.sets
         --For each setId: Read the setItemIds, and the name and the build a table for the WishList data (SavedVariables)
         for setId, _ in pairs(allSetIds) do
+--d(">setId: " ..tostring(setId))
             local setNamesAdded = false
             local setItemIdsAdded = false
             local setsArmorTypes = nil
@@ -1683,6 +1684,7 @@ function WL.GetAllSetData(silent)
             setsData[setId] = {}
             --Add set names and client language name
             if setNamesPreloaded[setId] ~= nil then
+--d(">>setNamesPreloaded found")
                 setNamesAdded = true
                 local setNames = setNamesPreloaded[setId]
                 setsData[setId].names = setNames
@@ -1693,6 +1695,7 @@ function WL.GetAllSetData(silent)
             end
             --Add the itemIds of the set
             if setItemIdsPreloaded[setId] ~= nil then
+--d(">>setItemIdsPreloaded found")
                 for setItemId, _ in pairs(setItemIdsPreloaded[setId]) do
                     setsData[setId][setItemId] = true
                     WL.accData.itemCount = WL.accData.itemCount + 1
