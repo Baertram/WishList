@@ -1421,7 +1421,7 @@ function WL.loadSettings()
         if migrateSavedVarsToServerDependent() == true then
             accDataServerIndependent.savedVarsWereMigratedToServerDependent = true
             accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp = os.date("%c")
-            d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL), tostring(os.date("%c", accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp))))
+            d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL), tostring(accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp)))
             WL.SVrelated_doReloadUINow = true
         else
             d(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FAILED))
