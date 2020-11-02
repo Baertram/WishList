@@ -215,6 +215,7 @@ WL.defaultSettings = {
     useItemFoundCharacterName            = true,
     useItemFoundCSA                      = true,
     itemFoundText                        = GetString(WISHLIST_LOOT_MSG_STANDARD),
+    showItemFoundHistoryChatOutput       = true,
     useLanguageForSetNames               = {
         ["de"] = false,
         ["en"] = true,

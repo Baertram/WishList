@@ -896,7 +896,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     return isAlreadyOnWishList, itemId, item
 end
 
---After an item is found during loot on a WishList
+--After an item is found on your WishList, during loot: Show a chat/onscreen message and add it to the history tab
 function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer, receivedBy, charData, whereWasItLootedData, debug)
     --WL._item = item
     --Item is on a wishlist, so output the info and center screen announcement

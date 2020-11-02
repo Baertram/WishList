@@ -324,6 +324,16 @@ function WL.buildAddonMenu()
             default = defaults.itemFoundText,
             width = "full",
         },
+        {
+            type = "checkbox",
+            name = GetString(WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT),
+            tooltip = GetString(WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT_TT),
+            getFunc = function() return settings.showItemFoundHistoryChatOutput end,
+            setFunc = function(value)
+                settings.showItemFoundHistoryChatOutput = value
+            end,
+            default = defaults.showItemFoundHistoryChatOutput,
+        },
         --==============================================================================
         {
             type = 'header',

@@ -833,9 +833,8 @@ function WL.AddSetItems(addType)
 end
 
 --Add item to the history SavedVariables
-function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
+function WishList:AddHistoryItem(items, charData)
 --d("[WishList:AddHistoryItem]")
-    noAddedChatOutput = noAddedChatOutput or false
     local count = 0
     local history = WL.getHistorySaveVars(charData)
     if history == nil then return true end
@@ -844,6 +843,7 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
+    local showItemFoundHistoryChatOutput = WL.data.showItemFoundHistoryChatOutput
     for i = 1, #items do
         local item = items[i]
         --Is the item already on the WishList?
@@ -866,11 +866,13 @@ function WishList:AddHistoryItem(items, charData, noAddedChatOutput)
             traitText = WL.TraitTypes[traitId]
             traitText = WL.buildItemTraitIconText(traitText, traitId)
         end
-        if not noAddedChatOutput then
+        if showItemFoundHistoryChatOutput then
             d(itemLink..GetString(WISHLIST_HISTORY_ADDED) .. ", " .. traitText .. charNameChat)
         end
     end
-    d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_ADDED) .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", count)) -- count.." item(s) added to Wish List"
+    if showItemFoundHistoryChatOutput then
+        d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_ADDED) .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", count)) -- count.." item(s) added to Wish List"
+    end
     WL.updateRemoveAllButon()
 
     if WL.window ~= nil then
