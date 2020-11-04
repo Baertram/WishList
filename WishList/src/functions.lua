@@ -876,7 +876,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                 if item.trait == traitType then
                                     --Quality checks
                                     --Get the itemQuality
-                                    itemQuality = itemQuality or GetItemLinkQuality(itemLink)
+                                    itemQuality = itemQuality or GetItemLinkDisplayQuality(itemLink)
                                     if itemQuality ~= nil and item.quality ~= nil then
                                         --Get the qualities to check
                                         local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
@@ -1028,6 +1028,49 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     end
 end
 
+--Select the set's items from the internal set data tables and build a return table with all items matching the criteria
+function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
+    local setsData = WL.accData.sets[setId]
+    local allTraitsTraitId = #WL.TraitTypes
+    local items = {}
+    for setItemId, _ in pairs(setsData) do
+        if type(setItemId) == "number" then
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
+            local itemType = GetItemLinkItemType(itemLink)
+            local armorOrWeaponType
+            if itemType == ITEMTYPE_ARMOR then
+                armorOrWeaponType = GetItemLinkArmorType(itemLink)
+            elseif itemType == ITEMTYPE_WEAPON then
+                armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+            end
+            local equipType = GetItemLinkEquipType(itemLink)
+            local traitType = GetItemLinkTraitInfo(itemLink)
+
+            --Are itemType, armorOrWeaponType, slot and trait (if not all traits choosen) etc. equal to the chosen entries at the add dialog?
+            if      itemType == itemTypeId
+                    and armorOrWeaponType == armorOrWeaponTypeId
+                    and equipType == slotId
+                    and (allTraitsTraitId == traitId or traitType == traitId) then
+                local clientLang = WL.clientLang or WL.fallbackSetLang
+--d(">[WL.getSetItemsByCriteria]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
+                local data = {}
+                data.setId                  = setId
+                data.setName                = setsData.names[clientLang]
+                data.id                     = setItemId
+                data.itemType               = itemType
+                data.armorOrWeaponType      = armorOrWeaponType
+                data.slot                   = equipType
+                data.trait                  = traitType
+                --Add the quality so we can check this data later on as an item was looted
+                data.quality                = qualityId
+                table.insert(items, data)
+            end
+        end
+    end
+    return items
+end
+
+--Get set items by the help of the dropdown boxes  of the add item dialog + clicked button addType on the add item dialog (to e.g. add a whole set, only monster helmet and shoulders, ...)
 function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWeaponTypeData, selectedSlotData, selectedItemTraitData, selectedItemQualityData, addType)
     --addType:
     --1=whole set items with selected traits
@@ -1174,6 +1217,13 @@ function WL.copyWishList(fromCharData, toCharId)
         d(GetString(WISHLIST_NO_ITEMS_COPIED))
     end
 end
+
+--Scan the WishList of a chosen char for items which are alreardy known in the Set item colelciton book, and mark their
+--data with the "setItemCollectionBookKnown = true" entry
+function WL.scanWishListForAlreadyKnownSetItemCollectionEntries(charData)
+    --TODO
+end
+
 ------------------------------------------------
 --- Tooltip functions
 ------------------------------------------------
@@ -1770,6 +1820,29 @@ local function MyGetItemDetails(rowControl)
     return bagId, slotIndex
 end
 
+function WL.checkIfAlreadyOnWishList(bagId, slotIndex, charData)
+    local itemLink = GetItemLink(bagId, slotIndex)
+    local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    if not isSet then return end
+    local itemType = GetItemLinkItemType(itemLink)
+    local armorOrWeaponType = 0
+    if itemType == ITEMTYPE_ARMOR then
+        armorOrWeaponType = GetItemLinkArmorType(itemLink)
+    elseif itemType == ITEMTYPE_WEAPON then
+        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+    end
+    local slotType = GetItemLinkEquipType(itemLink)
+    local traitType = GetItemLinkTraitInfo(itemLink)
+    local equipType = GetItemLinkEquipType(itemLink)
+    local itemQuality = GetItemLinkDisplayQuality(itemLink)
+    --Get the currently logged in charData
+    WL.checkCurrentCharData(true)
+    charData = charData or WL.LoggedInCharData
+    --Check if already on Wishlist
+    local isAlreadyOnWL, setItemId, item = WL.isItemAlreadyOnWishlist(itemLink, nil, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
+    return isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item
+end
+
 function WL.GetBagAndSlotFromControlUnderMouse()
     --Get the control below the mouse cursor
     local moctrl = WINDOW_MANAGER:GetMouseOverControl()
@@ -1913,8 +1986,8 @@ function WL.getCurrentZoneAndGroupStatus()
             -- in a delve
             isInDelve = true
         end
-        isInPublicDungeon = IsPOIPublicDungeon(zoneIndex, poiIndex)
-        isInGroupDungeon = IsPOIGroupDungeon(zoneIndex, poiIndex)
+        isInPublicDungeon = GetPOIType(zoneIndex, poiIndex) == POI_TYPE_PUBLIC_DUNGEON
+        isInGroupDungeon = GetPOIType(zoneIndex, poiIndex) == POI_TYPE_GROUP_DUNGEON
         if isInPublicDungeon then
             isInDelve = false
             isInGroupDungeon = false

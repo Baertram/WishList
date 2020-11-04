@@ -4,40 +4,37 @@ local WL = WishList
 ------------------------------------------------
 --- Wishlist - Keybindings
 ------------------------------------------------
---Add/Remove an item from the wishlist via keybinding
-function WishList:AddOrRemoveFromWishList()
+--Add/Remove an item from the wishlist via keybinding, or inventory context menu (bagId and slotIndex are given then)
+function WL:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData)
     --d("WishList:AddOrRemoveFromWishList()")
-    local bagId, slotIndex = WL.GetBagAndSlotFromControlUnderMouse()
+    if bagId == nil or slotIndex == nil then
+        bagId, slotIndex = WL.GetBagAndSlotFromControlUnderMouse()
+    end
     --bag and slot could be retrieved?
     if bagId ~= nil and slotIndex ~= nil then
-        --d(">bag: " .. tostring(bagId) .. ", slot: " .. tostring(slotIndex))
-        local itemLink = GetItemLink(bagId, slotIndex)
-        local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-        if not isSet then return end
-        --d(">isSet: " ..tostring(isSet) .. ", setName: " ..tostring(setName) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType))
-        local itemType = GetItemLinkItemType(itemLink)
-        local armorOrWeaponType = 0
-        if itemType == ITEMTYPE_ARMOR then
-            armorOrWeaponType = GetItemLinkArmorType(itemLink)
-        elseif itemType == ITEMTYPE_WEAPON then
-            armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+        --Check if already on Wishlist, or was this done before already?
+        local isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item
+        if alreadyOnWishListCheckData ~= nil then
+            isAlreadyOnWL = alreadyOnWishListCheckData.isAlreadyOnWL
+            setItemId = alreadyOnWishListCheckData.setItemId
+            setId = alreadyOnWishListCheckData.setId
+            setName = alreadyOnWishListCheckData.setName
+            itemType = alreadyOnWishListCheckData.itemType
+            armorOrWeaponType = alreadyOnWishListCheckData.armorOrWeaponType
+            equipType = alreadyOnWishListCheckData.equipType
+            traitType = alreadyOnWishListCheckData.traitType
+            itemQuality = alreadyOnWishListCheckData.itemQuality
+            charData = alreadyOnWishListCheckData.charData
+            item = alreadyOnWishListCheckData.item
+        else
+            isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
         end
-        local slotType = GetItemLinkEquipType(itemLink)
-        local traitType = GetItemLinkTraitInfo(itemLink)
-        local itemQuality = GetItemLinkQuality(itemLink)
-        --d(">Checking if item " .. itemLink .. " is on WishList...")
-        --Get the currently logged in charData
-        WL.checkCurrentCharData(true)
-        local charData = WL.LoggedInCharData
-        --Check if already on Wishlist
-        local isAlreadyOnWL, setItemId = WL.isItemAlreadyOnWishlist(itemLink, nil, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
         --If not: add the item
         if setItemId == nil then
             --d("<< ABORTED!")
             return
         end
-        if not isAlreadyOnWL then
-            local equipType = GetItemLinkEquipType(itemLink)
+        if not isAlreadyOnWL == true then
             local qualityWL = itemQuality + WL.ESOquality2WLqualityAdd
 
             setName = zo_strformat("<<C:1>>", setName)
@@ -56,8 +53,9 @@ function WishList:AddOrRemoveFromWishList()
             WishList:AddItem(items, charData, true)
         else
             --Already on WishList, so ask to remove it
-            local item = {}
+            --local item = {}
             item.id = setItemId
+            item.itemLink = GetItemLink(bagId, slotIndex)
             WL.showRemoveItem(item)
         end
     end

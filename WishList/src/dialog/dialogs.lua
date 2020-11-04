@@ -567,7 +567,7 @@ function WL.WishListWindowRemoveItemInitialize(control)
                 local slot
                 local itemLink
                 local traitId
-                --Coming from link handler??
+                --Coming from link handler or inventory context menu e.g.??
                 if not wlWindow and data ~= nil and data.itemData ~= nil and data.itemData.itemLink ~= nil then
                     itemLink = data.itemData.itemLink
                     timeStamp = data.itemData.timestamp

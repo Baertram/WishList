@@ -717,48 +717,6 @@ end
 ------------------------------------------------
 --- Wishlist / History - Add items
 ------------------------------------------------
---Select the set's items from the internal set data tables and build a return table with all items matching the criteria
-function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
-    local setsData = WL.accData.sets[setId]
-    local allTraitsTraitId = #WL.TraitTypes
-    local items = {}
-    for setItemId, _ in pairs(setsData) do
-        if type(setItemId) == "number" then
-            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
-            local itemType = GetItemLinkItemType(itemLink)
-            local armorOrWeaponType
-            if itemType == ITEMTYPE_ARMOR then
-                armorOrWeaponType = GetItemLinkArmorType(itemLink)
-            elseif itemType == ITEMTYPE_WEAPON then
-                armorOrWeaponType = GetItemLinkWeaponType(itemLink)
-            end
-            local equipType = GetItemLinkEquipType(itemLink)
-            local traitType = GetItemLinkTraitInfo(itemLink)
-
-            --Are itemType, armorOrWeaponType, slot and trait (if not all traits choosen) etc. equal to the chosen entries at the add dialog?
-            if      itemType == itemTypeId
-                    and armorOrWeaponType == armorOrWeaponTypeId
-                    and equipType == slotId
-                    and (allTraitsTraitId == traitId or traitType == traitId) then
-                local clientLang = WL.clientLang or WL.fallbackSetLang
---d(">[WL.getSetItemsByCriteria]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
-                local data = {}
-                data.setId                  = setId
-                data.setName                = setsData.names[clientLang]
-                data.id                     = setItemId
-                data.itemType               = itemType
-                data.armorOrWeaponType      = armorOrWeaponType
-                data.slot                   = equipType
-                data.trait                  = traitType
-                --Add the quality so we can check this data later on as an item was looted
-                data.quality                = qualityId
-                table.insert(items, data)
-            end
-        end
-    end
-    return items
-end
-
 --Add item to the WishList SavedVariables
 function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedChatOutput)
     alreadyOnWishlistCheckDone = alreadyOnWishlistCheckDone or false
@@ -1368,11 +1326,11 @@ function WishList:ReloadItems()
     end
 end
 
---Add one  last added setItems history (added via the "Add item dialog")
+--Add a last added setItems history (added via the "Add item dialog")
 function WishList:AddLastAddedHistory(newAddedData)
     if not newAddedData then return end
     newAddedData.dateTime = newAddedData.dateTime or GetTimeStamp()
-    local lastAddedHistoryData = WL.accData.lastAddedViaDialog
+    --local lastAddedHistoryData = WL.accData.lastAddedViaDialog
     WL.accData.lastAddedViaDialog = WL.accData.lastAddedViaDialog or {}
     WL.accData.lastAddedViaDialog[newAddedData.dateTime] = newAddedData
 end
@@ -1644,7 +1602,7 @@ local function WL_Hooks()
     local function WL_SortHeaderOnMouseUp(sortHeaderCtrl, upInside)
         --Was the mouse released above the ctrl ?
         if upInside == true and sortHeaderCtrl ~= nil
-            and sortHeaderCtrl.GetParent ~= nil and sortHeaderCtrl:GetParent() == WishListFrameHeaders then
+                and sortHeaderCtrl.GetParent ~= nil and sortHeaderCtrl:GetParent() == WishListFrameHeaders then
             --Was the shift key pressed?
             if IsShiftKeyDown() then
                 WL._clickedSortHeader = sortHeaderCtrl
@@ -1679,24 +1637,44 @@ local function WL_Hooks()
     end
     ZO_PreHook("ZO_SortHeader_OnMouseUp", WL_SortHeaderOnMouseUp)
 
-    --ItemSetCollection single piece tile - OnMouseContextMenu Show
-    -->Add "Add all traits to WishList" entry
-    --[[
-    function ZO_ItemSetCollectionPieceTile_Keyboard:ShowMenu()
-        ClearMenu()
-
-        local itemSetCollectionPieceData = self.itemSetCollectionPieceData
-        if itemSetCollectionPieceData then
-            if IsChatSystemAvailableForCurrentPlatform() then
-                --Link in chat
-                local link = itemSetCollectionPieceData:GetItemLink()
-                AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
-            end
-
-            ShowMenu(self.control)
-        end
+    --Player inventories etc.
+    local function addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData)
+        WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData)
     end
-    ]]
+
+    -->Add "Add to WishList" or "Remove from WishList" to the inventory context menu of items
+    local function WishList_OnInventory_ContextMenu(inventorySlot, slotActions)
+        local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        if not bagId or not slotIndex then return end
+        --Is item a set?
+        local isSet = GetItemLinkSetInfo(GetItemLink(bagId, slotIndex))
+        if not isSet then return end
+        --Check if already on Wishlist
+        local isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
+        local alreadyOnWishListCheckData = {
+            isAlreadyOnWL = isAlreadyOnWL,
+            setItemId = setItemId,
+            setId = setId,
+            setName = setName,
+            itemType = itemType,
+            armorOrWeaponType = armorOrWeaponType,
+            equipType = equipType,
+            traitType = traitType,
+            itemQuality = itemQuality,
+            charData = charData,
+            item = item,
+        }
+        if not isAlreadyOnWL then
+            AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_ADD), function() addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData) end)
+        else
+            AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE), function() addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData) end)
+        end
+        ShowMenu()
+    end
+    LibCustomMenu:RegisterContextMenu(WishList_OnInventory_ContextMenu, LibCustomMenu.CATEGORY_LATE)
+
+    --ItemSetCollection single piece tile - OnMouseContextMenu Show
+    -->Add "Add all traits to WishList" context menu entry, and "Remove all traits"
     local function getItemSetCollectionSinglePieceItemLink(p_ZO_ItemSetCollectionPieceTile_Keyboard)
         local itemLink
         local itemSetCollectionPieceData = p_ZO_ItemSetCollectionPieceTile_Keyboard.itemSetCollectionPieceData
@@ -1709,14 +1687,14 @@ local function WL_Hooks()
         local itemLink = getItemSetCollectionSinglePieceItemLink(self)
         if not itemLink or itemLink == "" then return end
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD),
-            function()
-                WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE)
-            end
+                function()
+                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE)
+                end
         )
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE),
-            function()
-                WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE)
-            end
+                function()
+                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE)
+                end
         )
         ShowMenu()
     end)
