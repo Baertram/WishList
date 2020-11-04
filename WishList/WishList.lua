@@ -1363,7 +1363,9 @@ function WishList:ClearHistory(charData)
 end
 
 function WishList:ReloadItems()
-    WL.window:RefreshData()
+    if WL.window then
+        WL.window:RefreshData()
+    end
 end
 
 --Add one  last added setItems history (added via the "Add item dialog")
