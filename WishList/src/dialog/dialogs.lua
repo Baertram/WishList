@@ -1186,63 +1186,28 @@ function WL.addLastAddedHistoryFromAddItemDialog(setId, comboItemType, comboArmo
     WL:AddLastAddedHistory(newAddedData)
 end
 
+
 --Get items which would be added to the WishList via the Add item dialog
 function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
     local itemTypeId = comboItemType:GetSelectedItemData().id
-    local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
+    local armorOrWeaponTypeId = comboArmorOrWeaponType:GetSelectedItemData().id
     local traitId = comboTrait:GetSelectedItemData().id
     local slotId = comboSlot:GetSelectedItemData().id
     local qualityId = comboQuality:GetSelectedItemData().id
+    local comboCharsSelectedData = comboChars:GetSelectedItemData()
 
     --Selected character ID and name for the SavedVars
-    local comboCharsSelectedData = comboChars:GetSelectedItemData()
     local charId = comboCharsSelectedData.id
     local charName = comboCharsSelectedData.name
     local charNameClean = comboCharsSelectedData.nameClean
     local charClass = comboCharsSelectedData.class
-    local items = {}
-
-    local setsData = WL.accData.sets[WL.currentSetId]
-    local allTraitsTraitId = #WL.TraitTypes
-    for setItemId, _ in pairs(setsData) do
-        if type(setItemId) == "number" then
-            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
-            local itemType = GetItemLinkItemType(itemLink)
-            local armorOrWeaponType
-            if itemType == ITEMTYPE_ARMOR then
-                armorOrWeaponType = GetItemLinkArmorType(itemLink)
-            elseif itemType == ITEMTYPE_WEAPON then
-                armorOrWeaponType = GetItemLinkWeaponType(itemLink)
-            end
-            local equipType = GetItemLinkEquipType(itemLink)
-            local traitType = GetItemLinkTraitInfo(itemLink)
-
-            --Are itemType, armorOrWeaponType, slot and trait (if not all traits choosen) etc. equal to the chosen entries at the add dialog?
-            if      itemType == itemTypeId
-                    and armorOrWeaponType == typeId
-                    and equipType == slotId
-                    and (allTraitsTraitId == traitId or traitType == traitId) then
-                local clientLang = WL.clientLang or WL.fallbackSetLang
---d(">[WL.buildSetItemDataFromAddItemDialog]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
-                local data = {}
-                data.setId                  = WL.currentSetId
-                data.setName                = setsData.names[clientLang]
-                data.id                     = setItemId
-                data.itemType               = itemType
-                data.armorOrWeaponType      = armorOrWeaponType
-                data.slot                   = equipType
-                data.trait                  = traitType
-                --Add the quality so we can check this data later on as an item was looted
-                data.quality                = qualityId
-                table.insert(items, data)
-            end
-        end
-    end
     local selectedCharData = {}
     selectedCharData.id         = charId
     selectedCharData.name       = charName
     selectedCharData.nameClean  = charNameClean
     selectedCharData.class      = charClass
+
+    local items = WL.getSetItemsByCriteria(WL.currentSetId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
 
     return items, selectedCharData
 end

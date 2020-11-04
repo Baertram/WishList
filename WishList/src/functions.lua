@@ -389,10 +389,11 @@ function WL.getCharDataByName(charName)
     return nil
 end
 
-function WL.checkCurrentCharData(loggedIn)
+function WL.checkCurrentCharData(loggedIn, fallbackLoggedIn)
     loggedIn = loggedIn or false
---d("[WL.checkCurrentCharData] loggedIn: " .. tostring(loggedIn))
-    if loggedIn then
+    fallbackLoggedIn = fallbackLoggedIn or false
+------------------------------------------------------------------------------------------------------------------------
+    local function checkLoggedInCharData()
         local charName = GetUnitName("player")
         charName = zo_strformat(SI_UNIT_NAME, charName)
         --Logged in data only needs to be filled once
@@ -403,14 +404,23 @@ function WL.checkCurrentCharData(loggedIn)
             local loggedInCharId = GetCurrentCharacterId()
             WL.LoggedInCharData = WL.getCharDataById(loggedInCharId)
         end
+    end
+------------------------------------------------------------------------------------------------------------------------
+--d("[WL.checkCurrentCharData] loggedIn: " .. tostring(loggedIn))
+    if loggedIn then
+        checkLoggedInCharData()
     else
         --Currently selected char data of the chasr dropdown at the WishList tab needs to be determined on demand
-        local selectedCharData = WL.window.charsDrop:GetSelectedItemData()
+        local selectedCharData = WL.window and WL.window.charsDrop:GetSelectedItemData()
         if selectedCharData and selectedCharData.id ~= nil then
             WL.CurrentCharData.id           = selectedCharData.id
             WL.CurrentCharData.name         = selectedCharData.name
             WL.CurrentCharData.nameClean    = selectedCharData.nameClean
             WL.CurrentCharData.class        = selectedCharData.class
+        else
+            if fallbackLoggedIn == true then
+                checkLoggedInCharData()
+            end
         end
     end
 end
@@ -1102,7 +1112,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
                             --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName = WL.getItemTypeNamesForSortListEntry(selectedItemTypeData.id, selectedItemArmorOrWeaponTypeData.id, selectedSlotData.id, traitType)
                             --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
                             local data = {}
-                            data.setId                  = WL.currentSetId
+                            data.setId                  = setId
                             data.setName                = setsData.names[WL.clientLang]
                             data.id                     = setItemId
                             data.itemType               = itemType

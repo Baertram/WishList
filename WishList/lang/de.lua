@@ -77,6 +77,9 @@ local strings = {
     WISHLIST_CLEAR_LAST_ADDED_TITLE = "Zuletzt hinzugefügt Historie leeren?",
     WISHLIST_CLEAR_LAST_ADDED_TEXT = "Willst du wirklich die zuletzt hinzugefügt Historie komplett leeren?",
 
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD = "Alle Eigenschaften zur " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE = "Alle Eigenschaften von der " .. GetString(WISHLIST_TITLE) .. " entfernen",
+
     WISHLIST_ADDED = " zur " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_REMOVED = " von der " .. GetString(WISHLIST_TITLE) .. " entfernt",
     WISHLIST_UPDATED = " <<1>> geändert in " .. GetString(WISHLIST_TITLE),

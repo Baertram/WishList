@@ -717,6 +717,48 @@ end
 ------------------------------------------------
 --- Wishlist / History - Add items
 ------------------------------------------------
+--Select the set's items from the internal set data tables and build a return table with all items matching the criteria
+function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
+    local setsData = WL.accData.sets[setId]
+    local allTraitsTraitId = #WL.TraitTypes
+    local items = {}
+    for setItemId, _ in pairs(setsData) do
+        if type(setItemId) == "number" then
+            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
+            local itemType = GetItemLinkItemType(itemLink)
+            local armorOrWeaponType
+            if itemType == ITEMTYPE_ARMOR then
+                armorOrWeaponType = GetItemLinkArmorType(itemLink)
+            elseif itemType == ITEMTYPE_WEAPON then
+                armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+            end
+            local equipType = GetItemLinkEquipType(itemLink)
+            local traitType = GetItemLinkTraitInfo(itemLink)
+
+            --Are itemType, armorOrWeaponType, slot and trait (if not all traits choosen) etc. equal to the chosen entries at the add dialog?
+            if      itemType == itemTypeId
+                    and armorOrWeaponType == armorOrWeaponTypeId
+                    and equipType == slotId
+                    and (allTraitsTraitId == traitId or traitType == traitId) then
+                local clientLang = WL.clientLang or WL.fallbackSetLang
+--d(">[WL.getSetItemsByCriteria]" .. itemLink .. " (" .. itemType .. ", ".. armorOrWeaponType .. ", ".. equipType .. ", ".. traitType .. ")")
+                local data = {}
+                data.setId                  = setId
+                data.setName                = setsData.names[clientLang]
+                data.id                     = setItemId
+                data.itemType               = itemType
+                data.armorOrWeaponType      = armorOrWeaponType
+                data.slot                   = equipType
+                data.trait                  = traitType
+                --Add the quality so we can check this data later on as an item was looted
+                data.quality                = qualityId
+                table.insert(items, data)
+            end
+        end
+    end
+    return items
+end
+
 --Add item to the WishList SavedVariables
 function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedChatOutput)
     alreadyOnWishlistCheckDone = alreadyOnWishlistCheckDone or false
@@ -772,6 +814,8 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
 	end
 end
 
+--Special ADD items function called from the item add dialog to add e.g. only monster helm and shoulders, or other special
+-- addTypes -> See constants WISHLIST_ADD_TYPE_*
 function WL.AddSetItems(addType)
     --d("[WL.AddSetItems] addType: " .. tostring(addType))
     --Close the add item dialog at first!
@@ -961,50 +1005,57 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     local charNameChat = charData.name
-    local setName = ""
+    local allTraitsId = #WL.TraitTypes --All traits
+    local checkSetId = false
+    if criteria.setId ~= nil then
+        checkSetId = true
+    end
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
-        if criteria.timestamp ~= nil then
---d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
-            if itm.timestamp == criteria.timestamp then
-                removeItemNow = true
-            else
-                removeItemNow = false
+        --setId must match or wasn't given as criteria
+        if not checkSetId or (checkSetId and itm.setId and itm.setId == criteria.setId) then
+            if criteria.timestamp ~= nil then
+                --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
+                if itm.timestamp == criteria.timestamp then
+                    removeItemNow = true
+                else
+                    removeItemNow = false
+                end
             end
-        end
-        if criteria.itemType ~= nil then
---d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
-            if itm.itemType == criteria.itemType then
-                removeItemNow = true
-            else
-                removeItemNow = false
+            if criteria.itemType ~= nil then
+                --d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+                if itm.itemType == criteria.itemType then
+                    removeItemNow = true
+                else
+                    removeItemNow = false
+                end
             end
-        end
-        if criteria.armorOrWeaponType ~= nil then
---d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
-            if itm.armorOrWeaponType == criteria.armorOrWeaponType then
-                removeItemNow = true
-            else
-                removeItemNow = false
+            if criteria.armorOrWeaponType ~= nil then
+                --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                    removeItemNow = true
+                else
+                    removeItemNow = false
+                end
             end
-        end
-        if criteria.slot ~= nil then
---d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
-            if itm.slot == criteria.slot then
-                removeItemNow = true
-            else
-                removeItemNow = false
+            if criteria.slot ~= nil then
+                --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                if itm.slot == criteria.slot then
+                    removeItemNow = true
+                else
+                    removeItemNow = false
+                end
             end
-        end
-        if criteria.trait ~= nil then
---d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
-            if itm.trait == criteria.trait then
-                removeItemNow = true
-            else
-                removeItemNow = false
+            if criteria.trait ~= nil then
+                --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
+                if criteria.trait == allTraitsId or itm.trait == criteria.trait then
+                    removeItemNow = true
+                else
+                    removeItemNow = false
+                end
             end
         end
         if removeItemNow then
@@ -1031,10 +1082,12 @@ end
 
 
 function WishList:RemoveAllItemsOfSet(setId, charData)
+d("[WhishList]RemoveAllItemsOfSet, setId: " ..tostring(setId))
     if setId == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsOfSet")
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
+d(">1")
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
@@ -1045,8 +1098,9 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
         local itm = wishList[i]
         if itm.setId == setId then
             local itemLink = WL.buildItemLink(itm.id, itm.quality)
+d(">itemLink: " ..itemLink)
             if setName == "" then
-                local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
+                local _, setLocName, _, _, _, _ = GetItemLinkSetInfo(itemLink, false)
                 --Remove the gender stuff from the setname
                 setName = zo_strformat("<<C:1>>", setLocName)
             end
@@ -1328,6 +1382,99 @@ function WishList:GetLastAddedHistory()
     return lastAddedHistoryData
 end
 
+
+--SetItemCollection stuff
+function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
+    if not itemLink or itemLink == "" then return end
+--d("[WishList]Add all traits to WishList, by SetItemCollection item: " ..itemLink)
+    local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    if not hasSet or not setId then return end
+
+    local itemType = GetItemLinkItemType(itemLink)
+    local armorOrWeaponType
+    if itemType == ITEMTYPE_ARMOR then
+        armorOrWeaponType = GetItemLinkArmorType(itemLink)
+    elseif itemType == ITEMTYPE_WEAPON then
+        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+    end
+    local equipType = GetItemLinkEquipType(itemLink)
+    local allTraitsTraitId = #WL.TraitTypes --All traits
+
+    WL.checkCurrentCharData(false, true)
+    local settings = WL.data
+    local charData
+    if settings.preSelectLoggedinCharAtItemAddDialog == true then
+        charData = WL.LoggedInCharData
+    else
+        charData = WL.CurrentCharData
+        if charData == nil or charData.id == nil then
+            charData = WL.LoggedInCharData
+        end
+    end
+
+    local items = {}
+    --Get the set parts to add for this setId
+    items = WL.getSetItemsByCriteria(setId, itemType, armorOrWeaponType, allTraitsTraitId, equipType, WISHLIST_QUALITY_ALL)
+
+    --Add the items now, if some were found
+    if #items > 0 then
+        --Add the found set items to the WishList of the selected user now
+        WishList:AddItem(items, charData)
+    end
+end
+
+function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, removeType)
+    if not itemLink or itemLink == "" then return end
+d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
+
+    local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    if not hasSet or not setId then return end
+
+    local itemType = GetItemLinkItemType(itemLink)
+    local armorOrWeaponType
+    if itemType == ITEMTYPE_ARMOR then
+        armorOrWeaponType = GetItemLinkArmorType(itemLink)
+    elseif itemType == ITEMTYPE_WEAPON then
+        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+    end
+    local equipType = GetItemLinkEquipType(itemLink)
+    local allTraitsTraitId = #WL.TraitTypes --All traits
+
+    local criteriaToIdentifyItemsToRemove
+    if removeType == WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE then
+        criteriaToIdentifyItemsToRemove = {}
+        criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.armorOrWeaponType = armorOrWeaponType
+    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_SLOT then
+        criteriaToIdentifyItemsToRemove = {}
+        criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.slot = equipType
+    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE then
+        criteriaToIdentifyItemsToRemove = {}
+        criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.itemType = itemType
+    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_TRAIT then
+        criteriaToIdentifyItemsToRemove = {}
+        criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.trait = allTraitsTraitId
+    end
+
+    WL.checkCurrentCharData(false, true)
+    local settings = WL.data
+    local charData
+    if settings.preSelectLoggedinCharAtItemAddDialog == true then
+        charData = WL.LoggedInCharData
+    else
+        charData = WL.CurrentCharData
+        if charData == nil or charData.id == nil then
+            charData = WL.LoggedInCharData
+        end
+    end
+    if criteriaToIdentifyItemsToRemove ~= nil then
+        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charData)
+    end
+end
+
 ------------------------------------------------
 --- Settings / SavedVariables
 ------------------------------------------------
@@ -1529,6 +1676,48 @@ local function WL_Hooks()
         end
     end
     ZO_PreHook("ZO_SortHeader_OnMouseUp", WL_SortHeaderOnMouseUp)
+
+    --ItemSetCollection single piece tile - OnMouseContextMenu Show
+    -->Add "Add all traits to WishList" entry
+    --[[
+    function ZO_ItemSetCollectionPieceTile_Keyboard:ShowMenu()
+        ClearMenu()
+
+        local itemSetCollectionPieceData = self.itemSetCollectionPieceData
+        if itemSetCollectionPieceData then
+            if IsChatSystemAvailableForCurrentPlatform() then
+                --Link in chat
+                local link = itemSetCollectionPieceData:GetItemLink()
+                AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
+            end
+
+            ShowMenu(self.control)
+        end
+    end
+    ]]
+    local function getItemSetCollectionSinglePieceItemLink(p_ZO_ItemSetCollectionPieceTile_Keyboard)
+        local itemLink
+        local itemSetCollectionPieceData = p_ZO_ItemSetCollectionPieceTile_Keyboard.itemSetCollectionPieceData
+        if itemSetCollectionPieceData then
+            itemLink = itemSetCollectionPieceData:GetItemLink()
+        end
+        return itemLink
+    end
+    SecurePostHook(ZO_ItemSetCollectionPieceTile_Keyboard, "ShowMenu", function(self)
+        local itemLink = getItemSetCollectionSinglePieceItemLink(self)
+        if not itemLink or itemLink == "" then return end
+        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD),
+            function()
+                WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE)
+            end
+        )
+        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE),
+            function()
+                WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE)
+            end
+        )
+        ShowMenu()
+    end)
 end
 
 function WL.init(_, addonName)
