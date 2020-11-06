@@ -78,6 +78,7 @@ local strings = {
     WISHLIST_LOOT_MSG_OTHER          = " LOOTED ",
     WISHLIST_LOOT_MSG_STANDARD       = "[<<2>>] looted \"<<1>>\" with trait <<3>>, quality <<4>>, level <<5>>, set \"<<6>>\"",
 
+    WISHLIST_CONTEXTMENU_FROM        = " from " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_ADD         = "Add to " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_REMOVE      = "Remove from " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED = "Remove from last added",
@@ -121,6 +122,8 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_TRAIT               = "Remove items with trait \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Remove known set item collection items of set \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Remove known set item collection items of all sets",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Remove known items of set \"<<1>>\" from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Remove known items of all sets from " ..GetString(WISHLIST_TITLE),
 
     WISHLIST_DIALOG_REMOVE_WHOLE_SET         = "Remove whole set \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION= "Really remove all items of set \"<<1>>\"?",

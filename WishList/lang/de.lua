@@ -70,6 +70,7 @@ local strings = {
     WISHLIST_LOOT_MSG_OTHER = " hat gefunden: ",
     WISHLIST_LOOT_MSG_STANDARD = "[<<2>>] hat \"<<1>>\" gefunden, mit Eigenschaft <<3>>, Qualität <<4>>, Level <<5>>, Set \"<<6>>\"",
 
+    WISHLIST_CONTEXTMENU_FROM        = " von der " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_ADD = "Zur " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_CONTEXTMENU_REMOVE = "Von " .. GetString(WISHLIST_TITLE) .. " entfernen",
     WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED = "Von zuletzt hinzugefügten entfernen",
@@ -104,7 +105,6 @@ local strings = {
     WISHLIST_DIALOG_ADD_BODY_PARTS_ARMOR_OF_SET_TT = "Alle Körper Rüstungsteile des aktuell gewählten Sets, mit gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_DIALOG_ADD_MONSTER_SET_PARTS_ARMOR_OF_SET_TT = "Schulter und Kopf Rüstungsteile des aktuell gewählten Sets, mit gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
 
-
     WISHLIST_DIALOG_REMOVE_ITEM = "Gegenstand entfernen",
     WISHLIST_DIALOG_REMOVE_ITEM_QUESTION = "Entferne <<1>>?",
     WISHLIST_DIALOG_REMOVE_ITEM_DATETIME = "Entferne Gegenstände mit Datum & Uhrzeit \"<<1>>\"",
@@ -114,6 +114,8 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_TRAIT = "Entferne Gegenstände mit Eigenschaft \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Entferne bekannte Set Sammlungs-Gegenst. des Sets \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Entferne alle bekannten Set Sammlungs-Gegenstände",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Bekannte Gegenst. des Sets \"<<1>>\" von der " .. GetString(WISHLIST_TITLE) .. " entfernen",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Alle bekannten Set Gegenstände von der " ..GetString(WISHLIST_TITLE) .. " entfernen",
 
 
     WISHLIST_BUTTON_REMOVE_ALL_TT = "Entferne alle Gegenstände des ausgewählten Charakters von deiner " .. GetString(WISHLIST_TITLE),

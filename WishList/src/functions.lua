@@ -1627,7 +1627,7 @@ function WL.showContextMenu(control, button, upInside)
                     end)  -- Remove item
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
-                    end)  -- Remove all sets items already known in Set Item Collection book
+                    end)  -- Remove all sets items of the setId already known in Set Item Collection book
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_DATETIME), dateAndTime),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_DATEANDTIME)
                     end)  -- Remove item by date & time

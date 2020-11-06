@@ -1719,9 +1719,37 @@ local function WL_Hooks()
         end
         return itemLink
     end
+    --Item Set Collection set collapsable header
+    SecurePostHook("ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseUp", function(control, button, upInside)
+        if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
+            local setId = control.dataEntry.data.header.dataSource.itemSetId
+            local nameCtrl = GetControl(control, "Name")
+            local setName = ""
+            if nameCtrl ~= nil and nameCtrl.GetText then
+                setName = nameCtrl:GetText()
+            end
+            local data = {
+                setId = setId,
+                setName = setName,
+            }
+            AddCustomMenuItem("-", function() end)
+            AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
+                    function() WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
+                    end)  -- Remove all sets items of the setId already known in Set Item Collection book
+            AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
+                    function() WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
+                    end)  -- Remove all sets items already known in Set Item Collection book
+            ShowMenu()
+        end
+    end)
+
+
+
+    --Item Set Collection single setitem tile
     SecurePostHook(ZO_ItemSetCollectionPieceTile_Keyboard, "ShowMenu", function(self)
         local itemLink = getItemSetCollectionSinglePieceItemLink(self)
         if not itemLink or itemLink == "" then return end
+        AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD),
                 function()
                     WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE)
