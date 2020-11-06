@@ -776,7 +776,6 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
     d(zo_strformat(GetString(WISHLIST_ITEMS_ADDED) .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", count)) -- count.." item(s) added to Wish List"
     WL.updateRemoveAllButon()
 
-    if not WL.window or not WL.windowShown then return false end
     WishList:ReloadItems()
 end
 
@@ -885,7 +884,6 @@ function WishList:AddHistoryItem(items, charData)
     end
     WL.updateRemoveAllButon()
 
-    if not WL.window or not WL.windowShown then return false end
     WishList:ReloadItems()
 end
 
@@ -923,7 +921,6 @@ function WishList:RemoveItem(item, charData)
 		d(itemLink..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
 	end
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -959,7 +956,6 @@ function WishList:RemoveHistoryItem(item, charData)
         d(itemLink..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat.. " (" .. WL.getHistoryItemCount(charData) .. ")")
     end
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1061,7 +1057,6 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
     end
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. " " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1100,7 +1095,6 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     end
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1138,7 +1132,6 @@ function WishList:ChangeQualityOfItem(item, charData, newQuality)
         d(itemLink.. zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
     end
 
-    if not WL.window or not WL.windowShown then return false end
     WishList:ReloadItems()
 end
 
@@ -1176,7 +1169,6 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
     end
     d(zo_strformat(GetString(WISHLIST_ITEMS_UPDATED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) updated in Wish List"
 
-    if not WL.window or not WL.windowShown then return false end
     WishList:ReloadItems()
 end
 
@@ -1255,7 +1247,6 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
     end
     d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_REMOVED) .. " " .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from history"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1292,7 +1283,6 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
     end
     d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from history"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1323,7 +1313,6 @@ function WishList:RemoveAllItems(charData)
     WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab] = nil
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1355,7 +1344,6 @@ function WishList:ClearHistory(charData)
     WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab] = nil
     d(zo_strformat(GetString(WISHLIST_HISTORY_ITEMS_REMOVED) .. charNameChat .. " (" .. WL.getHistoryItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from history"
 
-    if not WL.window or not WL.windowShown then return false end
     WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
@@ -1730,7 +1718,7 @@ local function WL_Hooks()
             end
             local data = {
                 setId = setId,
-                setName = setName,
+                name = setName,
             }
             AddCustomMenuItem("-", function() end)
             AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),

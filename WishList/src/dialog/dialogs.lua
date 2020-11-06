@@ -545,6 +545,7 @@ function WL.WishListWindowRemoveItemInitialize(control)
         title = { text = "???" },
         mainText = { text = "???" },
         setup = function(dialog, data)
+WL._dialogData = data
             local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
             local removeFromHistory = data.removeFromHistory or false
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
@@ -557,10 +558,6 @@ function WL.WishListWindowRemoveItemInitialize(control)
                 if data.itemData == nil then
                     --All items should be removed/changed etc.
                     noDataCall = true
-                else
-                    if data.itemData.setId ~= nil then
-
-                    end
                 end
             end
             --Remove item from WishList or history?

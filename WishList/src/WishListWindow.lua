@@ -199,7 +199,7 @@ end
 
 function WishListWindow:UpdateUI(state)
 	WL.CurrentState = state
-d("[WishListWindow:UpdateUI] state: " ..tostring(state) .. ", currentTab: " ..tostring(WL.CurrentTab))
+--d("[WishListWindow:UpdateUI] state: " ..tostring(state) .. ", currentTab: " ..tostring(WL.CurrentTab))
 
     ------------------------------------------------------------------------------------------------------------------------
     --SEARCH tab
@@ -453,7 +453,7 @@ end -- WishListWindow:UpdateUI(state)
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
     calledFromFilterFunction = calledFromFilterFunction or false
-d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
+--d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
     --Sets tab row creation from savedvars sets list
 ------------------------------------------------------------------------------------------------------------------------
 	if WL.CurrentTab == WISHLIST_TAB_SEARCH then
@@ -787,7 +787,7 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
 end
 
 function WishListWindow:FilterScrollList()
-d("[WishListWindow:FilterScrollList]")
+--d("[WishListWindow:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
