@@ -119,6 +119,8 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_ARMORORWEAPONTYPE   = "Remove items with type \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_SLOT                = "Remove items with slot \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_TRAIT               = "Remove items with trait \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Remove known set item collection items of set \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Remove known set item collection items of all sets",
 
     WISHLIST_DIALOG_REMOVE_WHOLE_SET         = "Remove whole set \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION= "Really remove all items of set \"<<1>>\"?",

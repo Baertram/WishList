@@ -551,8 +551,8 @@ function WL.WishListWindowRemoveItemInitialize(control)
             local charNameText = WL.CurrentCharData.name
             charNameText = WL.addCharBrackets(charNameText)
             --Remove item from WishList or history?
+            local setName = data.itemData and data.itemData.name
             if data.wholeSet then
-                local setName = data.itemData.name
                 if removeFromHistory then
                     title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName) .. " [" .. GetString(WISHLIST_HISTORY_TITLE) .. "]")
                 else
@@ -609,6 +609,8 @@ function WL.WishListWindowRemoveItemInitialize(control)
                     [WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE]  = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_ARMORORWEAPONTYPE), armorOrWeaponTypeText),
                     [WISHLIST_REMOVE_ITEM_TYPE_SLOT]                = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_SLOT), slotText),
                     [WISHLIST_REMOVE_ITEM_TYPE_TRAIT]               = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TRAIT), itemTraitText),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION] = GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET] = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
                 }
                 local titelForRemoveItem = removeItemTitles[data.removeType]
                 if titelForRemoveItem == "" then titelForRemoveItem = removeItemTitles[WISHLIST_REMOVE_ITEM_TYPE_NORMAL] end
@@ -645,11 +647,12 @@ function WL.WishListWindowRemoveItemInitialize(control)
                     --Remove a whole set
                     if dialog.data then
                         local removeFromHistory = dialog.data.removeFromHistory or false
+                        local setId = dialog.data and dialog.data.itemData and dialog.data.itemData.setId
                         if dialog.data.wholeSet then
                             if removeFromHistory then
-                                WishList:RemoveAllHistoryItemsOfSet(dialog.data.itemData.setId, WL.CurrentCharData)
+                                WishList:RemoveAllHistoryItemsOfSet(setId, WL.CurrentCharData)
                             else
-                                WishList:RemoveAllItemsOfSet(dialog.data.itemData.setId, WL.CurrentCharData)
+                                WishList:RemoveAllItemsOfSet(setId, WL.CurrentCharData)
                             end
                         else
                             local removeType = dialog.data.removeType
@@ -697,6 +700,12 @@ function WL.WishListWindowRemoveItemInitialize(control)
                                     criteriaToIdentifyItemsToRemove.trait = traitId
                                 elseif removeType == WISHLIST_REMOVE_ITEM_TYPE then
                                     criteriaToIdentifyItemsToRemove.itemType = itemType
+                                elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION then
+                                    criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
+                                    criteriaToIdentifyItemsToRemove.setId = nil
+                                elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET then
+                                    criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
+                                    criteriaToIdentifyItemsToRemove.setId = setId
                                 end
                                 if removeFromHistory then
                                     WishList:RemoveAllHistoryItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData)

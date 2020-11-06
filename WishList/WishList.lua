@@ -976,54 +976,69 @@ d("[WL]RemoveAllItemsWithCriteria")
     local charNameChat = charData.name
     local allTraitsId = #WL.TraitTypes --All traits
     local checkSetId = false
+    local removeKnownSetItemCollection
     if criteria.setId ~= nil then
         checkSetId = true
     end
+    if criteria.knownInSetItemCollectionBook ~= nil then
+        removeKnownSetItemCollection = criteria.knownInSetItemCollectionBook
+    end
+d(">checkSetId: " ..tostring(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
+        local setIdGiven = (checkSetId and itm.setId and itm.setId == criteria.setId) or false
         --setId must match or wasn't given as criteria
-        if not checkSetId or (checkSetId and itm.setId and itm.setId == criteria.setId) then
-            if criteria.timestamp ~= nil then
-                --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
-                if itm.timestamp == criteria.timestamp then
+        if removeKnownSetItemCollection ~= nil then
+d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
+            if checkSetId == false or setIdGiven then
+                if (itm.knownInSetItemCollectionBook ~= nil and itm.knownInSetItemCollectionBook == removeKnownSetItemCollection) then
                     removeItemNow = true
-                else
-                    removeItemNow = false
                 end
             end
-            if criteria.itemType ~= nil then
-d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
-                if itm.itemType == criteria.itemType then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+        else
+            if not checkSetId or setIdGiven == true then
+                if criteria.timestamp ~= nil then
+                    --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
+                    if itm.timestamp == criteria.timestamp then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
-            end
-            if criteria.armorOrWeaponType ~= nil then
-                --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
-                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if criteria.itemType ~= nil then
+--d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+                    if itm.itemType == criteria.itemType then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
-            end
-            if criteria.slot ~= nil then
-                --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
-                if itm.slot == criteria.slot then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if criteria.armorOrWeaponType ~= nil then
+                    --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                    if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
-            end
-            if criteria.trait ~= nil then
-                --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
-                if criteria.trait == allTraitsId or itm.trait == criteria.trait then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if criteria.slot ~= nil then
+                    --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                    if itm.slot == criteria.slot then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
+                end
+                if criteria.trait ~= nil then
+                    --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
+                    if criteria.trait == allTraitsId or itm.trait == criteria.trait then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
             end
         end

@@ -1520,6 +1520,7 @@ function WishListWindow:SearchNow(searchValue, resetSearchTextBox)
     searchBox:SetText(searchValue) --Will automatically raise self:RefreshFilters() as OnTextChanged event fires
 end
 
+--Search edit box context menu
 function WishListWindow:OnSearchEditBoxContextMenu(editboxControl)
     local wlWindow = self
     local searchType = self.searchType

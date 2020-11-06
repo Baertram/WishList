@@ -112,6 +112,10 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_ARMORORWEAPONTYPE = "Entferne Gegenstände mit Typ \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_SLOT = "Entferne Gegenstände mit Slot \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_TRAIT = "Entferne Gegenstände mit Eigenschaft \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Entferne bekannte Set Sammlungs-Gegenst. des Sets \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Entferne alle bekannten Set Sammlungs-Gegenstände",
+
+
     WISHLIST_BUTTON_REMOVE_ALL_TT = "Entferne alle Gegenstände des ausgewählten Charakters von deiner " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_REMOVE_ALL_ITEMS_QUESTION = "Wirklich alle Gegenstände entfernen?",
     WISHLIST_DIALOG_REMOVE_WHOLE_SET = "Entferne gesamtes Set \"<<1>>\"",
