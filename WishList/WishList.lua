@@ -965,7 +965,7 @@ function WishList:RemoveHistoryItem(item, charData)
 end
 
 function WishList:RemoveAllItemsWithCriteria(criteria, charData)
-d("[WL]RemoveAllItemsWithCriteria")
+--d("[WL]RemoveAllItemsWithCriteria")
     if criteria == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsWithCriteria")
     if wishList == nil then return true end
@@ -983,7 +983,7 @@ d("[WL]RemoveAllItemsWithCriteria")
     if criteria.knownInSetItemCollectionBook ~= nil then
         removeKnownSetItemCollection = criteria.knownInSetItemCollectionBook
     end
-d(">checkSetId: " ..tostring(checkSetId))
+--d(">checkSetId: " ..tostring(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
@@ -992,7 +992,7 @@ d(">checkSetId: " ..tostring(checkSetId))
         local setIdGiven = (checkSetId and itm.setId and itm.setId == criteria.setId) or false
         --setId must match or wasn't given as criteria
         if removeKnownSetItemCollection ~= nil then
-d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
+--d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
             if checkSetId == false or setIdGiven then
                 if (itm.knownInSetItemCollectionBook ~= nil and itm.knownInSetItemCollectionBook == removeKnownSetItemCollection) then
                     removeItemNow = true
