@@ -98,6 +98,7 @@ function WishListWindow:Setup( )
     --Sort headers
 	self.headers = self.frame:GetNamedChild("Headers")
     self.headerDate = self.headers:GetNamedChild("DateTime")
+    self.headerSetItemCollectionState = self.headers:GetNamedChild("SetItemCollectionState")
     self.headerName = self.headers:GetNamedChild("Name")
 	self.headerArmorOrWeaponType = self.headers:GetNamedChild("ArmorOrWeaponType")
 	self.headerSlot = self.headers:GetNamedChild("Slot")
@@ -174,8 +175,10 @@ function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWid
     elseif wlTab == WISHLIST_TAB_WISHLIST then
         self.headerDate:ClearAnchors()
         self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
+        self.headerSetItemCollectionState:ClearAnchors()
+        self.headerSetItemCollectionState:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, -26, 0)
         self.headerName:ClearAnchors()
-        self.headerName:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, 0, 0)
+        self.headerName:SetAnchor(TOPLEFT, self.headerSetItemCollectionState, TOPRIGHT, 0, 0)
         self.headerName:SetDimensions(200, nameHeaderHeight)
         self.headerQuality:ClearAnchors()
         self.headerQuality:SetAnchor(LEFT, self.headerTrait, RIGHT, 0, 0)
@@ -196,7 +199,7 @@ end
 
 function WishListWindow:UpdateUI(state)
 	WL.CurrentState = state
---d("[WishListWindow:UpdateUI] state: " ..tostring(state) .. ", currentTab: " ..tostring(WL.CurrentTab))
+d("[WishListWindow:UpdateUI] state: " ..tostring(state) .. ", currentTab: " ..tostring(WL.CurrentTab))
 
     ------------------------------------------------------------------------------------------------------------------------
     --SEARCH tab
@@ -238,6 +241,7 @@ function WishListWindow:UpdateUI(state)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
+            self.headerSetItemCollectionState:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -279,6 +283,7 @@ function WishListWindow:UpdateUI(state)
 
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
+            self.headerSetItemCollectionState:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -322,6 +327,7 @@ function WishListWindow:UpdateUI(state)
 
             self.frame:GetNamedChild("Headers"):SetHidden(false)
             self.headerDate:SetHidden(true)
+            self.headerSetItemCollectionState:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -371,6 +377,7 @@ function WishListWindow:UpdateUI(state)
 
         self.frame:GetNamedChild("Headers"):SetHidden(false)
         self.headerDate:SetHidden(false)
+        self.headerSetItemCollectionState:SetHidden(false)
 		self.headerArmorOrWeaponType:SetHidden(false)
 		self.headerSlot:SetHidden(false)
 		self.headerTrait:SetHidden(false)
@@ -420,6 +427,7 @@ function WishListWindow:UpdateUI(state)
 
         self.frame:GetNamedChild("Headers"):SetHidden(false)
         self.headerDate:SetHidden(false)
+        self.headerSetItemCollectionState:SetHidden(true)
         self.headerArmorOrWeaponType:SetHidden(false)
         self.headerSlot:SetHidden(false)
         self.headerTrait:SetHidden(false)
@@ -445,7 +453,7 @@ end -- WishListWindow:UpdateUI(state)
 
 function WishListWindow:BuildMasterList(calledFromFilterFunction)
     calledFromFilterFunction = calledFromFilterFunction or false
---d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
+d("[WishListWindow:BuildMasterList]calledFromFilterFunction: " ..tostring(calledFromFilterFunction))
     --Sets tab row creation from savedvars sets list
 ------------------------------------------------------------------------------------------------------------------------
 	if WL.CurrentTab == WISHLIST_TAB_SEARCH then
@@ -467,12 +475,14 @@ function WishListWindow:BuildMasterList(calledFromFilterFunction)
 --d(">Chardata found: " .. selectedCharData.name)
         local wishList = WL.getWishListSaveVars(selectedCharData, "WishListWindow:BuildMasterList")
         if wishList == nil or #wishList == 0 then return false end
+        --Scan the items on your WishList (currently selected char) for set item collection markers
+        WL.scanWishListForAlreadyKnownSetItemCollectionEntries(WL.CurrentCharData, true, wishList)
 --d(">>Building master list entries, count: " .. tostring(#wishList))
         for i = 1, #wishList do
 			local item = wishList[i]
             --local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
 --d(">>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName).. ", quality: " .. tostring(itemQualityName))
-			table.insert(self.masterList, WL.CreateEntryForItem(item))
+			table.insert(self.masterList, WL.CreateWishListEntryForItem(item))
         end
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -501,7 +511,9 @@ function WishListWindow:SetupItemRow( control, data )
     --local clientLang = WL.clientLang or WL.fallbackSetLang
     --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
-    local updateSortHeaderDimensionsAndAnchors = false
+    --local updateSortHeaderDimensionsAndAnchors = false
+    local setItemCollectionStateColumn = control:GetNamedChild("SetItemCollectionState")
+    local markerTexture = setItemCollectionStateColumn:GetNamedChild("Marker")
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
     if not data.columnWidth then data.columnWidth = 200 end
@@ -518,6 +530,10 @@ function WishListWindow:SetupItemRow( control, data )
     ------------------------------------------------------------------------------------------------------------------------
     if WL.CurrentTab == WISHLIST_TAB_SEARCH then
         --d(">WISHLIST_TAB_SEARCH")
+        setItemCollectionStateColumn:SetHidden(true)
+        markerTexture:SetHidden(true)
+        markerTexture:SetTexture("")
+        markerTexture:SetMouseEnabled(false)
         dateColumn:SetHidden(true)
         dateColumn:ClearAnchors()
         nameColumn:ClearAnchors()
@@ -542,6 +558,17 @@ function WishListWindow:SetupItemRow( control, data )
     ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
         --d(">WISHLIST_TAB_WISHLIST")
+        setItemCollectionStateColumn:SetHidden(false)
+        if data.knownInSetItemCollectionBook and data.knownInSetItemCollectionBook == 1 then
+            markerTexture:SetTexture(WISHLIST_TEXTURE_SETITEMCOLLECTION)
+            markerTexture:SetDimensions(26, 26)
+            markerTexture:SetColor(1, 1, 1, 1)
+            markerTexture:SetMouseEnabled(true)
+            markerTexture:SetHidden(false)
+        else
+            markerTexture:SetTexture("")
+            markerTexture:SetHidden(true)
+        end
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
         dateColumn:ClearAnchors()
@@ -590,6 +617,9 @@ function WishListWindow:SetupItemRow( control, data )
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")
+        setItemCollectionStateColumn:SetHidden(true)
+        markerTexture:SetHidden(true)
+        markerTexture:SetMouseEnabled(false)
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
         dateColumn:ClearAnchors()
@@ -757,7 +787,7 @@ function WL.getItemTypeNamesForSortListEntry(itemType, armorOrWeaponType, slot, 
 end
 
 function WishListWindow:FilterScrollList()
---d("[WishListWindow:FilterScrollList]")
+d("[WishListWindow:FilterScrollList]")
 	local scrollData = ZO_ScrollList_GetDataList(self.list)
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
@@ -815,7 +845,12 @@ function WishListWindow:FilterScrollList()
 --d(">MasterList count: " ..tostring(#self.masterList))
             --Add the saved wishlist items of the chosen character
             for i = 1, #self.masterList do
+                --LibSets and other MasterList inserted data -> see function checkIfMasterListRebuildNeeded
+                local mlData = self.masterList[i]
                 --Get the data of each set item on the wishlist of the char
+            --[[
+                --All the data here was already created inside the MasterList via function checkIfMasterListRebuildNeeded
+                --> WL.CreateWishListEntryForItem, so why was it "copied" here?
                 local wlDataOfCharId = wishListOfCharId[i]
                 local data = {}
                 local itemId = wlDataOfCharId["id"]
@@ -840,8 +875,8 @@ function WishListWindow:FilterScrollList()
                 data["itemLink"]                = itemLink
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
                 data["timestamp"]               = wlDataOfCharId["timestamp"]
-                --LibSets data
-                local mlData = self.masterList[i]
+                data["isKnownInSetItemCollectionBook"] = wlDataOfCharId["isKnownInSetItemCollectionBook"]
+                --Masterlist data
                 if mlData then
                     data["setType"]         = mlData.setType
                     data["traitsNeeded"]    = mlData.traitsNeeded
@@ -855,9 +890,10 @@ function WishListWindow:FilterScrollList()
                     data["armorTypes"]      = mlData.armorTypes
                     data["dropMechanics"]   = mlData.dropMechanics
                end
+            ]]
                 --Filter out by name or set bonus
-                if searchInput == "" or self:CheckForMatch(data, searchInput) then
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
+                if searchInput == "" or self:CheckForMatch(mlData, searchInput) then
+                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, mlData))
                 end
             end
         end
@@ -890,6 +926,9 @@ function WishListWindow:FilterScrollList()
 --d(">MasterList count: " ..tostring(#self.masterList))
             --Add the saved wishlist items of the chosen character
             for i = 1, #self.masterList do
+            --[[
+                --All the data here was already created inside the MasterList via function checkIfMasterListRebuildNeeded
+                --> WL.CreateHistoryEntryForItem, so why was it "copied" here?
                 --Get the data of each set item on the wishlist of the char
                 local histDataOfCharId = historyOfCharId[i]
                 local data = {}
@@ -935,6 +974,7 @@ function WishListWindow:FilterScrollList()
                     data["armorTypes"]      = mlData.armorTypes
                     data["dropMechanics"]   = mlData.dropMechanics
                 end
+            ]]
                 --Filter out by name or set bonus
                 if searchInput == "" or self:CheckForMatch(data, searchInput) then
                     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
@@ -966,8 +1006,9 @@ function WL.getSortKeysWithTiebrakerFromSettings()
     local tieBreaker = settings.useSortTiebraker
     local noTiebraker = true
     local tiebrakerColumn
-    local baseDatatForSortKeys = {
+    local baseDataForSortKeys = {
         ["timestamp"]               = { isId64          = true, }, --isNumeric = true
+        ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
         ["name"]                    = { caseInsensitive = true, },
         ["armorOrWeaponTypeName"]   = { caseInsensitive = true, },
         ["slotName"]                = { caseInsensitive = true, },
@@ -1015,7 +1056,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
                 ["locality"]                = { caseInsensitive = true, tiebreaker = tostring(tiebrakerColumn) },
             }
             ]]
-            for sortKeysKey, sortKeysBaseData in pairs(baseDatatForSortKeys) do
+            for sortKeysKey, sortKeysBaseData in pairs(baseDataForSortKeys) do
                 if sortKeysKey ~= nil and sortKeysBaseData ~= nil then
                     sortKeys[sortKeysKey] = {}
                     sortKeys[sortKeysKey] = sortKeysBaseData
@@ -1029,6 +1070,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
     if noTiebraker == true then
         sortKeys = {
             ["timestamp"]               = { isId64          = true }, -- isNumeric = true
+            ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
             ["slotName"]                = { caseInsensitive = true },
@@ -1049,6 +1091,7 @@ function WishListWindow:BuildSortKeys()
         --Get the tiebraker for the 2nd sort after the selected column
         self.sortKeys = {
             ["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
+            ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
@@ -1162,6 +1205,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["username"]                = histDataOfCharId["username"]
     data["displayName"]             = histDataOfCharId["displayName"]
     data["locality"]                = histDataOfCharId["locality"]
+    data["knownInSetItemCollectionBook"] = histDataOfCharId["knownInSetItemCollectionBook"]
     --LibSets data
     data["setType"]         = mlData.setType
     data["traitsNeeded"]    = mlData.traitsNeeded

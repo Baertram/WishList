@@ -141,6 +141,9 @@ WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 12
 WISHLIST_ZONEID_BATTLEGROUNDS = 999999
 WISHLIST_ZONEID_SPECIAL       = 999998
 
+--Textures
+WISHLIST_TEXTURE_SETITEMCOLLECTION = "esoui/art/collections/collections_tabIcon_itemSets_up.dds"
+
 --Sort header names
 local sortTiebrakerChoicesWithSortHeaderKeys = {
     [-1] = "!None",

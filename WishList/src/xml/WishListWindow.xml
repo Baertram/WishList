@@ -32,8 +32,17 @@
                     <Anchor point="LEFT" />
                     <Dimensions x="135" y="30" />
                 </Label>
+                <Label name="$(parent)SetItemCollectionState" inherits="WishListRowLabel">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime"/>
+                    <Dimensions x="26" y="26" />
+					<Controls>
+						<Texture name="$(parent)Marker" tier="HIGH">
+							<Anchor point="LEFT" offsetX="-26"/>
+						</Texture>
+					</Controls>
+                </Label>
 				<Label name="$(parent)Name" inherits="WishListRowLabel">
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" />
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetItemCollectionState" />
 					<Dimensions x="200" y="30" />
 				</Label>
 				<Label name="$(parent)ArmorOrWeaponType" inherits="WishListRowLabel">
@@ -290,11 +299,18 @@
                             <Anchor point="TOPLEFT" />
                             <Dimensions x="135" y="32" />
                         </Control>
+                        <Control name="$(parent)SetItemCollectionState" inherits="WhisListSortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(WISHLIST_TEXTURE_SETITEMCOLLECTION, 28, 28, "", nil), "knownInSetItemCollectionBook", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime"/>
+                            <Dimensions x="30" y="32" />
+                        </Control>
 						<Control name="$(parent)Name" inherits="WhisListSortHeader">
 							<OnInitialized>
 								ZO_SortHeader_Initialize(self, GetString(WISHLIST_HEADER_NAME), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
 							</OnInitialized>
-							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DateTime" />
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetItemCollectionState" />
 							<Dimensions x="200" y="32" />
 						</Control>
 						<Control name="$(parent)ArmorOrWeaponType" inherits="WhisListSortHeader">

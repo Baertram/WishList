@@ -1218,11 +1218,62 @@ function WL.copyWishList(fromCharData, toCharId)
     end
 end
 
+
+------------------------------------------------------------------------------------------------------------------------
+--- Set Item Collections book
+------------------------------------------------------------------------------------------------------------------------
+local function isKnownInSetItemCollectionBook(itemLink)
+    if not itemLink then return end
+    return IsItemLinkSetCollectionPiece(itemLink) and IsItemSetCollectionPieceUnlocked(GetItemLinkItemId(itemLink))
+end
+
+function WL.IsItemLinkKnownInSetItemCollectionBook(itemLink)
+    return isKnownInSetItemCollectionBook(itemLink)
+end
+
+function WL.IsItemKnownInSetItemCollectionBook(item)
+    if not item then return end
+    local itemLink = item.itemLink or WL.buildItemLink(item.id, item.quality)
+    if itemLink and itemLink ~= "" then
+        return IsItemLinkSetCollectionPiece(itemLink) and IsItemSetCollectionPieceUnlocked(GetItemLinkItemId(itemLink))
+    end
+    return false
+end
+
 --Scan the WishList of a chosen char for items which are alreardy known in the Set item colelciton book, and mark their
 --data with the "setItemCollectionBookKnown = true" entry
-function WL.scanWishListForAlreadyKnownSetItemCollectionEntries(charData)
-    --TODO
+function WL.scanWishListForAlreadyKnownSetItemCollectionEntries(charData, noReload, wishList)
+    charData = charData or WL.LoggedInCharData
+    wishList = wishList or WL.getWishListSaveVars(charData, "WL.scanWishListForAlreadyKnownSetItemCollectionEntries")
+    if wishList == nil then return false end
+    local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
+	local countChanged = 0
+    for i = 1, #wishList do
+		local itm = wishList[i]
+        if not itm.knownInSetItemCollectionBook then
+            if itm.id then
+                local itemLink = WL.buildItemLink(itm.id, itm.quality)
+                if itemLink and itemLink ~= "" then
+                    local isKnown = WL.IsItemKnownInSetItemCollectionBook(itm)
+                    if isKnown == true then
+                        WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i].knownInSetItemCollectionBook = true
+                        countChanged = countChanged + 1
+                    end
+                end
+            end
+        else
+            countChanged = countChanged + 1
+        end
+	end
+    if countChanged > 0 and not noReload then
+        if WL.window ~= nil and not WL.window.control:IsHidden() then
+            WishList:ReloadItems()
+        end
+    end
 end
+
 
 ------------------------------------------------
 --- Tooltip functions
