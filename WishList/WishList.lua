@@ -1412,10 +1412,10 @@ end
 
 function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, removeType)
     if not itemLink or itemLink == "" then return end
-d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
+--d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
 
     local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-d(">SetId: " ..tostring(setId))
+--d(">SetId: " ..tostring(setId))
     if not hasSet or not setId then return end
 
     local itemType = GetItemLinkItemType(itemLink)
@@ -1722,16 +1722,29 @@ local function WL_Hooks()
             }
             AddCustomMenuItem("-", function() end)
             AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
-                    function() WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
+                    function()
+                        WL.CurrentCharData = WL.LoggedInCharData
+                        WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
                     end)  -- Remove all sets items of the setId already known in Set Item Collection book
             AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
-                    function() WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
+                    function()
+                        WL.CurrentCharData = WL.LoggedInCharData
+                        WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
                     end)  -- Remove all sets items already known in Set Item Collection book
+            AddCustomMenuItem("-", function() end)
+            AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
+                    function()
+                        WL.CurrentCharData = WL.LoggedInCharData
+                        WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS)
+                    end)  -- Remove all sets items of the setId already known in Set Item Collection book from ALL WishLists
+            AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS),
+                    function()
+                        WL.CurrentCharData = WL.LoggedInCharData
+                        WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS)
+                    end)  -- Remove all sets items already known in Set Item Collection book from ALL WishLists
             ShowMenu()
         end
     end)
-
-
 
     --Item Set Collection single setitem tile
     SecurePostHook(ZO_ItemSetCollectionPieceTile_Keyboard, "ShowMenu", function(self)

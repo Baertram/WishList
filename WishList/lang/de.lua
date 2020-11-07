@@ -5,6 +5,7 @@ local WL = WishList
 -- so they can be created before the other strings
 local stringsBase = {
     WISHLIST_TITLE                      = "Wunschliste",
+    WISHLIST_ALL_WISHLISTS              = "[ ALLe Wunschlisten ]",
     WISHLIST_HISTORY_TITLE              = "Historie",
 
     WISHLIST_HEADER_DATE                = "Datum",
@@ -116,6 +117,8 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Entferne alle bekannten Set Sammlungs-Gegenstände",
     WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Bekannte Gegenst. des Sets \"<<1>>\" von der " .. GetString(WISHLIST_TITLE) .. " entfernen",
     WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Alle bekannten Set Gegenstände von der " ..GetString(WISHLIST_TITLE) .. " entfernen",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS = "Bekannte Gegenst. des Sets \"<<1>>\" von ALLEN WunschListen entfernen",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS = "Alle bekannten Set Gegenstände von ALLEN WunschListen entfernen",
 
 
     WISHLIST_BUTTON_REMOVE_ALL_TT = "Entferne alle Gegenstände des ausgewählten Charakters von deiner " .. GetString(WISHLIST_TITLE),

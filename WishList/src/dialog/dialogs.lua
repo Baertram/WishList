@@ -545,7 +545,6 @@ function WL.WishListWindowRemoveItemInitialize(control)
         title = { text = "???" },
         mainText = { text = "???" },
         setup = function(dialog, data)
-WL._dialogData = data
             local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
             local removeFromHistory = data.removeFromHistory or false
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
@@ -553,6 +552,12 @@ WL._dialogData = data
             charNameText = WL.addCharBrackets(charNameText)
             local setName = data.itemData and data.itemData.name
             --Coming from context menu of e.g. Set Item Collection UI
+            local removeType = dialog.data.removeType
+            local removeFromAllWishLists = false
+            if removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS or
+              removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS then
+                removeFromAllWishLists = true
+            end
             local noDataCall = false
             if wlWindow == false then
                 if data.itemData == nil then
@@ -624,6 +629,8 @@ WL._dialogData = data
                     [WISHLIST_REMOVE_ITEM_TYPE_TRAIT]               = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TRAIT), itemTraitText),
                     [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION] = GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
                     [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET] = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS] = GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS] = ZO_CachedStrFormat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
                 }
                 local titelForRemoveItem = removeItemTitles[data.removeType]
                 if titelForRemoveItem == "" then titelForRemoveItem = removeItemTitles[WISHLIST_REMOVE_ITEM_TYPE_NORMAL] end
@@ -641,7 +648,11 @@ WL._dialogData = data
                     virtualListRowControl.data.style      = style
                     WL.buildSetItemTooltipForDialog(WishListRemoveItemDialog, virtualListRowControl)
                 else
-                    descLabel:SetText(titelForRemoveItem .. "?\n" .. charNameText)
+                    if removeFromAllWishLists == false then
+                        descLabel:SetText(titelForRemoveItem .. "?\n" .. charNameText)
+                    else
+                        descLabel:SetText(titelForRemoveItem .. "?\n" .. GetString(WISHLIST_ALL_WISHLISTS))
+                    end
                 end
             end
         end,
@@ -698,6 +709,11 @@ WL._dialogData = data
                             --Remove several items by date&time, armorOrWeaponType, slot, trait
                             else
                                 local criteriaToIdentifyItemsToRemove = {}
+                                local removeFromAllWishLists = false
+                                if removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS or
+                                  removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS then
+                                    removeFromAllWishLists = true
+                                end
                                 if noDataCall == false then
                                     local data = dialog.data.itemData
                                     local timeStamp = data.timestamp
@@ -721,17 +737,35 @@ WL._dialogData = data
                                     elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET then
                                         criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
                                         criteriaToIdentifyItemsToRemove.setId = setId
+                                    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS then
+                                        criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
+                                        criteriaToIdentifyItemsToRemove.setId = nil
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
+                                    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS then
+                                        criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
+                                        criteriaToIdentifyItemsToRemove.setId = setId
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
                                     end
                                 else
                                     if removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION then
                                         criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
                                         criteriaToIdentifyItemsToRemove.setId = nil
+                                    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS then
+                                        criteriaToIdentifyItemsToRemove.knownInSetItemCollectionBook = true
+                                        criteriaToIdentifyItemsToRemove.setId = nil
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
                                     end
                                 end
                                 if removeFromHistory then
                                     WishList:RemoveAllHistoryItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData)
                                 else
-                                    WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData)
+                                    if removeFromAllWishLists == true then
+                                        for _, charDataInLoop in pairs(WL.charsData) do
+                                            WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop)
+                                        end
+                                    else
+                                        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData)
+                                    end
                                 end
                             end
                         end

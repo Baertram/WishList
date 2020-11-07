@@ -6,6 +6,7 @@ local WL = WishList
 -- so they can be created before the other strings
 local stringsBase = {
     WISHLIST_TITLE                      = "WishList",
+    WISHLIST_ALL_WISHLISTS              = "[ ALL WishLists ]",
     WISHLIST_HISTORY_TITLE              = "history",
 
     WISHLIST_TOOLTIP_COLOR_KEY          = "|cFFA500", --Orange, RGB: 255 165 000
@@ -124,6 +125,8 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Remove known set item collection items of all sets",
     WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Remove known items of set \"<<1>>\" from " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION = "Remove known items of all sets from " ..GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS = "Remove known items of set \"<<1>>\" from ALL WishLists",
+    WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS = "Remove known items of all sets from ALL WishLists",
 
     WISHLIST_DIALOG_REMOVE_WHOLE_SET         = "Remove whole set \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION= "Really remove all items of set \"<<1>>\"?",
