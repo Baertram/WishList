@@ -960,8 +960,9 @@ function WishList:RemoveHistoryItem(item, charData)
     WishList:ReloadItems()
 end
 
-function WishList:RemoveAllItemsWithCriteria(criteria, charData)
+function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishListsInLoop)
 --d("[WL]RemoveAllItemsWithCriteria")
+    removeFromWishListsInLoop = removeFromWishListsInLoop or false
     if criteria == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsWithCriteria")
     if wishList == nil then return true end
@@ -1057,8 +1058,18 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData)
     end
     d(zo_strformat(GetString(WISHLIST_ITEMS_REMOVED) .. " " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt)) -- count.." item(s) removed from Wish List"
 
-    WL.updateRemoveAllButon()
-    WishList:ReloadItems()
+    local updateNow = false
+    if removeFromWishListsInLoop == true then
+        if WL.CurrentCharData ~= nil and WL.CurrentCharData.id ~= nil and charData.id == WL.CurrentCharData.id then
+            updateNow = true
+        end
+    else
+        updateNow = true
+    end
+    if updateNow then
+        WL.updateRemoveAllButon()
+        WishList:ReloadItems()
+    end
 end
 
 

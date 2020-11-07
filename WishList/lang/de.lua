@@ -5,7 +5,7 @@ local WL = WishList
 -- so they can be created before the other strings
 local stringsBase = {
     WISHLIST_TITLE                      = "Wunschliste",
-    WISHLIST_ALL_WISHLISTS              = "[ ALLe Wunschlisten ]",
+    WISHLIST_ALL_WISHLISTS              = "[ ALLE Wunschlisten ]",
     WISHLIST_HISTORY_TITLE              = "Historie",
 
     WISHLIST_HEADER_DATE                = "Datum",

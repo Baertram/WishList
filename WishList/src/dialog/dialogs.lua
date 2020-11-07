@@ -761,10 +761,10 @@ function WL.WishListWindowRemoveItemInitialize(control)
                                 else
                                     if removeFromAllWishLists == true then
                                         for _, charDataInLoop in pairs(WL.charsData) do
-                                            WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop)
+                                            WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop, true)
                                         end
                                     else
-                                        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData)
+                                        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData, false)
                                     end
                                 end
                             end
