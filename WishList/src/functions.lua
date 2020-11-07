@@ -1611,13 +1611,22 @@ function WL.showContextMenu(control, button, upInside)
                     local trait = WL.buildItemTraitIconText(traitText, data.trait)
                     AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT),
                         function() if itemLink ~= nil and itemLink ~= "" then StartChatInput(CHAT_SYSTEM.textEntry:GetText()..itemLink) end
-                    end) -- Link item to chat
+                        end) -- Link item to chat
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
-                    end)  -- Remove item
+                        end)  -- Remove item
+                    AddCustomMenuItem("-", function() end)
+                    AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName),
+                        function() WL.showRemoveItem(data, true, true, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
+                    end)  -- Remove whole set
+                    AddCustomMenuItem("-", function() end)
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
                     end)  -- Remove all sets items of the setId already known in Set Item Collection book
+                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
+                        function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
+                    end)  -- Remove all sets items already known in Set Item Collection book
+                    AddCustomMenuItem("-", function() end)
                     AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_DATETIME), dateAndTime),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_DATEANDTIME)
                     end)  -- Remove item by date & time
@@ -1630,18 +1639,14 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TRAIT), trait),
                         function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_TRAIT)
                     end)  -- Remove item by trait
-                    AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
-                        function() WL.showRemoveItem(data, false, true, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
-                    end)  -- Remove all sets items already known in Set Item Collection book
-                    AddCustomMenuItem(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName),
-                        function() WL.showRemoveItem(data, true, true, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
-                    end)  -- Remove whole set
+                    AddCustomMenuItem("-", function() end)
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY),
                         function() WL.showChangeQuality(data, false, true)
                     end)  -- Change quality
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET),
                         function() WL.showChangeQuality(data, true, true)
                     end)  -- Change quality of whole set
+                    AddCustomMenuItem("-", function() end)
                     --LibSets data
                     --Got drop zones of the item?
                     buildSetDropLocationContextMenuEntries(data)
