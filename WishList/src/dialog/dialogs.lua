@@ -1008,8 +1008,8 @@ function WL.WishListWindowChooseCharInitialize(control)
                 labelQuality:SetHidden(false)
                 labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
                 comboQualityControl:SetHidden(false)
-                if data ~= nil and data.dataForChar ~= nil then
-                    local itemLink = data.dataForChar.itemLink
+                if data ~= nil and data.dataForChar ~= nil and data.dataForChar[1] ~= nil then
+                    local itemLink = data.dataForChar[1].itemLink
                     descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM), itemLink))
                 end
             end
@@ -1033,12 +1033,21 @@ function WL.WishListWindowChooseCharInitialize(control)
                         WL.checkCurrentCharData(false)
                         WL.copyWishList(WL.CurrentCharData, toCharId)
                     else
-                        --Add item to wishlist of selected char, from link handler
+                        local toCharData = WL.getCharDataById(toCharId)
+                        --Add item to wishlist of selected char, from link handler / context menu within Set item collections
                         if dialog.data and dialog.data.dataForChar then
                             local dataForChar = dialog.data.dataForChar
-                            --Get the character data of the selected char
-                            local toCharData = WL.getCharDataById(toCharId)
-                            WL.addItemFromLinkHandlerToWishList(dataForChar.itemLink, dataForChar.id, dataForChar.itemType, dataForChar.isSet, dataForChar.setName, dataForChar.numBonuses, dataForChar.setId, toCharData, qualityWL)
+                            local alreadyOnWishListCheckDone = false
+                            if toCharData.id == WL.LoggedInCharData.id then
+                                alreadyOnWishListCheckDone = true
+                            end
+                            --Update the quality if not chosen "All"
+                            if qualityWL ~= WISHLIST_QUALITY_ALL then
+                                for _, item in ipairs(dataForChar) do
+                                    item.quality = qualityWL
+                                end
+                            end
+                            WishList:AddItem(dataForChar, toCharData, alreadyOnWishListCheckDone)
                         end
                     end
                 end,

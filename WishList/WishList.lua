@@ -164,7 +164,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         d(">traitType: " ..tostring(traitType))
     end
     --Get the quality
-    local quality = GetItemLinkQuality(itemLink)
+    local quality = GetItemLinkDisplayQuality(itemLink)
     if debug then
         d(">quality: " ..tostring(quality))
     end
@@ -1398,6 +1398,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
     local equipType = GetItemLinkEquipType(itemLink)
     local allTraitsTraitId = #WL.TraitTypes --All traits
 
+    --[[
     WL.checkCurrentCharData(false, true)
     local settings = WL.data
     local charData
@@ -1409,7 +1410,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
             charData = WL.LoggedInCharData
         end
     end
-
+    ]]
     local items = {}
     --Get the set parts to add for this setId
     items = WL.getSetItemsByCriteria(setId, itemType, armorOrWeaponType, allTraitsTraitId, equipType, WISHLIST_QUALITY_ALL)
@@ -1417,7 +1418,9 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
     --Add the items now, if some were found
     if #items > 0 then
         --Add the found set items to the WishList of the selected user now
-        WishList:AddItem(items, charData)
+        --WishList:AddItem(items, charData)
+        --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
+        WL.ShowChooseChar(false, items, false)
     end
 end
 

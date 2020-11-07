@@ -128,7 +128,7 @@ WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS = 10
 WISHLIST_SEARCHDROP_PREFIX= "WISHLIST_SEARCHDROP"
 WISHLIST_CHARSDROP_PREFIX = "WISHLIST_CHARSDROP"
 --Qualities
-WL.ESOquality2WLqualityAdd = 2 --Add this number to the ESO quality returned by GetItemLinkQuality to get the appropriate WishList quality constant
+WL.ESOquality2WLqualityAdd = 2 --Add this number to the ESO quality returned by GetItemLinkDisplayQuality to get the appropriate WishList quality constant
 WISHLIST_QUALITY_ALL = 1
 WISHLIST_QUALITY_TRASH = 2
 WISHLIST_QUALITY_NORMAL = 3

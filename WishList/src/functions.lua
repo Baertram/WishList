@@ -946,7 +946,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
         --Get trait info
         local traitInfo = WL.buildItemTraitIconText(WL.TraitTypes[item.trait], item.trait)
         --Get item quality
-        local quality = GetItemLinkQuality(itemLink)
+        local quality = GetItemLinkDisplayQuality(itemLink)
         --Get item level
         local reqLevel = GetItemLinkRequiredLevel(itemLink)
         --is the item level 50? Check if CP rank is needed and update the level str
@@ -1036,6 +1036,7 @@ function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitI
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
             local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
+            local _, _, numBonuses = GetItemLinkSetInfo(itemLink)
             local itemType = GetItemLinkItemType(itemLink)
             local armorOrWeaponType
             if itemType == ITEMTYPE_ARMOR then
@@ -1063,6 +1064,8 @@ function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitI
                 data.trait                  = traitType
                 --Add the quality so we can check this data later on as an item was looted
                 data.quality                = qualityId
+                data.itemLink               = itemLink
+                data.bonuses                = numBonuses
                 table.insert(items, data)
             end
         end
@@ -1429,35 +1432,6 @@ end
 -----------------------------------------------------------
 --- Context menus (WishList, Sets, Inventory, LinkHandler
 -----------------------------------------------------------
-function WL.addItemFromLinkHandlerToWishList(itemLink, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData, qualityWL)
-    if charData == nil or charData.id == nil then return false end
-    if itemLink == nil then return false end
-    local items = {}
-    local traitType = GetItemLinkTraitInfo(itemLink)
-    local equipType = GetItemLinkEquipType(itemLink)
-    local armorOrWeaponType = 0
-    if itemId == nil then
-        itemId = WL.GetItemIDFromLink(itemLink)
-    end
-    if itemType == ITEMTYPE_ARMOR then
-        armorOrWeaponType = GetItemLinkArmorType(itemLink)
-    elseif itemType == ITEMTYPE_WEAPON then
-        armorOrWeaponType = GetItemLinkWeaponType(itemLink)
-    end
-    --Strip gender stuff from the set name
-    setNameStr = zo_strformat("<<C:1>>", setNameStr)
-    --Item data format: {id=number, itemType=ITEM_TYPE, trait=ITEM_TRAIT_TYPE, type=ARMOR_TYPE/WEAPON_TYPE, slot=EQUIP_TYPE}
-    table.insert(items, {setName=setNameStr, id=itemId, itemType=itemType, trait=traitType, armorOrWeaponType=armorOrWeaponType, slot=equipType, bonuses=numBonuses, setId=setId, quality=qualityWL})
-    if #items > 0 then
-        --Add to the selected char's savedvars data
-        local alreadyOnWishListCheckDone = false
-        if charData.id == WL.LoggedInCharData.id then
-            alreadyOnWishListCheckDone = true
-        end
-        WishList:AddItem(items, charData, alreadyOnWishListCheckDone)
-    end
-end
-
 --LINK_HANDLER right clickt context menu
 function WL.linkContextMenu(link, button, _, _, linkType, ...)
     if button == MOUSE_BUTTON_INDEX_RIGHT and linkType == ITEM_LINK_TYPE and not IsItemLinkCrafted(link) then
@@ -1468,6 +1442,7 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                 if allowedItemTypes[itemType] then
                     local isSet, setNameStr, numBonuses, _, _, setId = GetItemLinkSetInfo(link, false)
                     if not isSet then return false end
+                    setNameStr = ZO_CachedStrFormat("<<C:1>>", setNameStr)
                     local customMenuEntryAddOrRemoveWishList = ""
                     --WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType)
                     local isItemAlreadyOnWishList, itemId, _ = WL.isItemAlreadyOnWishlist(link, nil, WL.LoggedInCharData) or false, nil, nil
@@ -1476,7 +1451,18 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                     elseif isItemAlreadyOnWishList then
                         customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_REMOVE)
                     end
-                    local qualityWL = GetItemLinkQuality(link) + WL.ESOquality2WLqualityAdd
+                    local traitType = GetItemLinkTraitInfo(link)
+                    local equipType = GetItemLinkEquipType(link)
+                    local armorOrWeaponType = 0
+                    if itemId == nil then
+                        itemId = WL.GetItemIDFromLink(link)
+                    end
+                    if itemType == ITEMTYPE_ARMOR then
+                        armorOrWeaponType = GetItemLinkArmorType(link)
+                    elseif itemType == ITEMTYPE_WEAPON then
+                        armorOrWeaponType = GetItemLinkWeaponType(link)
+                    end
+                    local qualityWL = GetItemLinkDisplayQuality(link) + WL.ESOquality2WLqualityAdd
                     AddCustomMenuItem(customMenuEntryAddOrRemoveWishList, function()
                         --Show the dialog to choose the character where the item should be added now
                         --WL.addItemFromLinkHandlerToWishList(link, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
@@ -1484,14 +1470,18 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                         data.id         = itemId
                         data.itemLink   = link
                         data.itemType   = itemType
-                        data.isSet      = isSet
+                        data.armorOrWeaponType = armorOrWeaponType
+                        data.slot       = equipType
+                        data.trait      = traitType
                         data.setName    = setNameStr
-                        data.numBonuses = numBonuses
+                        data.bonuses    = numBonuses
                         data.setId      = setId
                         data.quality    = qualityWL
                         if isShiftKeyPressed or not isItemAlreadyOnWishList then
+                            local dataNew = {}
+                            dataNew[1] = data
                             --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
-                            WL.ShowChooseChar(false, data, false)
+                            WL.ShowChooseChar(false, dataNew, false)
                         else
                             WL.showRemoveItem(data, false, false)
                         end
