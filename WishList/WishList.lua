@@ -1677,7 +1677,7 @@ local function WL_Hooks()
 
     --Player inventories etc.
     local function addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData)
-        WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData)
+        WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, false)
     end
 
     -->Add "Add to WishList" or "Remove from WishList" to the inventory context menu of items
@@ -1688,12 +1688,13 @@ local function WL_Hooks()
         local isSet = GetItemLinkSetInfo(GetItemLink(bagId, slotIndex))
         if not isSet then return end
         --Check if already on Wishlist
-        local isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
+        local isAlreadyOnWL, setItemId, setId, setName, bonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
         local alreadyOnWishListCheckData = {
             isAlreadyOnWL = isAlreadyOnWL,
             setItemId = setItemId,
             setId = setId,
             setName = setName,
+            bonuses = bonuses,
             itemType = itemType,
             armorOrWeaponType = armorOrWeaponType,
             equipType = equipType,

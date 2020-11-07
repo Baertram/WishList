@@ -1874,7 +1874,7 @@ end
 
 function WL.checkIfAlreadyOnWishList(bagId, slotIndex, charData)
     local itemLink = GetItemLink(bagId, slotIndex)
-    local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    local isSet, setName, numBonuses, _, _, setId = GetItemLinkSetInfo(itemLink, false)
     if not isSet then return end
     local itemType = GetItemLinkItemType(itemLink)
     local armorOrWeaponType = 0
@@ -1892,7 +1892,7 @@ function WL.checkIfAlreadyOnWishList(bagId, slotIndex, charData)
     charData = charData or WL.LoggedInCharData
     --Check if already on Wishlist
     local isAlreadyOnWL, setItemId, item = WL.isItemAlreadyOnWishlist(itemLink, nil, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
-    return isAlreadyOnWL, setItemId, setId, setName, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item
+    return isAlreadyOnWL, setItemId, setId, setName, numBonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item
 end
 
 function WL.GetBagAndSlotFromControlUnderMouse()
