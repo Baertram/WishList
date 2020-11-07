@@ -1010,7 +1010,9 @@ function WL.WishListWindowChooseCharInitialize(control)
                 comboQualityControl:SetHidden(false)
                 if data ~= nil and data.dataForChar ~= nil and data.dataForChar[1] ~= nil then
                     local itemLink = data.dataForChar[1].itemLink
-                    descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM), itemLink))
+                    local countMoreItems = #data.dataForChar - 1
+                    local textId = countMoreItems <= 0 and WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM or WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM_AND_MORE
+                    descLabel:SetText(zo_strformat(GetString(textId), itemLink, tostring(countMoreItems)))
                 end
             end
         end,

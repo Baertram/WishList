@@ -29,7 +29,7 @@ function WL:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData
             charData = alreadyOnWishListCheckData.charData
             item = alreadyOnWishListCheckData.item
         else
-            isAlreadyOnWL, setItemId, setId, setName, bonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
+            isAlreadyOnWL, setItemId, setId, setName, bonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil, nil)
         end
         --If not: add the item
         if setItemId == nil then

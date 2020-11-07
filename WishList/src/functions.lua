@@ -1429,6 +1429,47 @@ function WL.GetFirstSetItem(setId)
     end
 end
 
+--Get the needed itemData from an itemLink
+function WL.getItemDataByItemLink(link, charData, specialTraitId)
+    if not link or link == "" then return end
+    charData = charData or WL.LoggedInCharData
+    local data
+    local isItemAlreadyOnWishList = false
+    local itemType = GetItemLinkItemType(link)
+    if allowedItemTypes[itemType] then
+        local isSet, setNameStr, numBonuses, _, _, setId = GetItemLinkSetInfo(link, false)
+        if not isSet then return false end
+        local itemId
+        setNameStr = ZO_CachedStrFormat("<<C:1>>", setNameStr)
+        --WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType)
+        isItemAlreadyOnWishList, itemId, _ = WL.isItemAlreadyOnWishlist(link, nil, charData) or false, nil, nil
+        local traitType = GetItemLinkTraitInfo(link)
+        local equipType = GetItemLinkEquipType(link)
+        local armorOrWeaponType = 0
+        if itemId == nil then
+            itemId = WL.GetItemIDFromLink(link)
+        end
+        if itemType == ITEMTYPE_ARMOR then
+            armorOrWeaponType = GetItemLinkArmorType(link)
+        elseif itemType == ITEMTYPE_WEAPON then
+            armorOrWeaponType = GetItemLinkWeaponType(link)
+        end
+        local qualityWL = GetItemLinkDisplayQuality(link) + WL.ESOquality2WLqualityAdd
+        data = {}
+        data.id         = itemId
+        data.itemLink   = link
+        data.itemType   = itemType
+        data.armorOrWeaponType = armorOrWeaponType
+        data.slot       = equipType
+        data.trait      = specialTraitId or traitType
+        data.setName    = setNameStr
+        data.bonuses    = numBonuses
+        data.setId      = setId
+        data.quality    = qualityWL
+    end
+    return data, isItemAlreadyOnWishList
+end
+
 -----------------------------------------------------------
 --- Context menus (WishList, Sets, Inventory, LinkHandler
 -----------------------------------------------------------
@@ -1438,56 +1479,26 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
         local isShiftKeyPressed = IsShiftKeyDown()
         zo_callLater(
             function ()
-                local itemType = GetItemLinkItemType(link)
-                if allowedItemTypes[itemType] then
-                    local isSet, setNameStr, numBonuses, _, _, setId = GetItemLinkSetInfo(link, false)
-                    if not isSet then return false end
-                    setNameStr = ZO_CachedStrFormat("<<C:1>>", setNameStr)
-                    local customMenuEntryAddOrRemoveWishList = ""
-                    --WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType)
-                    local isItemAlreadyOnWishList, itemId, _ = WL.isItemAlreadyOnWishlist(link, nil, WL.LoggedInCharData) or false, nil, nil
-                    if(isShiftKeyPressed or not isItemAlreadyOnWishList) then
-                        customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_ADD)
-                    elseif isItemAlreadyOnWishList then
-                        customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_REMOVE)
-                    end
-                    local traitType = GetItemLinkTraitInfo(link)
-                    local equipType = GetItemLinkEquipType(link)
-                    local armorOrWeaponType = 0
-                    if itemId == nil then
-                        itemId = WL.GetItemIDFromLink(link)
-                    end
-                    if itemType == ITEMTYPE_ARMOR then
-                        armorOrWeaponType = GetItemLinkArmorType(link)
-                    elseif itemType == ITEMTYPE_WEAPON then
-                        armorOrWeaponType = GetItemLinkWeaponType(link)
-                    end
-                    local qualityWL = GetItemLinkDisplayQuality(link) + WL.ESOquality2WLqualityAdd
-                    AddCustomMenuItem(customMenuEntryAddOrRemoveWishList, function()
-                        --Show the dialog to choose the character where the item should be added now
-                        --WL.addItemFromLinkHandlerToWishList(link, itemId, itemType, isSet, setNameStr, numBonuses, setId, charData)
-                        local data = {}
-                        data.id         = itemId
-                        data.itemLink   = link
-                        data.itemType   = itemType
-                        data.armorOrWeaponType = armorOrWeaponType
-                        data.slot       = equipType
-                        data.trait      = traitType
-                        data.setName    = setNameStr
-                        data.bonuses    = numBonuses
-                        data.setId      = setId
-                        data.quality    = qualityWL
-                        if isShiftKeyPressed or not isItemAlreadyOnWishList then
-                            local dataNew = {}
-                            dataNew[1] = data
-                            --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
-                            WL.ShowChooseChar(false, dataNew, false)
-                        else
-                            WL.showRemoveItem(data, false, false)
-                        end
-                    end)
-                    ShowMenu()
+                local data, isItemAlreadyOnWishList = WL.getItemDataByItemLink(link)
+
+                local customMenuEntryAddOrRemoveWishList = ""
+                if(isShiftKeyPressed or not isItemAlreadyOnWishList) then
+                    customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_ADD)
+                elseif isItemAlreadyOnWishList then
+                    customMenuEntryAddOrRemoveWishList = GetString(WISHLIST_CONTEXTMENU_REMOVE)
                 end
+                AddCustomMenuItem(customMenuEntryAddOrRemoveWishList, function()
+                    --Show the dialog to choose the character where the item should be added now
+                    if isShiftKeyPressed or not isItemAlreadyOnWishList then
+                        local dataNew = {}
+                        dataNew[1] = data
+                        --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
+                        WL.ShowChooseChar(false, dataNew, false)
+                    else
+                        WL.showRemoveItem(data, false, false)
+                    end
+                end)
+                ShowMenu()
             end
             , 1)
     end
@@ -1872,8 +1883,8 @@ local function MyGetItemDetails(rowControl)
     return bagId, slotIndex
 end
 
-function WL.checkIfAlreadyOnWishList(bagId, slotIndex, charData)
-    local itemLink = GetItemLink(bagId, slotIndex)
+function WL.checkIfAlreadyOnWishList(bagId, slotIndex, itemLink, charData)
+    itemLink = itemLink or GetItemLink(bagId, slotIndex)
     local isSet, setName, numBonuses, _, _, setId = GetItemLinkSetInfo(itemLink, false)
     if not isSet then return end
     local itemType = GetItemLinkItemType(itemLink)

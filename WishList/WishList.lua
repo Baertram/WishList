@@ -1680,6 +1680,38 @@ local function WL_Hooks()
         WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, false)
     end
 
+    --Set collection item book: Determine unknown items of setId by help of the collectionCategoryIndex and the parent'S category data
+    local function getUnknownSetItemsInCollection(setId)
+        if setId == nil then return end
+        local collectionCategoryIdCheck = GetItemSetCollectionCategoryId(setId)
+        local parentCategoryId = GetItemSetCollectionCategoryParentId(setId)
+        if collectionCategoryIdCheck == nil or parentCategoryId == nil then return end
+        local unlockedSlots = GetNumItemSetCollectionSlotsUnlocked(setId)
+        if not unlockedSlots or unlockedSlots <= 0 then return end
+        local numItemsInSet = GetNumItemSetCollectionPieces(setId)
+        if not numItemsInSet or numItemsInSet <= 0 then return end
+
+        local items = {}
+
+        local allTraitsId = #WL.TraitTypes --All traits
+
+        for i=1, numItemsInSet, 1 do
+            local pieceId, slot = GetItemSetCollectionPieceInfo(setId, i)
+            if pieceId and pieceId ~= 0 and slot then
+                local pieceData= ITEM_SET_COLLECTIONS_DATA_MANAGER:GetOrCreateItemSetCollectionPieceData(pieceId, slot)
+                if pieceData and pieceData:IsLocked() then
+                    local itemLink = pieceData:GetItemLink()
+                    --Check if already on Wishlist
+                    local data, isAlreadyOnWL = WL.getItemDataByItemLink(itemLink, nil, allTraitsId)
+                    if not isAlreadyOnWL and data ~= nil then
+                        table.insert(items, data)
+                    end
+                end
+            end
+        end
+        return items
+    end
+
     -->Add "Add to WishList" or "Remove from WishList" to the inventory context menu of items
     local function WishList_OnInventory_ContextMenu(inventorySlot, slotActions)
         local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
@@ -1688,7 +1720,7 @@ local function WL_Hooks()
         local isSet = GetItemLinkSetInfo(GetItemLink(bagId, slotIndex))
         if not isSet then return end
         --Check if already on Wishlist
-        local isAlreadyOnWL, setItemId, setId, setName, bonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil)
+        local isAlreadyOnWL, setItemId, setId, setName, bonuses, itemType, armorOrWeaponType, equipType, traitType, itemQuality, charData, item = WL.checkIfAlreadyOnWishList(bagId, slotIndex, nil, nil)
         local alreadyOnWishListCheckData = {
             isAlreadyOnWL = isAlreadyOnWL,
             setItemId = setItemId,
@@ -1725,7 +1757,11 @@ local function WL_Hooks()
     --Item Set Collection set collapsable header
     SecurePostHook("ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseUp", function(control, button, upInside)
         if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
-            local setId = control.dataEntry.data.header.dataSource.itemSetId
+            local controlDataSource = control.dataEntry.data.header.dataSource
+            local setId = controlDataSource.itemSetId
+            local unlockedSlots = GetNumItemSetCollectionSlotsUnlocked(setId)
+            local numItemsInSet = GetNumItemSetCollectionPieces(setId)
+            local allUnlocked = (unlockedSlots == numItemsInSet) or false
             local nameCtrl = GetControl(control, "Name")
             local setName = ""
             if nameCtrl ~= nil and nameCtrl.GetText then
@@ -1735,28 +1771,43 @@ local function WL_Hooks()
                 setId = setId,
                 name = setName,
             }
+
+            if not allUnlocked then
+                AddCustomMenuItem("-", function() end)
+                AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_ADD_ITEM_UNKNOWN_SETITEMCOLLECTION_OF_SET), setName),
+                        function()
+                            local unknownItems = getUnknownSetItemsInCollection(setId)
+                            if unknownItems and #unknownItems > 0 then
+                                WL.ShowChooseChar(false, unknownItems, false)
+                            end
+                        end)  -- Add all sets items of the setId not known yet in Set Item Collection book
+            end
             AddCustomMenuItem("-", function() end)
-            AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
-                    function()
-                        WL.CurrentCharData = WL.LoggedInCharData
-                        WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
-                    end)  -- Remove all sets items of the setId already known in Set Item Collection book
+            if unlockedSlots and unlockedSlots > 0 then
+                AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
+                        function()
+                            WL.CurrentCharData = WL.LoggedInCharData
+                            WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET)
+                        end)  -- Remove all sets items of the setId already known in Set Item Collection book
+            end
             AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
                     function()
                         WL.CurrentCharData = WL.LoggedInCharData
                         WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION)
                     end)  -- Remove all sets items already known in Set Item Collection book
             AddCustomMenuItem("-", function() end)
-            AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
-                    function()
-                        WL.CurrentCharData = WL.LoggedInCharData
-                        WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS)
-                    end)  -- Remove all sets items of the setId already known in Set Item Collection book from ALL WishLists
+            if unlockedSlots and unlockedSlots > 0 then
+                AddCustomMenuItem(zo_strformat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
+                        function()
+                            WL.CurrentCharData = WL.LoggedInCharData
+                            WL.showRemoveItem(data, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS)
+                        end)  -- Remove all sets items of the setId already known in Set Item Collection book from ALL WishLists
+            end
             AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS),
-                    function()
-                        WL.CurrentCharData = WL.LoggedInCharData
-                        WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS)
-                    end)  -- Remove all sets items already known in Set Item Collection book from ALL WishLists
+                function()
+                    WL.CurrentCharData = WL.LoggedInCharData
+                    WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS)
+                end)  -- Remove all sets items already known in Set Item Collection book from ALL WishLists
             ShowMenu()
         end
     end)
