@@ -1037,17 +1037,19 @@ function WL.WishListWindowChooseCharInitialize(control)
                         --Add item to wishlist of selected char, from link handler / context menu within Set item collections
                         if dialog.data and dialog.data.dataForChar then
                             local dataForChar = dialog.data.dataForChar
+                            --[[
                             local alreadyOnWishListCheckDone = false
                             if toCharData.id == WL.LoggedInCharData.id then
                                 alreadyOnWishListCheckDone = true
                             end
+                            ]]
                             --Update the quality if not chosen "All"
                             if qualityWL ~= WISHLIST_QUALITY_ALL then
                                 for _, item in ipairs(dataForChar) do
                                     item.quality = qualityWL
                                 end
                             end
-                            WishList:AddItem(dataForChar, toCharData, alreadyOnWishListCheckDone)
+                            WishList:AddItem(dataForChar, toCharData, false)
                         end
                     end
                 end,
