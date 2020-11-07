@@ -1682,14 +1682,15 @@ local function WL_Hooks()
 
     --Set collection item book: Determine unknown items of setId by help of the collectionCategoryIndex and the parent'S category data
     local function getUnknownSetItemsInCollection(setId)
+--d("[WishList]getUnknownSetItemsInCollection - setId: " ..tostring(setId))
         if setId == nil then return end
         local collectionCategoryIdCheck = GetItemSetCollectionCategoryId(setId)
         local parentCategoryId = GetItemSetCollectionCategoryParentId(setId)
         if collectionCategoryIdCheck == nil or parentCategoryId == nil then return end
-        local unlockedSlots = GetNumItemSetCollectionSlotsUnlocked(setId)
-        if not unlockedSlots or unlockedSlots <= 0 then return end
         local numItemsInSet = GetNumItemSetCollectionPieces(setId)
         if not numItemsInSet or numItemsInSet <= 0 then return end
+        local unlockedSlots = GetNumItemSetCollectionSlotsUnlocked(setId)
+        if not unlockedSlots or unlockedSlots >= numItemsInSet then return end
 
         local items = {}
 
