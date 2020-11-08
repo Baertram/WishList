@@ -1288,7 +1288,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     selectedCharData.nameClean  = charNameClean
     selectedCharData.class      = charClass
 
-    local items = WL.getSetItemsByCriteria(WL.currentSetId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
+    local items = WL.getSetItemsByCriteria(WL.currentSetId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId, false)
 
     return items, selectedCharData
 end

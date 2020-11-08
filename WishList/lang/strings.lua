@@ -87,7 +87,8 @@ local strings = {
     WISHLIST_CLEAR_LAST_ADDED_TITLE = "Clear last added history?",
     WISHLIST_CLEAR_LAST_ADDED_TEXT = "Do you really want to clear all entries of the last added history?",
 
-    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD = "Add all traits to " .. GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD = "Add each single trait to " .. GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD_1_ITEM = "Add all traits as 1 item to " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE = "Remove all traits from " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_ADDED                   = " added to " .. GetString(WISHLIST_TITLE),

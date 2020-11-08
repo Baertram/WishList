@@ -1382,7 +1382,7 @@ end
 
 
 --SetItemCollection stuff
-function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
+function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, addOneSingleTraitItem)
     if not itemLink or itemLink == "" then return end
 --d("[WishList]Add all traits to WishList, by SetItemCollection item: " ..itemLink)
     local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
@@ -1413,7 +1413,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
     ]]
     local items = {}
     --Get the set parts to add for this setId
-    items = WL.getSetItemsByCriteria(setId, itemType, armorOrWeaponType, allTraitsTraitId, equipType, WISHLIST_QUALITY_ALL)
+    items = WL.getSetItemsByCriteria(setId, itemType, armorOrWeaponType, allTraitsTraitId, equipType, WISHLIST_QUALITY_ALL, addOneSingleTraitItem) --only 1 item with all traits?
 
     --Add the items now, if some were found
     if #items > 0 then
@@ -1911,9 +1911,15 @@ local function WL_Hooks()
         AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD),
                 function()
-                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE)
+                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE, false)
                 end
         )
+        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD_1_ITEM),
+                function()
+                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE, true)
+                end
+        )
+        AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE),
                 function()
                     WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE)

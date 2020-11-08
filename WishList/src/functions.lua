@@ -1029,7 +1029,8 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
 end
 
 --Select the set's items from the internal set data tables and build a return table with all items matching the criteria
-function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId)
+function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId, onlyOneItemWithAllTraits)
+    onlyOneItemWithAllTraits = onlyOneItemWithAllTraits or false
     local setsData = WL.accData.sets[setId]
     local allTraitsTraitId = #WL.TraitTypes
     local items = {}
@@ -1061,12 +1062,19 @@ function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitI
                 data.itemType               = itemType
                 data.armorOrWeaponType      = armorOrWeaponType
                 data.slot                   = equipType
-                data.trait                  = traitType
+                if onlyOneItemWithAllTraits == true then
+                    data.trait                  = allTraitsTraitId
+                else
+                    data.trait                  = traitType
+                end
                 --Add the quality so we can check this data later on as an item was looted
                 data.quality                = qualityId
                 data.itemLink               = itemLink
                 data.bonuses                = numBonuses
                 table.insert(items, data)
+                if onlyOneItemWithAllTraits == true then
+                    return items
+                end
             end
         end
     end
