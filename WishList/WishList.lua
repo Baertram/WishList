@@ -961,7 +961,7 @@ function WishList:RemoveHistoryItem(item, charData)
 end
 
 function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishListsInLoop)
---d("[WL]RemoveAllItemsWithCriteria")
+d("[WL]RemoveAllItemsWithCriteria")
     removeFromWishListsInLoop = removeFromWishListsInLoop or false
     if criteria == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsWithCriteria")
@@ -980,7 +980,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
     if criteria.knownInSetItemCollectionBook ~= nil then
         removeKnownSetItemCollection = criteria.knownInSetItemCollectionBook
     end
---d(">checkSetId: " ..tostring(checkSetId))
+d(">checkSetId: " ..tostring(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
@@ -989,7 +989,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
         local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
         --setId must match or wasn't given as criteria
         if removeKnownSetItemCollection ~= nil then
---d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
+d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
             if checkSetId == false or setIdGiven then
                 if (itm.knownInSetItemCollectionBook ~= nil and itm.knownInSetItemCollectionBook == removeKnownSetItemCollection) then
                     removeItemNow = true
@@ -1006,16 +1006,16 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                     end
                 end
                 if removeItemNow == false and criteria.itemType ~= nil then
---d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
                     if itm.itemType == criteria.itemType then
                         if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
                             removeItemNow = true
                         else
                             if criteria.armorOrWeaponType ~= nil then
---d(">>armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+d(">>armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
                                 if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                                     if criteria.slot ~= nil then
---d(">>>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+d(">>>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
                                         if itm.slot == criteria.slot then
                                             removeItemNow = true
                                         else
@@ -1029,7 +1029,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                                 end
                             else
                                 if criteria.slot ~= nil then
---d(">>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+d(">>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
                                     if itm.slot == criteria.slot then
                                         removeItemNow = true
                                     else
@@ -1044,7 +1044,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                         removeItemNow = false
                     end
                 end
-                if removeItemNow == false and criteria.armorOrWeaponType ~= nil then
+                if removeItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
                     --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
                     if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                         removeItemNow = true
@@ -1052,7 +1052,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                         removeItemNow = false
                     end
                 end
-                if removeItemNow == false and criteria.slot ~= nil then
+                if removeItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
                     --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
                     if itm.slot == criteria.slot then
                         removeItemNow = true
