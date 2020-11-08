@@ -1720,6 +1720,7 @@ end
 ------------------------------------------------
 
 local function WL_Hooks()
+    --SORT HEADER
     --Sort header OnMouseUp callback function for SHIFT key checks
     local function WL_SortHeaderOnMouseUp(sortHeaderCtrl, upInside)
         --Was the mouse released above the ctrl ?
@@ -1759,6 +1760,9 @@ local function WL_Hooks()
     end
     ZO_PreHook("ZO_SortHeader_OnMouseUp", WL_SortHeaderOnMouseUp)
 
+
+
+    --INVENTORY CONTEXT MENU
     --Player inventories etc.
     local function addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData)
         WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, false, true)
@@ -1779,6 +1783,7 @@ local function WL_Hooks()
         local items = {}
 
         local allTraitsId = #WL.TraitTypes --All traits
+        local anyQualityId = WISHLIST_QUALITY_ALL
 
         for i=1, numItemsInSet, 1 do
             local pieceId, slot = GetItemSetCollectionPieceInfo(setId, i)
@@ -1787,7 +1792,7 @@ local function WL_Hooks()
                 if pieceData and pieceData:IsLocked() then
                     local itemLink = pieceData:GetItemLink()
                     --Check if already on Wishlist
-                    local data, isAlreadyOnWL = WL.getItemDataByItemLink(itemLink, nil, allTraitsId)
+                    local data, isAlreadyOnWL = WL.getItemDataByItemLink(itemLink, nil, allTraitsId, anyQualityId)
                     if not isAlreadyOnWL and data ~= nil then
                         table.insert(items, data)
                     end
@@ -1829,17 +1834,8 @@ local function WL_Hooks()
     end
     LibCustomMenu:RegisterContextMenu(WishList_OnInventory_ContextMenu, LibCustomMenu.CATEGORY_LATE)
 
-    --ItemSetCollection single piece tile - OnMouseContextMenu Show
-    -->Add "Add all traits to WishList" context menu entry, and "Remove all traits"
-    local function getItemSetCollectionSinglePieceItemLink(p_ZO_ItemSetCollectionPieceTile_Keyboard)
-        local itemLink
-        local itemSetCollectionPieceData = p_ZO_ItemSetCollectionPieceTile_Keyboard.itemSetCollectionPieceData
-        if itemSetCollectionPieceData then
-            itemLink = itemSetCollectionPieceData:GetItemLink()
-        end
-        return itemLink
-    end
-    --Item Set Collection set collapsable header
+    --SET ITEM COLLECTIONS - SET HEADER CONTEXT MENU
+    --Item Set Collection set collapsable header context menu hook
     SecurePostHook("ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseUp", function(control, button, upInside)
         if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
             local controlDataSource = control.dataEntry.data.header.dataSource
@@ -1897,7 +1893,18 @@ local function WL_Hooks()
         end
     end)
 
-    --Item Set Collection single setitem tile
+    --SET ITEM COLLECTIONS - SINGLE PIECE CONTEXT MENU
+    --ItemSetCollection single piece tile - OnMouseContextMenu Show
+    -->Add "Add all traits to WishList" context menu entry, and "Remove all traits"
+    local function getItemSetCollectionSinglePieceItemLink(p_ZO_ItemSetCollectionPieceTile_Keyboard)
+        local itemLink
+        local itemSetCollectionPieceData = p_ZO_ItemSetCollectionPieceTile_Keyboard.itemSetCollectionPieceData
+        if itemSetCollectionPieceData then
+            itemLink = itemSetCollectionPieceData:GetItemLink()
+        end
+        return itemLink
+    end
+    --Item Set Collection single setitem tile context menu hook
     SecurePostHook(ZO_ItemSetCollectionPieceTile_Keyboard, "ShowMenu", function(self)
         local itemLink = getItemSetCollectionSinglePieceItemLink(self)
         if not itemLink or itemLink == "" then return end

@@ -1430,7 +1430,7 @@ function WL.GetFirstSetItem(setId)
 end
 
 --Get the needed itemData from an itemLink
-function WL.getItemDataByItemLink(link, charData, specialTraitId)
+function WL.getItemDataByItemLink(link, charData, specialTraitId, specialQuality)
     if not link or link == "" then return end
     charData = charData or WL.LoggedInCharData
     local data
@@ -1465,7 +1465,7 @@ function WL.getItemDataByItemLink(link, charData, specialTraitId)
         data.setName    = setNameStr
         data.bonuses    = numBonuses
         data.setId      = setId
-        data.quality    = qualityWL
+        data.quality    = specialQuality or qualityWL
     end
     return data, isItemAlreadyOnWishList
 end
@@ -1492,8 +1492,8 @@ function WL.linkContextMenu(link, button, _, _, linkType, ...)
                     if isShiftKeyPressed or not isItemAlreadyOnWishList then
                         local dataNew = {}
                         dataNew[1] = data
-                        --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
-                        WL.ShowChooseChar(false, dataNew, false)
+                        --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow, useAnyQuality)
+                        WL.ShowChooseChar(false, dataNew, false, true)
                     else
                         WL.showRemoveItem(data, false, false)
                     end
