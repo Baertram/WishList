@@ -2177,3 +2177,13 @@ function WL.ColorizeByQualityColor(text, WLquality)
     end
     return colorizedText
 end
+
+function WL.openSetItemCollectionBrowser()
+    --Does not work?!
+    --MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetCollectionsBook")
+    MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "collectionsBook")
+    --Now press the mainmenu group bar button 5 of the set item collections
+    zo_callLater(function()
+        ZO_MenuBar_SelectDescriptor(ZO_MainMenuSceneGroupBar, "itemSetsBook", true)
+    end, 25)
+end

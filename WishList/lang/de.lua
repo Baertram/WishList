@@ -169,6 +169,7 @@ local strings = {
     WISHLIST_BUTTON_WISHLIST_TT = "Deine " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_HISTORY_TT = GetString(WISHLIST_HISTORY_TITLE),
     WISHLIST_BUTTON_SETTINGS_TT = GetString(WISHLIST_TITLE) .. " Einstellungen",
+    WISHLIST_BUTTON_SET_ITEM_COLLECTION_TT   = "Zeige Set Gegenstands Sammlung",
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_WISHLIST = "[<<C:1>>]\n<<2[Keine Gegenstände/1 Gegenstand/$d Gegenstände]>> auf der " .. GetString(WISHLIST_TITLE),
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_HISTORY = "[<<C:1>>]\n<<2[Keine Einträge/1 Eintrag/$d Einträge]>> in der " .. GetString(WISHLIST_HISTORY_TITLE),
 

@@ -175,6 +175,7 @@ local strings = {
     WISHLIST_BUTTON_WISHLIST_TT              = "Your " .. GetString(WISHLIST_TITLE),
     WISHLIST_BUTTON_HISTORY_TT               = zo_strformat("<<C:1>>", GetString(WISHLIST_HISTORY_TITLE)),
     WISHLIST_BUTTON_SETTINGS_TT              = GetString(WISHLIST_TITLE) .. " settings",
+    WISHLIST_BUTTON_SET_ITEM_COLLECTION_TT   = "Show Set item collections",
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_WISHLIST = "[<<C:1>>]\n<<2[No item/1 item/$d items]>> on " .. GetString(WISHLIST_TITLE),
     WISHLIST_CHARDROPDOWN_ITEMCOUNT_HISTORY  = "[<<C:1>>]\n<<2[No entry/1 entry/$d entries]>> in " .. GetString(WISHLIST_HISTORY_TITLE),
 

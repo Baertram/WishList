@@ -1420,7 +1420,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink)
         --Add the found set items to the WishList of the selected user now
         --WishList:AddItem(items, charData)
         --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
-        WL.ShowChooseChar(false, items, false)
+        WL.ShowChooseChar(false, items, false, true)
     end
 end
 
@@ -1620,6 +1620,90 @@ local function WL_addMainMenuButton()
 end
 
 ------------------------------------------------
+--- WishList button
+------------------------------------------------
+local function W_addWLButton(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
+    local buttonData =
+    {
+        tooltip         = SI_BINDING_NAME_WISHLIST_SHOW,
+        callback        = function()
+                            WishList:Show()
+                            WishList.SetTab(WISHLIST_TAB_WISHLIST)
+        end,
+        normal          = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_up.dds",
+        pressed         = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_down.dds",
+        highlight       = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_over.dds",
+        disabled        = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_disabled.dds",
+    }
+    local button
+    --Does the button already exist?
+    local btnName = relativeTo:GetName() .. "WishListButton"
+    button = WINDOW_MANAGER:GetControlByName(btnName, "")
+    if button == nil then
+        --Create the button control at the parent
+        button = WINDOW_MANAGER:CreateControl(btnName, relativeTo, CT_BUTTON)
+    end
+    --Button was created?
+    if button ~= nil then
+        --Set the button's size
+        button:SetDimensions(32, 32)
+
+        --SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+        button:SetAnchor(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
+
+        --Texture
+        local texture
+
+        --Check if texture exists
+        texture = WINDOW_MANAGER:GetControlByName(btnName, "Texture")
+        if texture == nil then
+            --Create the texture for the button to hold the image
+            texture = WINDOW_MANAGER:CreateControl(btnName .. "Texture", button, CT_TEXTURE)
+        end
+        texture:SetAnchorFill()
+
+        --Set the texture for normale state now
+        texture:SetTexture(buttonData.normal)
+
+        --Do we have seperate textures for the button states?
+        button.upTexture 	  = buttonData.normal
+        button.downTexture 	  = buttonData.pressed
+        button.clickedTexture = buttonData.pressed
+
+        button.tooltipText	= GetString(buttonData.tooltip)
+        button.tooltipAlign = TOP
+        button:SetHandler("OnMouseEnter", function(self)
+            self:GetChild(1):SetTexture(self.downTexture)
+            ZO_Tooltips_ShowTextTooltip(self, self.tooltipAlign, self.tooltipText)
+        end)
+        button:SetHandler("OnMouseExit", function(self)
+            self:GetChild(1):SetTexture(self.upTexture)
+            ZO_Tooltips_HideTextTooltip()
+        end)
+        --Set the callback function of the button
+        button:SetHandler("OnClicked", function(...)
+            buttonData.callback(...)
+        end)
+        button:SetHandler("OnMouseUp", function(butn, mouseButton, upInside)
+            if upInside then
+                butn:GetChild(1):SetTexture(butn.upTexture)
+            end
+        end)
+        button:SetHandler("OnMouseDown", function(butn)
+            butn:GetChild(1):SetTexture(butn.clickedTexture)
+        end)
+
+        --Show the button and make it react on mouse input
+        button:SetHidden(false)
+        button:SetMouseEnabled(true)
+
+        --Return the button control
+        return button
+    end
+end
+
+
+------------------------------------------------
 --- Slash commands
 ------------------------------------------------
 local function WL_RegisterSlashCommands()
@@ -1677,7 +1761,7 @@ local function WL_Hooks()
 
     --Player inventories etc.
     local function addOrRemoveByInv(bagId, slotIndex, alreadyOnWishListCheckData)
-        WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, false)
+        WishList:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, false, true)
     end
 
     --Set collection item book: Determine unknown items of setId by help of the collectionCategoryIndex and the parent'S category data
@@ -1779,7 +1863,7 @@ local function WL_Hooks()
                         function()
                             local unknownItems = getUnknownSetItemsInCollection(setId)
                             if unknownItems and #unknownItems > 0 then
-                                WL.ShowChooseChar(false, unknownItems, false)
+                                WL.ShowChooseChar(false, unknownItems, false, true)
                             end
                         end)  -- Add all sets items of the setId not known yet in Set Item Collection book
             end
@@ -1937,6 +2021,10 @@ function WL.init(_, addonName)
 
     --Hooks
     WL_Hooks()
+
+    --Buttons
+    --Add WishList button to Set item collection UI top right corner
+    W_addWLButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFiltersShowLockedLabel, RIGHT, 50, 0)
 
     WL.firstWishListCall = true
     WL.initDone = true

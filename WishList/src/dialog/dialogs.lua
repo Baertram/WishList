@@ -1008,6 +1008,11 @@ function WL.WishListWindowChooseCharInitialize(control)
                 labelQuality:SetHidden(false)
                 labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
                 comboQualityControl:SetHidden(false)
+                local useAnyQuality = data and data.useAnyQuality
+                if useAnyQuality == true then
+                    comboQuality:SelectItemByIndex(1, true)
+                end
+
                 if data ~= nil and data.dataForChar ~= nil and data.dataForChar[1] ~= nil then
                     local itemLink = data.dataForChar[1].itemLink
                     local countMoreItems = #data.dataForChar - 1
@@ -1039,12 +1044,11 @@ function WL.WishListWindowChooseCharInitialize(control)
                         --Add item to wishlist of selected char, from link handler / context menu within Set item collections
                         if dialog.data and dialog.data.dataForChar then
                             local dataForChar = dialog.data.dataForChar
-                            --[[
-                            local alreadyOnWishListCheckDone = false
-                            if toCharData.id == WL.LoggedInCharData.id then
-                                alreadyOnWishListCheckDone = true
+                            local useAnyQuality = dialog.data and dialog.data.useAnyQuality
+                            if useAnyQuality == true then
+                                comboQuality:SelectItemByIndex(1, true)
                             end
-                            ]]
+
                             --Update the quality if not chosen "All"
                             if qualityWL ~= WISHLIST_QUALITY_ALL then
                                 for _, item in ipairs(dataForChar) do
@@ -1325,13 +1329,14 @@ function WL.ShowRemoveAllItems(comingFromWishListWindow)
     end
 end
 
-function WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
+function WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow, useAnyQuality)
     comingFromWishListWindow = comingFromWishListWindow or false
+    useAnyQuality = useAnyQuality or false
     WL.createWindow(false)
     --Get the currently selected character from the Wishlist tab
     WL.checkCurrentCharData(false)
     doAWishListCopy = doAWishListCopy or false
-    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CHOOSE_CHAR_DIALOG", {copyWishList=doAWishListCopy, dataForChar=addItemForCharData, wlWindow=comingFromWishListWindow})
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_CHOOSE_CHAR_DIALOG", {copyWishList=doAWishListCopy, dataForChar=addItemForCharData, wlWindow=comingFromWishListWindow, useAnyQuality=useAnyQuality})
 end
 
 function WL.ShowClearHistory(comingFromWishListWindow)

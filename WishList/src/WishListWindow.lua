@@ -175,15 +175,15 @@ function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWid
     elseif wlTab == WISHLIST_TAB_WISHLIST then
         self.headerDate:ClearAnchors()
         self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
-        self.headerSetItemCollectionState:ClearAnchors()
-        self.headerSetItemCollectionState:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, -26, 0)
         self.headerName:ClearAnchors()
-        self.headerName:SetAnchor(TOPLEFT, self.headerSetItemCollectionState, TOPRIGHT, 0, 0)
+        self.headerName:SetAnchor(TOPLEFT, self.headerDate, TOPRIGHT, 0, 0)
         self.headerName:SetDimensions(200, nameHeaderHeight)
         self.headerQuality:ClearAnchors()
         self.headerQuality:SetAnchor(LEFT, self.headerTrait, RIGHT, 0, 0)
-        self.headerQuality:SetAnchor(RIGHT, self.headers, RIGHT, -16, 0)
         self.headerLocality:ClearAnchors()
+        self.headerSetItemCollectionState:ClearAnchors()
+        self.headerSetItemCollectionState:SetAnchor(TOPLEFT, self.headerQuality, TOPRIGHT, 0, 0)
+        self.headerSetItemCollectionState:SetAnchor(RIGHT, self.headers, RIGHT, -16, 0)
     elseif wlTab == WISHLIST_TAB_HISTORY then
         self.headerDate:ClearAnchors()
         self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
@@ -531,6 +531,7 @@ function WishListWindow:SetupItemRow( control, data )
     if WL.CurrentTab == WISHLIST_TAB_SEARCH then
         --d(">WISHLIST_TAB_SEARCH")
         setItemCollectionStateColumn:SetHidden(true)
+        setItemCollectionStateColumn:ClearAnchors()
         markerTexture:SetHidden(true)
         markerTexture:SetTexture("")
         markerTexture:SetMouseEnabled(false)
@@ -549,26 +550,15 @@ function WishListWindow:SetupItemRow( control, data )
         armorOrWeaponTypeColumn:SetText("")
         slotColumn:SetText("")
         traitColumn:SetText("")
+        qualityColumn:SetText("")
         localityColumn:ClearAnchors()
         localityColumn:SetAnchor(LEFT, nameColumn, RIGHT, 0, 0)
-        localityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
         localityColumn:SetText(data.locality)
         localityColumn.localityName = data.locality
-        qualityColumn:SetText("")
+        localityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
     ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
         --d(">WISHLIST_TAB_WISHLIST")
-        setItemCollectionStateColumn:SetHidden(false)
-        if data.knownInSetItemCollectionBook and data.knownInSetItemCollectionBook == 1 then
-            markerTexture:SetTexture(WISHLIST_TEXTURE_SETITEMCOLLECTION)
-            markerTexture:SetDimensions(26, 26)
-            markerTexture:SetColor(1, 1, 1, 1)
-            markerTexture:SetMouseEnabled(true)
-            markerTexture:SetHidden(false)
-        else
-            markerTexture:SetTexture("")
-            markerTexture:SetHidden(true)
-        end
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
         dateColumn:ClearAnchors()
@@ -612,8 +602,21 @@ function WishListWindow:SetupItemRow( control, data )
         end
         qualityColumn:ClearAnchors()
         qualityColumn:SetAnchor(LEFT, traitColumn, RIGHT, 0, 0)
-        qualityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
         qualityColumn:SetText(qualityText)
+        setItemCollectionStateColumn:SetHidden(false)
+        setItemCollectionStateColumn:ClearAnchors()
+        setItemCollectionStateColumn:SetAnchor(LEFT, qualityColumn, RIGHT, 0, 0)
+        if data.knownInSetItemCollectionBook and data.knownInSetItemCollectionBook == 1 then
+            markerTexture:SetTexture(WISHLIST_TEXTURE_SETITEMCOLLECTION)
+            markerTexture:SetDimensions(26, 26)
+            markerTexture:SetColor(1, 1, 1, 1)
+            markerTexture:SetMouseEnabled(true)
+            markerTexture:SetHidden(false)
+        else
+            markerTexture:SetTexture("")
+            markerTexture:SetHidden(true)
+        end
+        setItemCollectionStateColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")

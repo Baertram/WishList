@@ -5,9 +5,10 @@ local WL = WishList
 --- Wishlist - Keybindings
 ------------------------------------------------
 --Add/Remove an item from the wishlist via keybinding, or inventory context menu (bagId and slotIndex are given then)
-function WL:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, currentCharOrDialog)
+function WL:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData, currentCharOrDialog, useAnyQuality)
     --d("WishList:AddOrRemoveFromWishList()")
     currentCharOrDialog = currentCharOrDialog or false
+    useAnyQuality = useAnyQuality or false
     if bagId == nil or slotIndex == nil then
         bagId, slotIndex = WL.GetBagAndSlotFromControlUnderMouse()
     end
@@ -60,7 +61,7 @@ function WL:AddOrRemoveFromWishList(bagId, slotIndex, alreadyOnWishListCheckData
             else
                 --Show add dialog
                 --WL.ShowChooseChar(doAWishListCopy, addItemForCharData, comingFromWishListWindow)
-                WL.ShowChooseChar(false, items, false)
+                WL.ShowChooseChar(false, items, false, useAnyQuality)
             end
         else
             --Already on WishList, so ask to remove it
