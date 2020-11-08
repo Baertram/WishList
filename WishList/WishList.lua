@@ -1911,12 +1911,12 @@ local function WL_Hooks()
         AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD),
                 function()
-                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE, false)
+                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, false)
                 end
         )
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD_1_ITEM),
                 function()
-                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, WISHLIST_ADD_TYPE_BY_ITEMTYPE, true)
+                    WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, true)
                 end
         )
         AddCustomMenuItem("-", function() end)
