@@ -82,6 +82,7 @@ local strings = {
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD = "Alle Eigenschaften einzeln zur " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD_1_ITEM = "Alle Eigenschaften als 1 Gegenstand zur " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE = "Alle Eigenschaften von der " .. GetString(WISHLIST_TITLE) .. " entfernen",
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE_SLOT = "Alle Eigenschaften des Ausrüstungsslot von der " .. GetString(WISHLIST_TITLE) .. " entfernen",
 
     WISHLIST_ADDED = " zur " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_REMOVED = " von der " .. GetString(WISHLIST_TITLE) .. " entfernt",

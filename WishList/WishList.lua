@@ -1426,10 +1426,10 @@ end
 
 function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, removeType)
     if not itemLink or itemLink == "" then return end
---d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
+d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
 
     local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
---d(">SetId: " ..tostring(setId))
+d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
     if not hasSet or not setId then return end
 
     local itemType = GetItemLinkItemType(itemLink)
@@ -1922,7 +1922,12 @@ local function WL_Hooks()
         AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE),
                 function()
-                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE)
+                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE)
+                end
+        )
+        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE_SLOT),
+                function()
+                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE_SLOT)
                 end
         )
         ShowMenu()

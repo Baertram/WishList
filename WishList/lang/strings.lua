@@ -89,7 +89,8 @@ local strings = {
 
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD = "Add each single trait to " .. GetString(WISHLIST_TITLE),
     WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_ADD_1_ITEM = "Add all traits as 1 item to " .. GetString(WISHLIST_TITLE),
-    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE = "Remove all traits from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE = "Remove all traits of item from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE_SLOT = "Remove all traits of slot from " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_ADDED                   = " added to " .. GetString(WISHLIST_TITLE),
     WISHLIST_REMOVED                 = " removed from " .. GetString(WISHLIST_TITLE),
