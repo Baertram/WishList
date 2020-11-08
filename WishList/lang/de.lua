@@ -113,6 +113,7 @@ local strings = {
     WISHLIST_DIALOG_REMOVE_ITEM_DATETIME = "Entferne Gegenstände mit Datum & Uhrzeit \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_TYPE = "Entferne Gegenstände mit Item Typ \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_ARMORORWEAPONTYPE = "Entferne Gegenstände mit Typ \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_ITEM_TYPE_ARMORORWEAPONTYPE_SLOT = "Entferne Gegenstände mit Item Typ \"<<1>>\", Typ \"<<2>>\", Slot \"<<3>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_SLOT = "Entferne Gegenstände mit Slot \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_TRAIT = "Entferne Gegenstände mit Eigenschaft \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET = "Entferne bekannte Set Sammlungs-Gegenst. des Sets \"<<1>>\"",

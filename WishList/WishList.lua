@@ -986,7 +986,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
         local itm = wishList[i]
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
-        local setIdGiven = (checkSetId and itm.setId and itm.setId == criteria.setId) or false
+        local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
         --setId must match or wasn't given as criteria
         if removeKnownSetItemCollection ~= nil then
 --d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
@@ -996,8 +996,8 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                 end
             end
         else
-            if not checkSetId or setIdGiven == true then
-                if criteria.timestamp ~= nil then
+            if checkSetId == false or setIdGiven == true then
+                if removeItemNow == false and criteria.timestamp ~= nil then
                     --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
                     if itm.timestamp == criteria.timestamp then
                         removeItemNow = true
@@ -1005,15 +1005,46 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                         removeItemNow = false
                     end
                 end
-                if criteria.itemType ~= nil then
+                if removeItemNow == false and criteria.itemType ~= nil then
 --d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
                     if itm.itemType == criteria.itemType then
-                        removeItemNow = true
+                        if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
+                            removeItemNow = true
+                        else
+                            if criteria.armorOrWeaponType ~= nil then
+--d(">>armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                                    if criteria.slot ~= nil then
+--d(">>>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                                        if itm.slot == criteria.slot then
+                                            removeItemNow = true
+                                        else
+                                            removeItemNow = false
+                                        end
+                                    else
+                                        removeItemNow = false
+                                    end
+                                else
+                                    removeItemNow = false
+                                end
+                            else
+                                if criteria.slot ~= nil then
+--d(">>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                                    if itm.slot == criteria.slot then
+                                        removeItemNow = true
+                                    else
+                                        removeItemNow = false
+                                    end
+                                else
+                                    removeItemNow = false
+                                end
+                            end
+                        end
                     else
                         removeItemNow = false
                     end
                 end
-                if criteria.armorOrWeaponType ~= nil then
+                if removeItemNow == false and criteria.armorOrWeaponType ~= nil then
                     --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
                     if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                         removeItemNow = true
@@ -1021,7 +1052,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                         removeItemNow = false
                     end
                 end
-                if criteria.slot ~= nil then
+                if removeItemNow == false and criteria.slot ~= nil then
                     --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
                     if itm.slot == criteria.slot then
                         removeItemNow = true
@@ -1029,7 +1060,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                         removeItemNow = false
                     end
                 end
-                if criteria.trait ~= nil then
+                if removeItemNow == false and criteria.trait ~= nil then
                     --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
                     if criteria.trait == allTraitsId or itm.trait == criteria.trait then
                         removeItemNow = true
@@ -1426,10 +1457,9 @@ end
 
 function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, removeType)
     if not itemLink or itemLink == "" then return end
-d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
+--d("[WishList]Remove all traits from WishList, by SetItemCollection item: " ..itemLink)
 
     local hasSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
-d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
     if not hasSet or not setId then return end
 
     local itemType = GetItemLinkItemType(itemLink)
@@ -1442,9 +1472,18 @@ d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
     local equipType = GetItemLinkEquipType(itemLink)
     local allTraitsTraitId = #WL.TraitTypes --All traits
 
+--d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
+--d(">>itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " ..tostring(armorOrWeaponType) .. ", slotType: " ..tostring(equipType))
+
     local criteriaToIdentifyItemsToRemove = {}
-    if removeType == WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE then
+    if removeType == WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE_SLOT then
         criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.itemType = itemType
+        criteriaToIdentifyItemsToRemove.armorOrWeaponType = armorOrWeaponType
+        criteriaToIdentifyItemsToRemove.slot = equipType
+    elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE then
+        criteriaToIdentifyItemsToRemove.setId = setId
+        criteriaToIdentifyItemsToRemove.itemType = itemType
         criteriaToIdentifyItemsToRemove.armorOrWeaponType = armorOrWeaponType
     elseif removeType == WISHLIST_REMOVE_ITEM_TYPE_SLOT then
         criteriaToIdentifyItemsToRemove.setId = setId
@@ -1469,7 +1508,7 @@ d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
         end
     end
     if criteriaToIdentifyItemsToRemove ~= nil and criteriaToIdentifyItemsToRemove.setId ~= nil then
-        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charData)
+        WishList:RemoveAllItemsWithCriteria(criteriaToIdentifyItemsToRemove, charData, false)
     end
 end
 
@@ -1922,7 +1961,7 @@ local function WL_Hooks()
         AddCustomMenuItem("-", function() end)
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE),
                 function()
-                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE)
+                    WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE_SLOT)
                 end
         )
         AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_SETITEMCOLLECTION_REMOVE_SLOT),
