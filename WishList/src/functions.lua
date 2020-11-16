@@ -891,6 +891,10 @@ d("[WL.isItemAlreayOnWishlist] " .. itemLink)
                                     else
                                         isAlreadyOnWishList = true
                                     end
+                                    --Overwrit the "Any trait" with the trait of the looted item
+                                    if item.trait == allTraits then
+                                        item.trait = traitType
+                                    end
                                     return isAlreadyOnWishList, itemId, item
                                 end
                             end
