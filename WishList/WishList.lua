@@ -127,8 +127,22 @@ local isItemAlreadyOnWishlist = WL.isItemAlreadyOnWishlist
 local IfItemIsOnWishlist = WL.IfItemIsOnWishlist
 local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedByCharName, whereWasItLootedData, debug, bagId, slotIndex)
     debug = debug or false
+    --Get the settings
+    local settings = WL.data
+    local isOnWishList, item, itemIdOfSetPart
+    local charData = {}
     local receivedBy = {}
+
     if itemLink == nil or itemId == nil then return nil end
+
+    --Check if not in dungeon and setting to be in a ddngeon upon notify is enabled
+    if settings.notifyOnFoundItemsOnlyInDungeons == true then
+        if not IsUnitInDungeon("player") then
+            if debug then d("<<<should be in dungeon but is not!") end
+            return
+        end
+    end
+
     --Compare some data like the itemType, weaponOrArmorType, slot, traut of itemLink of the looted item with your wishList
     local itemType = GetItemLinkItemType(itemLink)
     if debug then
@@ -142,6 +156,26 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         d(">isSet: " ..tostring(isSet) .. ", setName: " .. tostring(setName) .. ", setId: " ..tostring(setId))
     end
     if not isSet then return false end
+
+    --Check the item's level and if the setting to only notify if the level is the currently max CP level is enabled
+    local doGoOn = true
+    if settings.notifyOnFoundItemsOnlyMaxCP == true then
+        doGoOn = false
+        local maxLevel = GetMaxLevel()
+        local requiredLevel = GetItemLinkRequiredLevel(itemLink)
+        local itemReqCPLevel = GetItemLinkRequiredChampionPoints(itemLink)
+        if requiredLevel >= maxLevel then doGoOn = true end
+        if doGoOn == true then
+            local maxCP = GetChampionPointsPlayerProgressionCap()
+            if itemReqCPLevel <= 0 or itemReqCPLevel < maxCP then
+                doGoOn = false
+            end
+        end
+        if doGoOn == false then
+            if debug then d("<<<item level should be max CP but is only " ..tostring(requiredLevel) .. " and " .. tostring(itemReqCPLevel) .. " CP)") end
+            return
+        end
+    end
 
     --Get the armor or weapon type for comparison
     local armorOrWeaponType
@@ -168,38 +202,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     if debug then
         d(">quality: " ..tostring(quality))
     end
-    --Get the settings
-    local settings = WL.data
-    local isOnWishList, item, itemIdOfSetPart
-    local charData = {}
 
-    --Check if not in dungeon and setting to be in a ddngeon upon notify is enabled
-    if settings.notifyOnFoundItemsOnlyInDungeons == true then
-        if not IsUnitInDungeon("player") then
-            if debug then d("<<<should be in dungeon but is not!") end
-            return
-        end
-    end
-
-    --Check the item's level and if the setting to only notify if the level is the currently max CP level is enabled
-    local doGoOn = true
-    if settings.notifyOnFoundItemsOnlyMaxCP == true then
-        doGoOn = false
-        local maxLevel = GetMaxLevel()
-        local requiredLevel = GetItemLinkRequiredLevel(itemLink)
-        local itemReqCPLevel = GetItemLinkRequiredChampionPoints(itemLink)
-        if requiredLevel >= maxLevel then doGoOn = true end
-        if doGoOn == true then
-            local maxCP = GetChampionPointsPlayerProgressionCap()
-            if itemReqCPLevel <= 0 or itemReqCPLevel < maxCP then
-                doGoOn = false
-            end
-        end
-        if doGoOn == false then
-            if debug then d("<<<item level should be max CP but is only " ..tostring(requiredLevel) .. " and " .. tostring(itemReqCPLevel) .. " CP)") end
-            return
-        end
-    end
     --Scan all characters or only the currently logged in?
     if settings.scanAllChars then
         if debug then

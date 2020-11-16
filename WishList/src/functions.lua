@@ -850,7 +850,7 @@ end
 --Checksi fi the item is already on trhe WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
 function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
     scanByDetails = scanByDetails or false
---d("[WL.isItemAlreayOnWishlist] " .. itemLink)
+d("[WL.isItemAlreayOnWishlist] " .. itemLink)
     if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or itemQuality == nil) then return false, nil, nil end
     if charData == nil then return false, nil, nil end
     local wishList = WL.getWishListSaveVars(charData, "WL.isItemAlreadyOnWishlist")
@@ -863,6 +863,8 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     if itemId == nil then
         itemId = WL.GetItemIDFromLink(itemLink)
     end
+    local allTraits = #WL.TraitTypes
+
     local item = {}
 --d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType) .. ", quality: " ..tostring(itemQuality))
     if itemId ~= nil then
@@ -873,11 +875,11 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                     if item.itemType == itemType then
                         if item.armorOrWeaponType == armorOrWeaponType then
                             if item.slot == slotType then
-                                if item.trait == traitType then
+                                if item.trait == traitType or item.trait == allTraits then
                                     --Quality checks
                                     --Get the itemQuality
                                     itemQuality = itemQuality or GetItemLinkDisplayQuality(itemLink)
-                                    if itemQuality ~= nil and item.quality ~= nil then
+                                    if itemQuality ~= nil and item.quality ~= nil and item.quality ~= WISHLIST_QUALITY_ALL then
                                         --Get the qualities to check
                                         local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
                                         if qualitiesToCheck ~= nil then
