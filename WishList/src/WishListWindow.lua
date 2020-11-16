@@ -927,8 +927,9 @@ function WishListWindow:FilterScrollList()
                 return false
             end
 --d(">MasterList count: " ..tostring(#self.masterList))
-            --Add the saved wishlist items of the chosen character
+            --Add the saved history items of the chosen character
             for i = 1, #self.masterList do
+                local histData = self.masterList[i]
             --[[
                 --All the data here was already created inside the MasterList via function checkIfMasterListRebuildNeeded
                 --> WL.CreateHistoryEntryForItem, so why was it "copied" here?
@@ -979,8 +980,8 @@ function WishListWindow:FilterScrollList()
                 end
             ]]
                 --Filter out by name or set bonus
-                if searchInput == "" or self:CheckForMatch(data, searchInput) then
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, data))
+                if searchInput == "" or self:CheckForMatch(histData, searchInput) then
+                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(WISHLIST_DATA, histData))
                 end
             end
         end
@@ -1238,20 +1239,43 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 
     --Search by armor type
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_ARMORTYPE then
-        local itemLink = data["itemLink"]
-        if itemLink then
-            local itemType = GetItemLinkItemType(itemLink)
-            if itemType and itemType == ITEMTYPE_ARMOR then
-                if searchValueIsString then
-                    local armorOrWeaponTypeName = data.armorOrWeaponTypeName
-                    if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
-                        if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
-                            return true
+        --Are we searching at the WishList and/or History, then we are able to use the itemlink
+        --Else we need to use the armorTypes table (e.g. at the set search, as there is only 1 example itemlink in the
+        --dataEntry.data (could be a weapon or ring...)
+        if WL.CurrentTab == WISHLIST_TAB_SEARCH then
+            if data.armorTypes ~= nil then
+                if searchValueIsNumber and searchInputNumber ~= nil then
+                    if data.armorTypes[searchInputNumber] ~= nil and data.armorTypes[searchInputNumber] == true then
+                        return true
+                    end
+                elseif searchValueIsString then
+                    local armorTypes = WL.ArmorTypes
+                    for armorTypeNr, armorTypeText in ipairs(armorTypes) do
+                        if zo_plainstrfind(armorTypeText:lower(), searchInputLower) then
+                            if data.armorTypes[armorTypeNr] == true then
+                                return true
+                            end
                         end
                     end
-                elseif searchValueIsNumber then
-                    local armorOrWeaponType = data.armorOrWeaponType
-                    if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+                    return
+                end
+            end
+        else
+            local itemLink = data["itemLink"]
+            if itemLink then
+                local itemType = GetItemLinkItemType(itemLink)
+                if itemType and itemType == ITEMTYPE_ARMOR then
+                    if searchValueIsString then
+                        local armorOrWeaponTypeName = data.armorOrWeaponTypeName
+                        if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
+                            if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
+                                return true
+                            end
+                        end
+                    elseif searchValueIsNumber then
+                        local armorOrWeaponType = data.armorOrWeaponType
+                        if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+                    end
                 end
             end
         end
@@ -1350,8 +1374,9 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
             end
         end
 
-    --LibSets searches
-
+------------------------------------------------------------------------------------------------------------------------
+--LibSets searches
+------------------------------------------------------------------------------------------------------------------------
     --Search by setType
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_LIBSETSSETTYPE then
         local setType = data.setType
@@ -1514,6 +1539,7 @@ end
 --- Wish List Search Dropdown
 ------------------------------------------------
 function WishListWindow:SearchNow(searchValue, resetSearchTextBox)
+--d("[WishListWindow:SearchNow]searchValue: " ..tostring(searchValue))
     resetSearchTextBox = resetSearchTextBox or false
     if not searchValue then return end
     local searchBox = self.searchBox
@@ -1725,7 +1751,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                         exclude = {
                             [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
                             [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
-                            [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = true,
+                            [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
                             [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = true,
                             [WISHLIST_SEARCH_TYPE_BY_SLOT]                = true,
                             [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = true,
@@ -1738,7 +1764,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                             [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
-                            [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
+                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC]           = false,
                         }, --exclude the search entries from the set search
             },
         },
@@ -1760,7 +1786,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
-                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC]           = false,
                        }, --exclude the search entries from the set search
             },
             ["char"]= {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},
@@ -1783,7 +1809,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSTRAITSNEEDED] = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSZONEID]       = false,
                            [WISHLIST_SEARCH_TYPE_BY_LIBSETSWAYSHRINENODEINDEX] = false,
-                           [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
+                           [WISHLIST_SEARCH_TYPE_BY_LIBSETSDROPMECHANIC]           = false,
                        }, --exclude the search entries from the set search
             },
             ["char"] = {dropdown=wishListWindow.charsDrop,   prefix=WISHLIST_CHARSDROP_PREFIX,    entryCount=#WL.charsData},

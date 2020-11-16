@@ -101,7 +101,7 @@ local strings = {
     WISHLIST_DIALOG_ADD_WHOLE_SET_TT = "Alle Gegenstände des aktuell gewählten Sets, mit gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_DIALOG_ADD_ALL_TYPE_OF_SET_TT = "Alle Gegenstände des aktuell gewählten Sets, mit ausgewählter Art (<<1>>) und gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_DIALOG_ADD_ALL_TYPE_TYPE_OF_SET_TT = "Alle Gegenstände des aktuell gewählten Sets, mit ausgewählter Art (<<1>>) sowie ausgewähltem Gegenstand (<<2>>) und gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
-    WISHLIST_DIALOG_ADD_ANY_TRAIT = "- Jede Eigenschaft des akt. Gegenstandes -",
+    WISHLIST_DIALOG_ADD_ANY_TRAIT = "Jede Eigenschaft",
     WISHLIST_NO_ITEMS_ADDED_WITH_SELECTED_DATA = "Keine passenden Gegenstände gefunden -> Es wurde nichts zu der " .. GetString(WISHLIST_TITLE) .. " hinzugefügt",
     WISHLIST_DIALOG_ADD_ONE_HANDED_WEAPONS_OF_SET_TT = "Alle 1-händigen Waffen des aktuell gewählten Sets, mit gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
     WISHLIST_DIALOG_ADD_TWO_HANDED_WEAPONS_OF_SET_TT = "Alle 2-händigen Waffen des aktuell gewählten Sets, mit gewählter Eigenschaft, zu deiner " .. GetString(WISHLIST_TITLE) .. " hinzufügen",
@@ -159,7 +159,7 @@ local strings = {
     WISHLIST_TOTAL_SETS_ITEMS = "Set Gegenstände: ",
     WISHLIST_SETS_FOUND = "<<1>> Sets gefunden, mit <<2>> Gegenständen",
 
-    WISHLIST_ITEM_QUALITY_ALL   = "- Jede " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " -",
+    WISHLIST_ITEM_QUALITY_ALL   = "Jede " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5),
     WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE           = GetString(SI_ITEMQUALITY2) .. ", " .. GetString(SI_ITEMQUALITY3), 		--Magic or arcane
     WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT        = GetString(SI_ITEMQUALITY3) .. ", " .. GetString(SI_ITEMQUALITY4), 		--Arcane or artifact
     WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY     = GetString(SI_ITEMQUALITY4) .. ", " .. GetString(SI_ITEMQUALITY5), 	    --Artifact or legendary

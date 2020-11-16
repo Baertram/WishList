@@ -1405,6 +1405,34 @@ function WL.HideTooltip()
 end
 
 
+
+------------------------------------------------
+--- Set Item Collection functions
+------------------------------------------------
+--Returns knownPieces, totalPieces of a setId. If setId is not given it will return the values for all possible setIds
+function WL.GetSetItemCollectionPiecesCounts(setId)
+	local numSetPiecesKnownTotal = 0
+	local numSetPiecesTotal = 0
+
+    local function countSetPiecesForSetId(p_setId)
+        local numSetPieces = GetNumItemSetCollectionPieces(p_setId)
+        if (numSetPieces > 0) then
+            numSetPiecesKnownTotal = numSetPiecesKnownTotal + GetNumItemSetCollectionSlotsUnlocked(p_setId)
+            numSetPiecesTotal = numSetPiecesTotal + numSetPieces
+        end
+    end
+    if setId ~= nil then
+        countSetPiecesForSetId(setId)
+    else
+        setId = GetNextItemSetCollectionId()
+        while (setId) do
+            countSetPiecesForSetId(setId)
+            setId = GetNextItemSetCollectionId(setId)
+        end
+    end
+	return numSetPiecesKnownTotal, numSetPiecesTotal
+end
+
 ------------------------------------------------
 --- Set functions
 ------------------------------------------------
@@ -2187,11 +2215,12 @@ function WL.ColorizeByQualityColor(text, WLquality)
 end
 
 function WL.openSetItemCollectionBrowser()
-    --Does not work?!
-    --MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetCollectionsBook")
+    MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "itemSetsBook")
+    --[[--Workaround!
     MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "collectionsBook")
-    --Now press the mainmenu group bar button 5 of the set item collections
+    --Delay it by 200ms, so the menus open properly
     zo_callLater(function()
         ZO_MenuBar_SelectDescriptor(ZO_MainMenuSceneGroupBar, "itemSetsBook", true)
-    end, 25)
+    end, 200)
+    ]]
 end

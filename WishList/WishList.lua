@@ -684,6 +684,9 @@ function WL.CreateHistoryEntryForItem(item)
     --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     local setsData = WL.accData.sets[setId]
+    local function getDisplayNameOfItem()
+        if item.displayName ~= nil then return item.displayName else return "" end
+    end
     return({
         type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
         setId                   = setId,
@@ -701,7 +704,7 @@ function WL.CreateHistoryEntryForItem(item)
         itemLink                = itemLink,
         timestamp               = item.timestamp,
         username                = item.username,
-        displayName             = function() if item.displayName ~= nil then return item.displayName else return "" end end,
+        displayName             = getDisplayNameOfItem(),
         locality                = item.locality,
         quality                 = item.quality,
         qualityName             = itemQualityName,

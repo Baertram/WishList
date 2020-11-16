@@ -109,7 +109,7 @@ local strings = {
     WISHLIST_DIALOG_ADD_WHOLE_SET_TT         = "Add all items of the current set, with selected traits, to your " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_ADD_ALL_TYPE_OF_SET_TT   = "Add all items of the current set, with selected item type (<<1>>) and selected trait, to your " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_ADD_ALL_TYPE_TYPE_OF_SET_TT = "Add all items of the current set, with selected item type (<<1>>), item (<<2>>) and selected trait, to your " .. GetString(WISHLIST_TITLE),
-    WISHLIST_DIALOG_ADD_ANY_TRAIT            = "- Any trait of current item -",
+    WISHLIST_DIALOG_ADD_ANY_TRAIT            = "Any trait",
     WISHLIST_NO_ITEMS_ADDED_WITH_SELECTED_DATA = "No items found with the selected data -> No items were added to your " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_ADD_ONE_HANDED_WEAPONS_OF_SET_TT = "Add all one-handed items of the current set, with selected trait, to your " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_ADD_TWO_HANDED_WEAPONS_OF_SET_TT = "Add all two-handed items of the current set, with selected trait, to your " .. GetString(WISHLIST_TITLE),
@@ -165,7 +165,7 @@ local strings = {
     WISHLIST_TOTAL_SETS_ITEMS                = "Total items: ",
     WISHLIST_SETS_FOUND                      = "Sets found: <<1>> with <<2>> total items",
 
-    WISHLIST_ITEM_QUALITY_ALL                       = "- Any " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5) .. " -",
+    WISHLIST_ITEM_QUALITY_ALL                       = "Any " .. GetString(SI_TRADINGHOUSEFEATURECATEGORY5),
     WISHLIST_ITEM_QUALITY_MAGIC_OR_ARCANE           = GetString(SI_ITEMQUALITY2) .. ", " .. GetString(SI_ITEMQUALITY3), 		--Magic or arcane
     WISHLIST_ITEM_QUALITY_ARCANE_OR_ARTIFACT        = GetString(SI_ITEMQUALITY3) .. ", " .. GetString(SI_ITEMQUALITY4), 		--Arcane or artifact
     WISHLIST_ITEM_QUALITY_ARTIFACT_OR_LEGENDARY     = GetString(SI_ITEMQUALITY4) .. ", " .. GetString(SI_ITEMQUALITY5), 	    --Artifact or legendary
