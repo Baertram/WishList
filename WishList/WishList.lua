@@ -560,6 +560,7 @@ function WL.CreateEntryForSet( setId, setData )
         dlcName     = dlcName,
         setTypeName = setTypeName,
         armorTypes  = setsData.armorTypes,
+        weaponTypes  = setsData.weaponTypes,
         dropMechanics = setsData.dropMechanics,
 	})
 end

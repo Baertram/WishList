@@ -1839,6 +1839,7 @@ function WL.GetAllSetData(silent)
             local setNamesAdded = false
             local setItemIdsAdded = false
             local setsArmorTypes = nil
+            local setsWeaponTypes = nil
             local setsDropMechanics = nil
             setsData[setId] = {}
             --Add set names and client language name
@@ -1867,7 +1868,14 @@ function WL.GetAllSetData(silent)
                         setsData[setId]["armorTypes"] = setsArmorTypes
                     end
                 end
-                --Get the dropMEchnic of the setItemIds and build the setsDropMechanics table
+                --Get the weaponType of the setItemIds and build the setsArmorTypes table
+                if libSets.GetSetWeaponTypes then
+                    setsWeaponTypes = libSets.GetSetWeaponTypes(setId)
+                    if setsWeaponTypes then
+                        setsData[setId]["weaponTypes"] = setsWeaponTypes
+                    end
+                end
+                --Get the dropMechanic of the setItemIds and build the setsDropMechanics table
                 if libSets.GetDropMechanic then
                     setsDropMechanics = libSets.GetDropMechanic(setId, false)
                     if setsDropMechanics then

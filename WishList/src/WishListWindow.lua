@@ -1282,24 +1282,46 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
 
     --Search by weapon type
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE then
-        local itemLink = data["itemLink"]
-        if itemLink then
-            local itemType = GetItemLinkItemType(itemLink)
-            if itemType and itemType == ITEMTYPE_WEAPON then
-                if searchValueIsString then
-                    local armorOrWeaponTypeName = data.armorOrWeaponTypeName
-                    if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
-                        if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
-                            return true
+        --Are we searching at the WishList and/or History, then we are able to use the itemlink
+        --Else we need to use the armorTypes table (e.g. at the set search, as there is only 1 example itemlink in the
+        --dataEntry.data (could be a weapon or ring...)
+        if WL.CurrentTab == WISHLIST_TAB_SEARCH then
+            if data.weaponTypes ~= nil then
+                if searchValueIsNumber and searchInputNumber ~= nil then
+                    if data.weaponTypes[searchInputNumber] ~= nil and data.weaponTypes[searchInputNumber] == true then
+                        return true
+                    end
+                elseif searchValueIsString then
+                    local weaponTypes = WL.WeaponTypes
+                    for weaponTypeNr, weaponTypeText in ipairs(weaponTypes) do
+                        if zo_plainstrfind(weaponTypeText:lower(), searchInputLower) then
+                            if data.weaponTypes[weaponTypeNr] == true then
+                                return true
+                            end
                         end
                     end
-                elseif searchValueIsNumber then
-                    local armorOrWeaponType = data.armorOrWeaponType
-                    if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+                    return
+                end
+            end
+        else
+            local itemLink = data["itemLink"]
+            if itemLink then
+                local itemType = GetItemLinkItemType(itemLink)
+                if itemType and itemType == ITEMTYPE_WEAPON then
+                    if searchValueIsString then
+                        local armorOrWeaponTypeName = data.armorOrWeaponTypeName
+                        if armorOrWeaponTypeName and armorOrWeaponTypeName ~= "" then
+                            if zo_plainstrfind(armorOrWeaponTypeName:lower(), searchInputLower) then
+                                return true
+                            end
+                        end
+                    elseif searchValueIsNumber then
+                        local armorOrWeaponType = data.armorOrWeaponType
+                        if armorOrWeaponType ~= nil and armorOrWeaponType == searchInputNumber then return true end
+                    end
                 end
             end
         end
-
     --Search by slot
     elseif searchType == WISHLIST_SEARCH_TYPE_BY_SLOT then
         if searchValueIsString then
@@ -1752,7 +1774,7 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
                             [WISHLIST_SEARCH_TYPE_BY_NAME]                = false,
                             [WISHLIST_SEARCH_TYPE_BY_SET_BONUS]           = false,
                             [WISHLIST_SEARCH_TYPE_BY_ARMORTYPE]           = false,
-                            [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = true,
+                            [WISHLIST_SEARCH_TYPE_BY_WEAPONTYPE]          = false,
                             [WISHLIST_SEARCH_TYPE_BY_SLOT]                = true,
                             [WISHLIST_SEARCH_TYPE_BY_TRAIT]               = true,
                             [WISHLIST_SEARCH_TYPE_BY_ITEMID]              = true,
