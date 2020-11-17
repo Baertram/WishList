@@ -234,7 +234,6 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT =      "Show history added chat output",
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT_TT =   "Show the chat output about the looted items which have been added to the history.",
 
-
     WISHLIST_LAM_FORMAT_OPTIONS                     = "Output format",
     WISHLIST_LAM_SETNAME_LANGUAGES                  = "Set name languages",
     WISHLIST_LAM_SETNAME_LANGUAGES_TT               = "Enable the set name languages which should be shown in the " .. GetString(WISHLIST_TITLE) .. " sets list (seperated by a / character). The current client language will be shown first (If supported. Else English is shown first).",
@@ -253,6 +252,15 @@ local strings = {
     WISHLIST_SV_MIGRATION_RELOADUI              = "[WishList]Reloading the UI due to SavedVariables migration!",
     WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED    = "[WishList]Migration of SavedVariables of account \'%s\' to server \'%s\' finished!",
     WISHLIST_SV_MIGRATED_TO_SERVER              = "[|c00FF00WishList|r]SavedVariables migrated to server!",
+
+    WISHLIST_LAM_ONLY_CURRENT_CHAR              = "Only for current char",
+    WISHLIST_LAM_ONLY_CURRENT_CHAR_TT           = "Only do this for the currently logged in character",
+    WISHLIST_LAM_NOT_ANY_TRAIT                  = "Not \'Any\' trait",
+    WISHLIST_LAM_NOT_ANY_TRAIT_TT               = "Do not do this if the item's trait on your " .. GetString(WISHLIST_TITLE) .. " is set to \'Any\'",
+
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_HEADER  = "Auto-remove from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE         = "Auto-Remove found items",
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_TT      = "Automatically remove found items from your ".. GetString(WISHLIST_TITLE).." if you have looted them yourself.",
 }
 WL.stringsEN = strings
 

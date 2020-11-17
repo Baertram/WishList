@@ -246,6 +246,15 @@ local strings = {
     WISHLIST_SV_MIGRATION_RELOADUI              = "[WishList]Benutzeroberfläche wird nun neu geladen. Grund: WishList SavedVariables Migration!",
     WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED    = "[WishList]Migration der SavedVariables vom Account \'%s\' zum Server \'%s\' abgeschlossen!",
     WISHLIST_SV_MIGRATED_TO_SERVER              = "[|c00FF00WishList|r]SavedVariables wurden zum Server migriert!",
+
+    WISHLIST_LAM_ONLY_CURRENT_CHAR              = "Nur aktueller Charakter",
+    WISHLIST_LAM_ONLY_CURRENT_CHAR_TT           = "Tue dies nur für den aktuell eingeloggten Charakter",
+    WISHLIST_LAM_NOT_ANY_TRAIT                  = "Nicht \'Jede\' Eigenschaft",
+    WISHLIST_LAM_NOT_ANY_TRAIT_TT               = "Tue dies nicht wenn die Eigenschaft des Gegenstandes auf deiner " .. GetString(WISHLIST_TITLE) .. " mit \'Jede\' eingestellt ist",
+
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_HEADER  = "Auto-Entfernen von der " .. GetString(WISHLIST_TITLE),
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE         = "Auto-Entfernen gefundenet Gegenstände",
+    WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_TT      = "Entfernt automatisch Gegenstände von der ".. GetString(WISHLIST_TITLE)..", welche du selber gelootet hast.",
 }
 
 --Add missing translations from language "en" strings table as "fallback" (metatable)

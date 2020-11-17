@@ -1,6 +1,7 @@
 WishList = WishList or {}
 local WL = WishList
 local libSets = WL.LibSets
+WL.searchBoxLastSelected = {}
 
 ------------------------------------------------
 --- WishList Window -> ZO_SortFilterList
@@ -1841,18 +1842,19 @@ function WL.initializeSearchDropdown(wishListWindow, currentTab, searchBoxType)
     local searchDropData = searchDropAtTab[searchBoxType]
     if searchDropData == nil then return false end
     --d(">searchDropData: " .. tostring(searchDropData.dropdown) ..", " ..tostring(searchDropData.prefix) .. ", " .. tostring(searchDropData.entryCount))
-    wishListWindow:InitializeComboBox(searchDropData.dropdown, searchDropData.prefix, searchDropData.entryCount, searchDropData.exclude )
+    wishListWindow:InitializeComboBox(searchDropData.dropdown, searchDropData.prefix, searchDropData.entryCount, searchDropData.exclude, searchBoxType )
 end
 
-function WishListWindow:InitializeComboBox( control, prefix, max, exclude )
-    local isCharCB = (prefix == WISHLIST_CHARSDROP_PREFIX) or false
-    local isSetSearchCB = (prefix == WISHLIST_SEARCHDROP_PREFIX) or false
+function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searchBoxType )
+    local isCharCB = ((prefix == WISHLIST_CHARSDROP_PREFIX) or searchBoxType == "char") or false
+    local isSetSearchCB = ((prefix == WISHLIST_SEARCHDROP_PREFIX) or searchBoxType == "set") or false
 --d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
-    local setSearchCBEntryStart = WISHLIST_SEARCHDROP_PREFIX
+    --local setSearchCBEntryStart = WISHLIST_SEARCHDROP_PREFIX
     control:SetSortsItems(false)
     control:ClearItems()
 
-    local callback = function( ... ) --comboBox, entryText, entry, selectionChanged )
+    local callback = function( _, _, entry, _ ) --comboBox, entryText, entry, selectionChanged )
+        self:SetSearchBoxLastSelected(WL.CurrentTab, searchBoxType, entry.selectedIndex)
         self:RefreshFilters()
     end
 
@@ -1873,6 +1875,7 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude )
             currentCharId = GetCurrentCharacterId()
         end
     end
+    local numEntriesAdded = 0
     for i = 1, max do
         if not exclude or (exclude and not exclude[i]) then
             local entry
@@ -1903,17 +1906,22 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude )
                 entry.nameClean  = charData.nameClean
                 entry.class      = charData.class
 
-                --Search type combo box
+            --Search type combo box
             elseif isSetSearchCB then
                 local entryText = GetString(prefix, i)
                 --entryText = entryText .. GetString(setSearchCBEntryStart, i)
                 entry = ZO_ComboBox:CreateItemEntry(entryText, callback)
                 entry.id = i
             end
+            numEntriesAdded = numEntriesAdded + 1
+            entry.selectedIndex = numEntriesAdded
             control:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
         end
     end
     if itemToSelect ~= nil then
+        if isSetSearchCB then
+            itemToSelect = self:GetSearchBoxLastSelected(WL.CurrentTab, "set")
+        end
         control:SelectItemByIndex(itemToSelect, true)
     end
 
@@ -1954,4 +1962,16 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude )
             end
         end)
     end
+end
+
+function WishListWindow:SetSearchBoxLastSelected(wishListUITab, searchBoxType, selectedIndex)
+    WL.searchBoxLastSelected[wishListUITab] = WL.searchBoxLastSelected[wishListUITab] or {}
+    WL.searchBoxLastSelected[wishListUITab][searchBoxType] = selectedIndex
+end
+
+function WishListWindow:GetSearchBoxLastSelected(wishListUITab, searchBoxType)
+    if WL.searchBoxLastSelected[wishListUITab] and WL.searchBoxLastSelected[wishListUITab][searchBoxType] then
+        return WL.searchBoxLastSelected[wishListUITab][searchBoxType]
+    end
+    return 1
 end
