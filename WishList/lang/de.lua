@@ -179,6 +179,9 @@ local strings = {
     --Keybindings
     SI_BINDING_NAME_WISHLIST_SHOW = "Zeige/Verstecke " .. GetString(WISHLIST_TITLE),
     SI_BINDING_NAME_WISHLIST_ADD_OR_REMOVE = "Hinzufügen/Entfernen zu/aus " .. GetString(WISHLIST_TITLE),
+    SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE  = "Zeige aktuelle Zone in Sets Sammlungen",
+    SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE  = "Zeige aktuelle Übergeordnete Zone in Sets Sammlungen",
+    WISHLIST_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS = "Mehr Optionen",
 
     -- LAM addon settings
     WISHLIST_WARNING_RELOADUI = "Achtung:\nBeim Verändern dieser Option wird automatisch die Benutzeroberfläche neu geladen!",

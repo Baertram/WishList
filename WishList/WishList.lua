@@ -1668,83 +1668,72 @@ end
 ------------------------------------------------
 --- WishList button
 ------------------------------------------------
-local function W_addWLButton(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
-    local buttonData =
-    {
-        tooltip         = SI_BINDING_NAME_WISHLIST_SHOW,
-        callback        = function()
-                            WishList:Show()
-                            WishList.SetTab(WISHLIST_TAB_WISHLIST)
-        end,
-        normal          = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_up.dds",
-        pressed         = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_down.dds",
-        highlight       = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_over.dds",
-        disabled        = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_disabled.dds",
-    }
+local function W_addWLButton(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY, buttonData)
+    if not buttonData or not buttonData.parentControl or not buttonData.buttonName or not buttonData.callback then return end
     local button
     --Does the button already exist?
-    local btnName = relativeTo:GetName() .. "WishListButton"
+    local btnName = buttonData.parentControl:GetName() .. "WishListButton" .. buttonData.buttonName
     button = WINDOW_MANAGER:GetControlByName(btnName, "")
     if button == nil then
-        --Create the button control at the parent
-        button = WINDOW_MANAGER:CreateControl(btnName, relativeTo, CT_BUTTON)
+    --Create the button control at the parent
+    button = WINDOW_MANAGER:CreateControl(btnName, buttonData.parentControl, CT_BUTTON)
     end
     --Button was created?
     if button ~= nil then
-        --Set the button's size
-        button:SetDimensions(32, 32)
+    --Set the button's size
+    button:SetDimensions(buttonData.width or 32, buttonData.height or 32)
 
-        --SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
-        button:SetAnchor(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
+    --SetAnchor(point, relativeTo, relativePoint, offsetX, offsetY)
+    button:SetAnchor(myAnchorPoint, relativeTo, relativePoint, offsetX, offsetY)
 
-        --Texture
-        local texture
+    --Texture
+    local texture
 
-        --Check if texture exists
-        texture = WINDOW_MANAGER:GetControlByName(btnName, "Texture")
-        if texture == nil then
-            --Create the texture for the button to hold the image
-            texture = WINDOW_MANAGER:CreateControl(btnName .. "Texture", button, CT_TEXTURE)
-        end
-        texture:SetAnchorFill()
+    --Check if texture exists
+    texture = WINDOW_MANAGER:GetControlByName(btnName, "Texture")
+    if texture == nil then
+    --Create the texture for the button to hold the image
+    texture = WINDOW_MANAGER:CreateControl(btnName .. "Texture", button, CT_TEXTURE)
+    end
+    texture:SetAnchorFill()
 
-        --Set the texture for normale state now
-        texture:SetTexture(buttonData.normal)
+    --Set the texture for normale state now
+    texture:SetTexture(buttonData.normal)
 
-        --Do we have seperate textures for the button states?
-        button.upTexture 	  = buttonData.normal
-        button.downTexture 	  = buttonData.pressed
-        button.clickedTexture = buttonData.pressed
+    --Do we have seperate textures for the button states?
+    button.upTexture 	  = buttonData.normal
+    button.mouseOver 	  = buttonData.highlight
+    button.clickedTexture = buttonData.pressed
 
-        button.tooltipText	= GetString(buttonData.tooltip)
-        button.tooltipAlign = TOP
-        button:SetHandler("OnMouseEnter", function(self)
-            self:GetChild(1):SetTexture(self.downTexture)
-            ZO_Tooltips_ShowTextTooltip(self, self.tooltipAlign, self.tooltipText)
-        end)
-        button:SetHandler("OnMouseExit", function(self)
-            self:GetChild(1):SetTexture(self.upTexture)
-            ZO_Tooltips_HideTextTooltip()
-        end)
-        --Set the callback function of the button
-        button:SetHandler("OnClicked", function(...)
-            buttonData.callback(...)
-        end)
-        button:SetHandler("OnMouseUp", function(butn, mouseButton, upInside)
-            if upInside then
-                butn:GetChild(1):SetTexture(butn.upTexture)
-            end
-        end)
-        button:SetHandler("OnMouseDown", function(butn)
-            butn:GetChild(1):SetTexture(butn.clickedTexture)
-        end)
+    button.tooltipText	= GetString(buttonData.tooltip)
+    button.tooltipAlign = TOP
+    button:SetHandler("OnMouseEnter", function(self)
+    self:GetChild(1):SetTexture(self.mouseOver)
+    ZO_Tooltips_ShowTextTooltip(self, self.tooltipAlign, self.tooltipText)
+    end)
+    button:SetHandler("OnMouseExit", function(self)
+    self:GetChild(1):SetTexture(self.upTexture)
+    ZO_Tooltips_HideTextTooltip()
+    end)
+    --Set the callback function of the button
+    button:SetHandler("OnClicked", function(...)
+    buttonData.callback(...)
+    end)
+    button:SetHandler("OnMouseUp", function(butn, mouseButton, upInside)
+    if upInside then
+    butn:GetChild(1):SetTexture(butn.upTexture)
+    end
+    end)
+    button:SetHandler("OnMouseDown", function(butn)
+    butn:GetChild(1):SetTexture(butn.clickedTexture)
+    end)
 
-        --Show the button and make it react on mouse input
-        button:SetHidden(false)
-        button:SetMouseEnabled(true)
+    --Show the button and make it react on mouse input
+    button:SetHidden(false)
+    button:SetMouseEnabled(true)
 
-        --Return the button control
-        return button
+    --Return the button control
+    return button
     end
 end
 
@@ -1980,6 +1969,54 @@ local function WL_Hooks()
     end)
 end
 
+local function WL_AddButtons()
+    --Add "show current parent zone" button to item set collection UI top right corner
+    local buttonDataOpenCurrentParentZone =
+    {
+        buttonName      = "MoreOptions",
+        parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
+        tooltip         = WISHLIST_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS,
+        callback        = function()
+            ClearMenu()
+            AddCustomMenuItem(GetString(SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE), function()
+                WL.openSetItemCollectionBrowserForCurrentZone(true)
+            end)
+            AddCustomMenuItem(GetString(SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE), function()
+                if not WL.openSetItemCollectionBrowserForCurrentZone(false) then
+                    WL.openSetItemCollectionBrowserForCurrentZone(true)
+                end
+            end)
+            ShowMenu(WL.itemSetCollectionBookMoreOptionsButton)
+        end,
+        width           = 20,
+        height          = 20,
+        normal          = "/esoui/art/buttons/dropbox_arrow_normal.dds",
+        pressed         = "/esoui/art/buttons/dropbox_arrow_mousedown.dds",
+        highlight       = "/esoui/art/buttons/dropbox_arrow_mouseover.dds",
+        disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
+    }
+    WL.itemSetCollectionBookMoreOptionsButton = W_addWLButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
+    --Add WishList button to item set collection UI top right corner
+    local buttonDataShowWLUI =
+    {
+        buttonName      = "ShowWishListUI",
+        parentControl   = ZO_ItemSetsBook_Keyboard_TopLevelFilters,
+        tooltip         = SI_BINDING_NAME_WISHLIST_SHOW,
+        callback        = function()
+                            WishList:Show()
+                            WishList.SetTab(WISHLIST_TAB_WISHLIST)
+        end,
+        width           = 32,
+        height          = 32,
+        normal          = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_up.dds",
+        pressed         = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_down.dds",
+        highlight       = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_over.dds",
+        disabled        = "esoui/art/tradinghouse/tradinghouse_listings_tabicon_disabled.dds",
+    }
+    WL.itemSetCollectionBookOpenWishListUIButton = W_addWLButton(RIGHT, WL.itemSetCollectionBookMoreOptionsButton, LEFT, -4, 0, buttonDataShowWLUI)
+
+end
+
 function WL.init(_, addonName)
     local addonVars = WL.addonVars
     if addonName ~= addonVars.addonName then
@@ -2087,8 +2124,7 @@ function WL.init(_, addonName)
     WL_Hooks()
 
     --Buttons
-    --Add WishList button to Set item collection UI top right corner
-    W_addWLButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFiltersShowLockedLabel, RIGHT, 50, 0)
+    WL_AddButtons()
 
     WL.firstWishListCall = true
     WL.initDone = true

@@ -2240,3 +2240,11 @@ function WL.openSetItemCollectionBrowser()
     end, 200)
     ]]
 end
+
+function WL.openSetItemCollectionBrowserForCurrentZone(useParentZone)
+    if useParentZone == true then
+        return WL.LibSets.OpenItemSetCollectionBookOfCurrentParentZone()
+    else
+        return WL.LibSets.OpenItemSetCollectionBookOfCurrentZone()
+    end
+end

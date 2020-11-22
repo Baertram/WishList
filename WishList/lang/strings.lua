@@ -185,6 +185,9 @@ local strings = {
     --Keybindings
     SI_BINDING_NAME_WISHLIST_SHOW           = "Show " .. GetString(WISHLIST_TITLE),
     SI_BINDING_NAME_WISHLIST_ADD_OR_REMOVE  = "Add/Remove to/from " .. GetString(WISHLIST_TITLE),
+    SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_ZONE  = "Show current zone in item set collection book",
+    SI_BINDING_NAME_WISHLIST_SHOW_ITEM_SET_COLLECTION_CURRENT_PARENT_ZONE  = "Show current parent zone in item set collection book",
+    WISHLIST_SHOW_ITEM_SET_COLLECTION_MORE_OPTIONS = "More options",
 
     -- LAM addon settings
     WISHLIST_WARNING_RELOADUI               = "Attention:\nChanging this option will do an automatic reload of the user interface!",
