@@ -891,11 +891,13 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                     else
                                         isAlreadyOnWishList = true
                                     end
-                                    --Overwrit the "Any trait" with the trait of the looted item
-                                    if item.trait == allTraits then
-                                        item.trait = traitType
+                                    --Overwrite the "Any trait" with the trait of the looted item
+                                    -->Attention: Copy the item before or else you'll change the WishList's entry diretcly as well!
+                                    local itemCopy = ZO_ShallowTableCopy(item)
+                                    if itemCopy.trait == allTraits then
+                                        itemCopy.trait = traitType
                                     end
-                                    return isAlreadyOnWishList, itemId, item
+                                    return isAlreadyOnWishList, itemCopy, item
                                 end
                             end
                         end
