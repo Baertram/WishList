@@ -5,7 +5,7 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		    = 2.98
+WL.addonVars.addonRealVersion		    = 3.00
 WL.addonVars.addonSavedVarsVersion	    = 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				    = "WishList"
 WL.addonVars.addonSavedVars			    = "WishList_Data"
@@ -234,6 +234,7 @@ WL.defaultSettings = {
     notifyOnFoundItemsOnlyMaxCP = false,
     notifyOnFoundItemsOnlyInDungeons = false,
     dialogAddHistory = {},
+    askForItemWhisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION),
 }
 
 --For the add item dialog

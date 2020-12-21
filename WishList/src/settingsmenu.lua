@@ -334,6 +334,20 @@ function WL.buildAddonMenu()
             end,
             default = defaults.showItemFoundHistoryChatOutput,
         },
+        {
+            type = "editbox",
+            name = GetString(WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT),
+            tooltip = GetString(WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT_TT),
+            isMultiline = false,
+            isExtraWide = true,
+            getFunc = function() return settings.askForItemWhisperText end,
+            setFunc = function(value)
+                if value == "" then value = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION ) end
+                settings.askForItemWhisperText = value
+            end,
+            default = defaults.askForItemWhisperText,
+            width = "full",
+        },
         --==============================================================================
         {
             type = 'header',

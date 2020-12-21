@@ -1,3 +1,5 @@
+--Translations by @Baertram
+
 WishList = WishList or {}
 local WL = WishList
 
@@ -140,7 +142,7 @@ local strings = {
     WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION = "Dies wird alle Set Gegenstände über die Bibliothek \"LibSets\" neu einlesen!\nDies sollte nicht länger als 10 Sekunden benötigen.",
     WISHLIST_LINK_ITEM_TO_CHAT = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER = "\"<<C:1>>\" anflüstern und nach <<2>> fragen",
-    WISHLIST_WHISPER_RECEIVER_QUESTION = "Hallo <<C:1>>, du hast diesen Gegenstand gefunden: <<2>>. Ich suche danach und wollte dich fragen, ob du mir diesen gibst? Danke sehr.",
+    WISHLIST_WHISPER_RECEIVER_QUESTION = "Hallo <<1>>, du hast diesen Gegenstand gefunden: <<2>>. Ich suche danach und wollte dich fragen, ob du mir diesen gibst? Danke sehr.",
 
 
     WISHLIST_BUTTON_COPY_WISHLIST_TT = "Kopiere " .. GetString(WISHLIST_TITLE),
@@ -228,6 +230,8 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT = "Zeige die Loot Benachrichtigung, zusätzlich zum Chat Text, auch als Bildschirm Nachricht an.",
     WISHLIST_LAM_ITEM_FOUND_TEXT = "Nachrichtentext beim Looten",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT = "Spezifiziere den Nachrichtentext, welcher beim Looten eines Gegenstandes von deiner " .. GetString(WISHLIST_TITLE) .. " im Chat, und falls aktiviert auch in der Bildschirmnachricht, angezeigt werden soll.\nLasse das Editfeld leer um eine Standard Loot Nachricht anzuzeigen.\n\nDu kannst die folgenden Platzhalter in dem Text verwenden, welche dann mit den Daten aus dem gelooteten Gegenstand ersetzt werden:\n<<1>>    Name (Link)\n<<2>>  Gelooted von\n<<3>>   Eigenschaft\n<<4>>  Qualität\n<<5>>  Level\n<<6>>  Set Name",
+    WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT            = "Flüster Nachricht: 'Nach Gegenstand fragen'",
+    WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT_TT         = "Dieser Text wird als Flüster Nachricht an den Benutzer gesendet, welchen du per WunschListe Historie nach einem Gegenstand fragst.\nDie folgenden Platzhalter kannst du verwenden:\n<<1>>   Der Name des Benutzers, welcher den Gegenstand gelootet hat.\n<<2>>Der Gegenstand Name + Link",
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT =      "Chat Ausgabe von neuen Historien Einträgen",
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT_TT =   "Zeige die Chat Ausgabe für neue Historien Einträge an, wenn etwas gelooted wird.",
 

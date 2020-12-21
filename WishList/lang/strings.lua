@@ -155,7 +155,7 @@ local strings = {
     WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "THIS WILL RELOAD ALL SET ITEMS using library \'LibSets\'!\nShouldn't take longer than 10 seconds.",
     WISHLIST_LINK_ITEM_TO_CHAT               = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER                = "Whisper \"<<C:1>>\" and ask for <<2>>",
-    WISHLIST_WHISPER_RECEIVER_QUESTION       = "Hey <<C:1>>, you have found this item: <<2>>. I'm searching for it and would like to ask if you will trade it to me? Thank you.",
+    WISHLIST_WHISPER_RECEIVER_QUESTION       = "Hey <<1>>, you have found this item: <<2>>. I'm searching for it and would like to ask if you will trade it to me? Thank you.",
 
     WISHLIST_SETS_LOADED                     = "<<1[No set/1 set/$d sets]>> loaded",
     WISHLIST_NO_SETS_LOADED                  = "No sets are loaded. Click the button to load all sets.\This can take several minutes to finish and will lag your game client!",
@@ -234,6 +234,8 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_USE_CSA_TT              = "Show a center screen announcement message in addition to the chat message",
     WISHLIST_LAM_ITEM_FOUND_TEXT                    = "Looted item message",
     WISHLIST_LAM_ITEM_FOUND_TEXT_TT                 = "Specify the message text which will appear in the chat and (if enabled) at the center screen announcement, if an item on your " .. GetString(WISHLIST_TITLE) .. " was looted.\nLeve the edit field empty to show a default loot message.\n\nYou can use the following placeholders in your message, which will be replaced with the looted item information:\n<<1>>    Name (link)\n<<2>>  Looted by\n<<3>>   Trait\n<<4>>  Quality\n<<5>>  Level\n<<6>>  Set name",
+    WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT            = "Whisper message: 'Ask for item'",
+    WISHLIST_LAM_ITEM_FOUND_WHISPER_TEXT_TT         = "This text will be posted as whisper to a user you are asking for an item (via the WishList history). You can use the following placeholders in the text:\n<<1>>   The name of the user who looted the item\n<<2>>The item's name + link",
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT =      "Show history added chat output",
     WISHLIST_LAM_ITEM_FOUND_SHOW_HISTORY_CHAT_OUTPUT_TT =   "Show the chat output about the looted items which have been added to the history.",
 
