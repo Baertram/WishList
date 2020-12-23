@@ -1722,12 +1722,14 @@ function WL.showContextMenu(control, button, upInside)
             end
             data = control.data
             itemLink = data.itemLink
+
+            local whisperText = WL.data.askForItemWhisperText
+            if whisperText == nil or whisperText == "" then
+                whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
+            end
+
             if button == MOUSE_BUTTON_INDEX_LEFT then
-                if username ~= nil and username ~= "" and userName ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
-                    local whisperText = WL.data.askForItemWhisperText
-                    if whisperText == nil or whisperText == "" then
-                        whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
-                    end
+                if username ~= nil and username ~= "" and username ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
                     StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(whisperText, username, itemLink))
                 end
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
@@ -1747,7 +1749,7 @@ function WL.showContextMenu(control, button, upInside)
                     local traitText = WL.TraitTypes[data.trait]
                     local trait = WL.buildItemTraitIconText(traitText, data.trait)
                     if username ~= nil and username ~= "" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
-                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER_QUESTION), username, itemLink)) end) -- Whisper and ask for item
+                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(whisperText, username, itemLink)) end) -- Whisper and ask for item
                     end
                     AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT), function() StartChatInput(CHAT_SYSTEM.textEntry:GetText()..itemLink) end) -- Link item
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM), function()

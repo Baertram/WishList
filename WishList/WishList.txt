@@ -11,7 +11,7 @@
 ## AddOnVersion: 300
 ## APIVersion: 100033 100034
 ## SavedVariables: WishList_Data WishList_Data_All_Servers
-## DependsOn: LibSets>=000205
+## DependsOn: LibSets>=000204
 ## DependsOn: LibAddonMenu-2.0>=32 LibCustomMenu>=694 LibMainMenu-2.0>=432
 ## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver
 
