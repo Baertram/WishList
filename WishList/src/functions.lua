@@ -558,6 +558,32 @@ end
 ------------------------------------------------
 --- Itemlink functions
 ------------------------------------------------
+function WL.checkIfItemLinkItemIdIsValid(itemLink, itemId)
+    if itemLink == nil and itemId == nil then return false end
+    if itemLink ~= nil and itemId == nil then
+        itemId = GetItemLinkItemId(itemLink)
+    end
+    if itemId == nil or itemId == "" or itemId <= 0 then return false end
+    if itemLink == nil or itemLink == "" then
+        itemLink = WL.buildItemLink(itemId, nil)
+    end
+    if itemLink ~= nil and itemId ~= nil then
+        local isSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+        if not isSet or setId == nil or setId == 0 then
+            return false
+        else
+            --Check the setId's itemIds if the itemId is "still" valid for this set
+            --table setItemIds = {[setItemId1]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK,[setItemId2]=LIBSETS_SET_ITEMID_TABLE_VALUE_OK, ...}
+            local setItemIds = libSets.GetSetItemIds(setId, nil)
+            if setItemIds == nil or (setItemIds ~= nil and setItemIds[itemId] == nil or setItemIds[itemId] == LIBSETS_SET_ITEMID_TABLE_VALUE_NOTOK) then
+                return false
+            end
+            return true
+        end
+    end
+    return false
+end
+
 function WL.buildItemLink(itemId, qualityIdWishList)
     if itemId == nil then return nil end
     qualityIdWishList = qualityIdWishList or WISHLIST_QUALITY_LEGENDARY -- Legendary
@@ -566,8 +592,12 @@ function WL.buildItemLink(itemId, qualityIdWishList)
     --and must be mapped to the real qualityIds for the itemlink.
     local qualityIdItemLink = WL.mapWLQualityToItemLinkQuality(qualityIdWishList)
     --Using LibSets to get the itemLink
-    return libSets.buildItemLink(itemId, qualityIdItemLink)
+    local il = libSets.buildItemLink(itemId, qualityIdItemLink)
+
+    if not WL.checkIfItemLinkItemIdIsValid(il, itemId) then return end
+
     --return string.format("|H1:item:%d:%d:50:0:0:0:0:0:0:0:0:0:0:0:0:%d:%d:0:0:%d:0|h|h", itemId, qualityIdItemLink, ITEMSTYLE_NONE, 0, 10000)
+    return il
 end
 
 --Map the WishList internal quality (See file WishListDataTypes.lua, table WL.quality) to the itemLink qualities:
@@ -1299,6 +1329,8 @@ end
 ------------------------------------------------
 function WL.showItemLinkTooltip(control, parent, anchor1, offsetX, offsetY, anchor2)
     if control == nil or control.data == nil or control.data.itemLink == nil then ClearTooltip(WishListTooltip) return nil end
+    if not WL.checkIfItemLinkItemIdIsValid(control.data.itemLink, nil) then return end
+    --d("itemLink: " .. control.data.itemLink)
     anchor1 = anchor1 or TOPRIGHT
     anchor2 = anchor2 or TOPLEFT
     offsetX = offsetX or -100
@@ -1722,14 +1754,12 @@ function WL.showContextMenu(control, button, upInside)
             end
             data = control.data
             itemLink = data.itemLink
-
-            local whisperText = WL.data.askForItemWhisperText
-            if whisperText == nil or whisperText == "" then
-                whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
-            end
-
             if button == MOUSE_BUTTON_INDEX_LEFT then
-                if username ~= nil and username ~= "" and username ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
+                if username ~= nil and username ~= "" and userName ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
+                    local whisperText = WL.data.askForItemWhisperText
+                    if whisperText == nil or whisperText == "" then
+                        whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
+                    end
                     StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(whisperText, username, itemLink))
                 end
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
@@ -1749,7 +1779,7 @@ function WL.showContextMenu(control, button, upInside)
                     local traitText = WL.TraitTypes[data.trait]
                     local trait = WL.buildItemTraitIconText(traitText, data.trait)
                     if username ~= nil and username ~= "" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
-                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(whisperText, username, itemLink)) end) -- Whisper and ask for item
+                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER_QUESTION), username, itemLink)) end) -- Whisper and ask for item
                     end
                     AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT), function() StartChatInput(CHAT_SYSTEM.textEntry:GetText()..itemLink) end) -- Link item
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM), function()
