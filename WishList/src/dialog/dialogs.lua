@@ -8,6 +8,10 @@ local WL = WishList
 --Build the entry text for the entries of the last added dropdown control, at the add item dialog
 local function buildLastAddedEntryText(lastAddedData)
     if not lastAddedData then return end
+    local charId = lastAddedData.charId
+    local charName = (charId ~= nil and WL.accData.chars and WL.accData.chars[charId] and WL.accData.chars[charId].name) or nil
+    if charName == nil then return nil end
+
     local dateTime = lastAddedData.dateTime
     local dateTimeString = os.date("%c", dateTime)
     local setId = lastAddedData.setId
@@ -23,8 +27,6 @@ local function buildLastAddedEntryText(lastAddedData)
     local traitIcon = WL.buildItemTraitIconText("", trait, 24)
     local quality = lastAddedData.quality
     local setQualityText = WL.ColorizeByQualityColor(setName, quality)
-    local charId = lastAddedData.charId
-    local charName = WL.accData.chars[charId].name
 
     local specialAddedType = lastAddedData.specialAddedType
     local entryTextTemplate = "%s: %s %s %s%s%s%s(%s)"
@@ -224,9 +226,9 @@ function WL.WishListWindowAddItemInitialize(control)
                 for idx, lastAddedData in ipairs(lastAddedHistoryDataSortedByTimeStamp) do
                     local entryText = buildLastAddedEntryText(lastAddedData)
                     if entryText ~= nil and entryText ~= "" then
-                        local entry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
-                        entry.id = lastAddedData.dateTime
-                        comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                        local lastAddedEntry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
+                        lastAddedEntry.id = lastAddedData.dateTime
+                        comboLastAddedHistory:AddItem(lastAddedEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
                     end
                 end
                 if not WL.lastSelectedLastAddedHistoryEntry then

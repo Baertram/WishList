@@ -619,8 +619,11 @@ function WL.CreateWishListEntryForItem(item)
     local setsData = WL.accData.sets[setId]
 
     if not setsData then
-        df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tostring(setId))
-        return
+    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tostring(setId))
+    return
+    end
+    if not setsData.armorTypes then
+    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing armor types!", tostring(setId))
     end
 
     local wlEntryTable = {
