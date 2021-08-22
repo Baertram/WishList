@@ -1567,9 +1567,9 @@ local function fixSVData()
             for _, charData in ipairs(WL.charsData) do
                 local wishList = WL.getWishListSaveVars(charData, "WishList:fixSVData", nil)
                 if wishList ~= nil then
-                    for _, wlEntryData in pairs(wishList) do
+                    for wlIndex, wlEntryData in pairs(wishList) do
                         if wlEntryData and wlEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(wlEntryData["trait"])] then
-                            wlEntryData["trait"] = traitIdToReplaceWith
+                            wishList[wlIndex]["trait"] = traitIdToReplaceWith
                             atLeastOneEntryFixed = true
                             traitIdsFixedCount = traitIdsFixedCount + 1
                         end
@@ -1577,9 +1577,9 @@ local function fixSVData()
                 end
                 local history = WL.getHistorySaveVars(charData, "WishList:fixSVData", nil)
                 if history ~= nil then
-                    for _, hisEntryData in pairs(history) do
+                    for histIndex, hisEntryData in pairs(history) do
                         if hisEntryData and hisEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(hisEntryData["trait"])] then
-                            hisEntryData["trait"] = traitIdToReplaceWith
+                            history[histIndex]["trait"] = traitIdToReplaceWith
                             atLeastOneEntryFixed  = true
                             traitIdsFixedCount = traitIdsFixedCount + 1
                         end
@@ -1588,18 +1588,17 @@ local function fixSVData()
             end
         end
         --Account wide data
-        for _, addedData in pairs(WL.accData.lastAddedViaDialog) do
+        for addedIndex, addedData in pairs(WL.accData.lastAddedViaDialog) do
             if addedData and addedData["trait"] and traitIdsToReplace[tonumber(addedData["trait"])] then
-                addedData["trait"] = traitIdToReplaceWith
+                WL.accData.lastAddedViaDialog[addedIndex]["trait"] = traitIdToReplaceWith
                 atLeastOneEntryFixed = true
                 traitIdsFixedCount = traitIdsFixedCount + 1
             end
         end
 
         if atLeastOneEntryFixed == true then
-            d("[WishList]Fixed " ..tostring(traitIdsFixedCount) " traitIds in the SavedVariables to the new ALL constant!")
-
-            WL.SVrelated_doReloadUINow = true
+            d("[WishList]Fixed " ..tostring(traitIdsFixedCount) .. " traitIds in the SavedVariables to the new ALL constant!")
+            ReloadUI("ingame")
         end
     end
 end
@@ -1621,9 +1620,6 @@ local function afterSettings()
     --WishList version 2.96: Added "Add dialog" history of last added data
     --Build characterId entries in the accountWide SavedVariables
     --settings.dialogAddHistory
-
-    --WishList version 3.02 - Fix some trait related entries in the SV, gotting corrupted due to new companin trait Ids added by ZOs
-    fixSVData()
 end
 
 --Migrate the SavedVariables from server non-dependent to server dependent ones
@@ -2188,8 +2184,12 @@ function WL.init(_, addonName)
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
                     --Show an onscreen message + chat message
                     d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED), tostring(GetDisplayName()), tostring(GetWorldName())))
-                     WL.CSA(GetString(WISHLIST_SV_MIGRATED_TO_SERVER))
+                    WL.CSA(GetString(WISHLIST_SV_MIGRATED_TO_SERVER))
                 end
+            end
+            if WL.accDataServerIndependent ~= nil and WL.accDataServerIndependent.savedVarsWereMigratedToServerDependent == true then
+                --WishList version 3.02 - Fix some trait related entries in the SV, gotting corrupted due to new companin trait Ids added by ZOs
+                fixSVData()
             end
         end
     end)
