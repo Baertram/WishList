@@ -359,7 +359,7 @@ function WL.WishListWindowAddItemInitialize(control)
                 comboTrait:ClearItems()
 
                 --Add 1st entry to trait combobox with "- All traits -"
-                local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL]
+                local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL
                 entry = ZO_ComboBox:CreateItemEntry(WL.TraitTypes[allTraitsTraitId], callbackTraitsTypes)
                 entry.id = allTraitsTraitId --Any/All traits of current chosen item
                 comboTrait:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)

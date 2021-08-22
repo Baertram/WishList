@@ -893,7 +893,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     if itemId == nil then
         itemId = WL.GetItemIDFromLink(itemLink)
     end
-    local allTraits = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL]
+    local allTraits = WISHLIST_TRAIT_TYPE_ALL
 
     local item = {}
 --d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType) .. ", quality: " ..tostring(itemQuality))
@@ -1070,7 +1070,7 @@ end
 function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId, onlyOneItemWithAllTraits)
     onlyOneItemWithAllTraits = onlyOneItemWithAllTraits or false
     local setsData = WL.accData.sets[setId]
-    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL]
+    local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL
     local items = {}
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
@@ -1134,7 +1134,7 @@ function WL.getSetItemsByData(setId, selectedItemTypeData, selectedItemArmorOrWe
     if setId == nil or WL.accData == nil or WL.accData.sets == nil or WL.accData.sets[setId] == nil then return items end
     if WL.TraitTypes == nil then return items end
     local setsData = WL.accData.sets[setId]
-    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL]
+    local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL
     local addTypeIsAll = (addType == WISHLIST_ADD_TYPE_WHOLE_SET) or false
     local addTypeIsOnlyWeapons = (addType == WISHLIST_ADD_ONE_HANDED_WEAPONS or addType == WISHLIST_ADD_TWO_HANDED_WEAPONS) or false
     local addTypeIsOnlyArmor = (addType == WISHLIST_ADD_BODY_PARTS_ARMOR or addType == WISHLIST_ADD_MONSTER_SET_PARTS_ARMOR) or false
@@ -1370,7 +1370,7 @@ function WL.buildItemlinkTooltipData(control)
     local content   = GetControl(control, "Content")
     local comboTrait = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("TraitCombo")) --GetControl(content, "TraitCombo")
     --Check if the all traits is selected
-    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL]
+    local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL
     local traitId = comboTrait:GetSelectedItemData().id
     --No tooltip if trait is not specified!
     if traitId == allTraitsTraitId then WL.hideItemLinkTooltip() return nil end

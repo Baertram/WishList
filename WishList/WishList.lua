@@ -998,7 +998,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     local charNameChat = charData.name
-    local allTraitsId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
+    local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
     local checkSetId = false
     local removeKnownSetItemCollection
     if criteria.setId ~= nil then
@@ -1462,7 +1462,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, addOneSi
         armorOrWeaponType = GetItemLinkWeaponType(itemLink)
     end
     local equipType = GetItemLinkEquipType(itemLink)
-    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
+    local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL --All traits
 
     --[[
     WL.checkCurrentCharData(false, true)
@@ -1505,7 +1505,7 @@ function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, rem
         armorOrWeaponType = GetItemLinkWeaponType(itemLink)
     end
     local equipType = GetItemLinkEquipType(itemLink)
-    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
+    local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL --All traits
 
 --d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
 --d(">>itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " ..tostring(armorOrWeaponType) .. ", slotType: " ..tostring(equipType))
@@ -1898,7 +1898,7 @@ local function WL_Hooks()
 
         local items = {}
 
-        local allTraitsId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
+        local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
         local anyQualityId = WISHLIST_QUALITY_ALL
 
         for i=1, numItemsInSet, 1 do
