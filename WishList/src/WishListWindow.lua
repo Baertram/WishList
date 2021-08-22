@@ -3,6 +3,10 @@ local WL = WishList
 local libSets = WL.LibSets
 WL.searchBoxLastSelected = {}
 
+-- ZO_SortFilterList:RefreshData()      =>  BuildMasterList()   =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+-- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
+-- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
+
 ------------------------------------------------
 --- WishList Window -> ZO_SortFilterList
 ------------------------------------------------
@@ -79,8 +83,10 @@ function WishListWindow:Setup( )
 	self.searchDrop = ZO_ComboBox_ObjectFromContainer(self.frame:GetNamedChild("SearchDrop"))
     WL.initializeSearchDropdown(self, WISHLIST_TAB_SEARCH, "set")
     --Character/toon dropdown box
-    WL.charsData = {}
-    WL.charsData = WL.buildCharsDropEntries()
+    WL.charsData = WL.charsData or {}
+    if not WL.charsData or #WL.charsData == 0 then
+        WL.charsData = WL.buildCharsDropEntries()
+    end
     self.charsDrop = ZO_ComboBox_ObjectFromContainer(self.frame:GetNamedChild("CharsDrop"))
 
     WL.initializeSearchDropdown(self, WISHLIST_TAB_WISHLIST, "char")
@@ -1609,8 +1615,8 @@ function WishListWindow:OnSearchEditBoxContextMenu(editboxControl)
         local traitTypesToExclude = {
             [ITEM_TRAIT_TYPE_ARMOR_NIRNHONED] = true,
             [ITEM_TRAIT_TYPE_WEAPON_NIRNHONED] = true,
-            [ITEM_TRAIT_TYPE_MAX_VALUE + 1] = true,
-            [#traitTypes] = true,
+            [WISHLIST_TRAIT_TYPE_SPECIAL] = true, --the "special" traits entry
+            [WISHLIST_TRAIT_TYPE_ALL] = true, --the "all" traits entry
         }
         local traitHeadLines = {
             [ITEM_TRAIT_TYPE_WEAPON_POWERED]    = GetString(WISHLIST_WEAPONS),

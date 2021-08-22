@@ -107,10 +107,10 @@ WL.TraitTypes = {
 	[ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY] = GetString(SI_ITEMTRAITTYPE31), --Bloodthirsty
 	[ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE] = GetString(SI_ITEMTRAITTYPE32), --Protective
 	[ITEM_TRAIT_TYPE_JEWELRY_INFUSED] = GetString(SI_ITEMTRAITTYPE33), --Infused
-	--Entry for "All traits"
-	[ITEM_TRAIT_TYPE_MAX_VALUE + 1] = GetString(WISHLIST_ITEMTRAITTYPE_SPECIAL), --Special
+	--Entry for "Special traits"
+	[WISHLIST_TRAIT_TYPE_SPECIAL] = GetString(WISHLIST_ITEMTRAITTYPE_SPECIAL), --the special traits entry
+	[WISHLIST_TRAIT_TYPE_ALL] = GetString(WISHLIST_DIALOG_ADD_ANY_TRAIT) --Any/All traits of current chosen item
 }
-table.insert(WL.TraitTypes, GetString(WISHLIST_DIALOG_ADD_ANY_TRAIT)) --Any/All traits of current chosen item
 
 WL.traitTextures = {
     --belebend: esoui/art/icons/crafting_jewelry_base_garnet_r3.dds
@@ -152,8 +152,8 @@ WL.traitTextures = {
     [ITEM_TRAIT_TYPE_WEAPON_PRECISE]		= "esoui/art/icons/crafting_jewelry_base_ruby_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_SHARPENED]		= "esoui/art/icons/crafting_enchantment_base_fire_opal_r3.dds",
     [ITEM_TRAIT_TYPE_WEAPON_TRAINING] 		= "esoui/art/icons/crafting_runecrafter_armor_component_004.dds",
-	[ITEM_TRAIT_TYPE_MAX_VALUE + 1]			= "esoui/art/campaign/campaignbrowser_indexicon_specialevents_up.dds", --Special
-	[ITEM_TRAIT_TYPE_MAX_VALUE + 2]			= "/esoui/art/crafting/gamepad/crafting_alchemy_trait_unknown.dds" --All traits!
+	[WISHLIST_TRAIT_TYPE_SPECIAL]			= "esoui/art/campaign/campaignbrowser_indexicon_specialevents_up.dds", --Special
+	[WISHLIST_TRAIT_TYPE_ALL]				= "/esoui/art/crafting/gamepad/crafting_alchemy_trait_unknown.dds" --All traits!
 }
 
 WL.SlotTypes = {

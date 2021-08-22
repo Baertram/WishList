@@ -998,7 +998,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     local charNameChat = charData.name
-    local allTraitsId = #WL.TraitTypes --All traits
+    local allTraitsId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
     local checkSetId = false
     local removeKnownSetItemCollection
     if criteria.setId ~= nil then
@@ -1462,7 +1462,7 @@ function WL.addItemSetCollectionSinglePieceItemLinkToWishList(itemLink, addOneSi
         armorOrWeaponType = GetItemLinkWeaponType(itemLink)
     end
     local equipType = GetItemLinkEquipType(itemLink)
-    local allTraitsTraitId = #WL.TraitTypes --All traits
+    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
 
     --[[
     WL.checkCurrentCharData(false, true)
@@ -1505,7 +1505,7 @@ function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, rem
         armorOrWeaponType = GetItemLinkWeaponType(itemLink)
     end
     local equipType = GetItemLinkEquipType(itemLink)
-    local allTraitsTraitId = #WL.TraitTypes --All traits
+    local allTraitsTraitId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
 
 --d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
 --d(">>itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " ..tostring(armorOrWeaponType) .. ", slotType: " ..tostring(equipType))
@@ -1550,6 +1550,60 @@ end
 ------------------------------------------------
 --- Settings / SavedVariables
 ------------------------------------------------
+local function fixSVData()
+    --Fix the entries with ["traitId"] = 34 or 35 to 999 --all traits
+    if GetAPIVersion() >= 100035 then
+        local atLeastOneEntryFixed = false
+        local traitIdsToReplace = {
+            [34] = true,
+            [35] = true,
+        }
+        local traitIdToReplaceWith = WISHLIST_TRAIT_TYPE_ALL
+        local traitIdsFixedCount = 0
+
+        --Per character data
+        WL.charsData = WL.buildCharsDropEntries()
+        if WL.charsData and #WL.charsData > 0 then
+            for _, charData in ipairs(WL.charsData) do
+                local wishList = WL.getWishListSaveVars(charData, "WishList:fixSVData", nil)
+                if wishList ~= nil then
+                    for _, wlEntryData in pairs(wishList) do
+                        if wlEntryData and wlEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(wlEntryData["trait"])] then
+                            wlEntryData["trait"] = traitIdToReplaceWith
+                            atLeastOneEntryFixed = true
+                            traitIdsFixedCount = traitIdsFixedCount + 1
+                        end
+                    end
+                end
+                local history = WL.getHistorySaveVars(charData, "WishList:fixSVData", nil)
+                if history ~= nil then
+                    for _, hisEntryData in pairs(history) do
+                        if hisEntryData and hisEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(hisEntryData["trait"])] then
+                            hisEntryData["trait"] = traitIdToReplaceWith
+                            atLeastOneEntryFixed  = true
+                            traitIdsFixedCount = traitIdsFixedCount + 1
+                        end
+                    end
+                end
+            end
+        end
+        --Account wide data
+        for _, addedData in pairs(WL.accData.lastAddedViaDialog) do
+            if addedData and addedData["trait"] and traitIdsToReplace[tonumber(addedData["trait"])] then
+                addedData["trait"] = traitIdToReplaceWith
+                atLeastOneEntryFixed = true
+                traitIdsFixedCount = traitIdsFixedCount + 1
+            end
+        end
+
+        if atLeastOneEntryFixed == true then
+            d("[WishList]Fixed " ..tostring(traitIdsFixedCount) " traitIds in the SavedVariables to the new ALL constant!")
+
+            WL.SVrelated_doReloadUINow = true
+        end
+    end
+end
+
 local function afterSettings()
     --==================================================================================================================
     --UPDATES TO THE SETTINGS AFTER THEY HAVE BEEN LOADED
@@ -1567,6 +1621,9 @@ local function afterSettings()
     --WishList version 2.96: Added "Add dialog" history of last added data
     --Build characterId entries in the accountWide SavedVariables
     --settings.dialogAddHistory
+
+    --WishList version 3.02 - Fix some trait related entries in the SV, gotting corrupted due to new companin trait Ids added by ZOs
+    fixSVData()
 end
 
 --Migrate the SavedVariables from server non-dependent to server dependent ones
@@ -1845,7 +1902,7 @@ local function WL_Hooks()
 
         local items = {}
 
-        local allTraitsId = #WL.TraitTypes --All traits
+        local allTraitsId = WL.TraitTypes[WISHLIST_TRAIT_TYPE_ALL] --All traits
         local anyQualityId = WISHLIST_QUALITY_ALL
 
         for i=1, numItemsInSet, 1 do
@@ -2066,7 +2123,6 @@ function WL.init(_, addonName)
 
     --Load the settings
     WL.loadSettings()
-
     --Build the list sortkeys depending on the selected dropdown entry from LAM settings
     WL.sortKeys =  WL.getSortKeysWithTiebrakerFromSettings()
 
@@ -2119,7 +2175,7 @@ function WL.init(_, addonName)
         if WL.SVrelated_doReloadUINow == true then
             zo_callLater(function()
                 d(GetString(WISHLIST_SV_MIGRATION_RELOADUI))
-                if WishList_Data[addonVars.addonSavedVarsDefault] == nil then
+                if (WL.accDataServerIndependent and WL.accDataServerIndependent.savedVarsWereMigratedFinished ~= true) and WishList_Data[addonVars.addonSavedVarsDefault] == nil then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = true
                 end
                 ReloadUI("ingame")

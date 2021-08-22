@@ -5,7 +5,7 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		    = 3.00
+WL.addonVars.addonRealVersion		    = 3.02
 WL.addonVars.addonSavedVarsVersion	    = 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				    = "WishList"
 WL.addonVars.addonSavedVars			    = "WishList_Data"
@@ -145,9 +145,11 @@ WISHLIST_QUALITY_ARCANE_TO_LEGENDARY = 12
 --ZoneIds for LibSets data
 WISHLIST_ZONEID_BATTLEGROUNDS = 999999
 WISHLIST_ZONEID_SPECIAL       = 999998
-
 --Textures
 WISHLIST_TEXTURE_SETITEMCOLLECTION = "esoui/art/collections/collections_tabIcon_itemSets_up.dds"
+--Traits
+WISHLIST_TRAIT_TYPE_SPECIAL = 998
+WISHLIST_TRAIT_TYPE_ALL = 999
 
 --Sort header names
 local sortTiebrakerChoicesWithSortHeaderKeys = {
