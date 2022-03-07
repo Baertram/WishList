@@ -2,6 +2,13 @@ WishList = WishList or {}
 local WL = WishList
 local libSets = WL.LibSets
 
+--local strfor = string.format
+local gilsi = GetItemLinkSetInfo
+--local giliscs = GetItemLinkItemSetCollectionSlot
+--local id64tos = Id64ToString
+
+local getItemSetCollectionsSlotKey = libSets.GetItemSetCollectionsSlotKey
+
 local allowedItemTypes = WL.checkItemTypes
 --Only body armor parts
 local isBodyArmorPart = {
@@ -568,7 +575,7 @@ function WL.checkIfItemLinkItemIdIsValid(itemLink, itemId)
         itemLink = WL.buildItemLink(itemId, nil)
     end
     if itemLink ~= nil and itemId ~= nil then
-        local isSet, _, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+        local isSet, _, _, _, _, setId = gilsi(itemLink, false)
         if not isSet or setId == nil or setId == 0 then
             return false
         else
@@ -826,7 +833,7 @@ function WL.AddLootToHistory(item, itemId, itemLink, setName, isLootedByPlayer, 
     --Check set parameters
     local setId = item.setId
     if setId == nil or setName == nil then
-        local _, setLocName, _, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
+        local _, setLocName, _, _, _, setLocId = gilsi(itemLink, false)
         --Remove the gender stuff from the setname
         setName = zo_strformat("<<C:1>>", setLocName)
         setId = setLocId
@@ -877,8 +884,29 @@ function WL.IsHistoryEmpty(charData)
     return true, 0
 end
 
+local function traitFix(item, traitType)
+    local allTraits = WISHLIST_TRAIT_TYPE_ALL
+    --Overwrite the "Any trait" with the trait of the looted item
+    -->Attention: Copy the item before or else you'll change the WishList's entry diretcly as well!
+    local itemCopy = ZO_ShallowTableCopy(item)
+    if item.trait == allTraits then
+        itemCopy.trait = traitType
+    end
+    return itemCopy
+end
+
+local function isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey)
+    if itemSetCollectionKey ~= nil and item and item.itemLink then
+        local itemSetCollectionKeyOfWLItem = getItemSetCollectionsSlotKey(item.itemLink)
+        if itemSetCollectionKeyOfWLItem and itemSetCollectionKeyOfWLItem ~= "" and itemSetCollectionKey == itemSetCollectionKeyOfWLItem then
+            return true
+        end
+    end
+    return false
+end
+
 --Checksi fi the item is already on trhe WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
-function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality)
+function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality, itemSetCollectionKey)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
     if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or itemQuality == nil) then return false, nil, nil end
@@ -900,8 +928,15 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
-            if scanByDetails then
+            if scanByDetails == true then
                 if item.setId == setId then
+
+                    if isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
+                        isAlreadyOnWishList = true
+                        local itemCopy = traitFix(item, traitType)
+                        return isAlreadyOnWishList, itemId, itemCopy
+                    end
+
                     if item.itemType == itemType then
                         if item.armorOrWeaponType == armorOrWeaponType then
                             if item.slot == slotType then
@@ -921,12 +956,7 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                     else
                                         isAlreadyOnWishList = true
                                     end
-                                    --Overwrite the "Any trait" with the trait of the looted item
-                                    -->Attention: Copy the item before or else you'll change the WishList's entry diretcly as well!
-                                    local itemCopy = ZO_ShallowTableCopy(item)
-                                    if item.trait == allTraits then
-                                        itemCopy.trait = traitType
-                                    end
+                                    local itemCopy = traitFix(item, traitType)
                                     return isAlreadyOnWishList, itemId, itemCopy
                                 end
                             end
@@ -934,6 +964,10 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                     end
                 end
             else
+                if item.setId == setId and isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
+                    isAlreadyOnWishList = true
+                    return isAlreadyOnWishList, itemId, item
+                end
                 if item.id == itemId then
                     isAlreadyOnWishList = true
                     return isAlreadyOnWishList, itemId, item
@@ -1075,7 +1109,7 @@ function WL.getSetItemsByCriteria(setId, itemTypeId, armorOrWeaponTypeId, traitI
     for setItemId, _ in pairs(setsData) do
         if type(setItemId) == "number" then
             local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use legendary quality for the setData
-            local _, _, numBonuses = GetItemLinkSetInfo(itemLink)
+            local _, _, numBonuses = gilsi(itemLink)
             local itemType = GetItemLinkItemType(itemLink)
             local armorOrWeaponType
             if itemType == ITEMTYPE_ARMOR then
@@ -1513,7 +1547,7 @@ function WL.getItemDataByItemLink(link, charData, specialTraitId, specialQuality
     local isItemAlreadyOnWishList = false
     local itemType = GetItemLinkItemType(link)
     if allowedItemTypes[itemType] then
-        local isSet, setNameStr, numBonuses, _, _, setId = GetItemLinkSetInfo(link, false)
+        local isSet, setNameStr, numBonuses, _, _, setId = gilsi(link, false)
         if not isSet then return false end
         local itemId
         setNameStr = ZO_CachedStrFormat("<<C:1>>", setNameStr)
@@ -1973,7 +2007,7 @@ end
 
 function WL.checkIfAlreadyOnWishList(bagId, slotIndex, itemLink, charData)
     itemLink = itemLink or GetItemLink(bagId, slotIndex)
-    local isSet, setName, numBonuses, _, _, setId = GetItemLinkSetInfo(itemLink, false)
+    local isSet, setName, numBonuses, _, _, setId = gilsi(itemLink, false)
     if not isSet then return end
     local itemType = GetItemLinkItemType(itemLink)
     local armorOrWeaponType = 0
@@ -2283,4 +2317,12 @@ function WL.openSetItemCollectionBrowserForCurrentZone(useParentZone)
     else
         return WL.LibSets.OpenItemSetCollectionBookOfCurrentZone()
     end
+end
+
+--Returns the "set collections slot" of the itemLink, e.g. "Ring" for rings so that one is able to put any ring of the set,
+--named or not (e.g. "Pulsing Dremora Ring" or "Leviathan Ring") to the WishList but recognize all of them dropping to your
+--inventory
+function WL.getSetItemSlotKey(itemLink)
+    getItemSetCollectionsSlotKey = getItemSetCollectionsSlotKey or libSets.GetItemSetCollectionsSlotKey
+    return getItemSetCollectionsSlotKey(itemLink)
 end

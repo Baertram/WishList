@@ -41,6 +41,8 @@ WL.maxNameColumnWidth = nil
 
 --Local speed-up function pointer
 local getSavedVarsServer = WL.getSavedVarsServer
+local getSetItemSlotKey = WL.getSetItemSlotKey
+
 
 ------------------------------------------------
 --- Event Handlers
@@ -122,9 +124,11 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
         WL.preventerVars.writCreatorAutoLootBoxesActive = false
     end
 end
+local inv_Single_Slot_Update = WL.Inv_Single_Slot_Update
 
 local isItemAlreadyOnWishlist = WL.isItemAlreadyOnWishlist
 local IfItemIsOnWishlist = WL.IfItemIsOnWishlist
+local isCraftedSet = libSets.IsCraftedSet
 local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedByCharName, whereWasItLootedData, debug, bagId, slotIndex)
     debug = debug or false
     --Get the settings
@@ -177,6 +181,18 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         end
     end
 
+
+    --2022-03-07
+    --Check if the item's key is on a WishList
+    -->Only for non craftable set items!
+    isCraftedSet = isCraftedSet or libSets.IsCraftedSet
+    local itemSetCollectionKey
+    local isCraftedSetItem = isCraftedSet[setId]
+    if not isCraftedSetItem then
+        itemSetCollectionKey = getSetItemSlotKey(itemLink)
+    end
+
+
     --Get the armor or weapon type for comparison
     local armorOrWeaponType
     if itemType == ITEMTYPE_ARMOR then
@@ -219,7 +235,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             charData.class = charInfo.class
             if charData ~= nil and charData.id ~= nil then
                 --Check if the item is on the wishlist
-                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
+                isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality, itemSetCollectionKey)
                 if debug then
                     d(">>isOnWishList: " .. tostring(isOnWishList))
                 end
@@ -250,7 +266,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         charData = WL.LoggedInCharData
         if charData == nil or charData.id == nil then return false end
         --Check if the item is on the wishlist
-        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality)
+        isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality, itemSetCollectionKey)
         if debug then
             d(">>isOnWishList: " .. tostring(isOnWishList))
         end
@@ -312,6 +328,7 @@ function WL.LootReceived(_, receivedBy, itemLink, _, _, lootType, isLootedByPlay
     --Check if the item is on a wishlist
     lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, WL.debug, nil, nil)
 end
+local lootReceived = WL.LootReceived
 
 ------------------------------------------------
 --- Wishlist - ZO_SortFilterList entry creation
@@ -2161,9 +2178,9 @@ function WL.init(_, addonName)
     end
 
     --EVENTs
-    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_LOOT_RECEIVED, WL.LootReceived)
+    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_LOOT_RECEIVED, lootReceived)
     --Register for player inventory slot update
-    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, WL.Inv_Single_Slot_Update)
+    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, inv_Single_Slot_Update)
     --Add a filter to the event to speed up item checks only on default items not a weapon charge etc.
     EVENT_MANAGER:AddFilterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, true)
 
