@@ -1,6 +1,10 @@
 WishList = WishList or {}
 local WL = WishList
+
+--LibSets
 local libSets = WL.LibSets
+local isCraftedSet = libSets.IsCraftedSet --needs to be updated as LibSets was loaded properly
+local libSetsCraftedUpdated = false
 
 --> Taken from addon DolgubonLazyWritCretaor to speed up the loot messages!
 --The flavour text of a writ reward box
@@ -128,7 +132,7 @@ local inv_Single_Slot_Update = WL.Inv_Single_Slot_Update
 
 local isItemAlreadyOnWishlist = WL.isItemAlreadyOnWishlist
 local IfItemIsOnWishlist = WL.IfItemIsOnWishlist
-local isCraftedSet = libSets.IsCraftedSet
+
 local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedByCharName, whereWasItLootedData, debug, bagId, slotIndex)
     debug = debug or false
     --Get the settings
@@ -184,8 +188,14 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
 
     --2022-03-07
     --Check if the item's key is on a WishList
-    -->Only for non craftable set items!
-    isCraftedSet = isCraftedSet or libSets.IsCraftedSet
+    -->Only for non craftable set items which belong to setItemCollections!
+    -->Check via the slot the item is defiend for, e.g. rings could drop for a slot "ring" and thus the slot type should be
+    -->enough to apply a valid dropped item which is with the same other data on your wishlsit, but the itemId does not match in detail
+    -->e.g. a named ring from a boss dungeon of set A vs. the normal non named ring of the same set A
+    if not libSetsCraftedUpdated and libSets.fullyLoaded == true then
+        isCraftedSet = libSets.IsCraftedSet --Updated here once after LibSets was loaded
+        libSetsCraftedUpdated = true
+    end
     local itemSetCollectionKey
     local isCraftedSetItem = isCraftedSet[setId]
     if not isCraftedSetItem then

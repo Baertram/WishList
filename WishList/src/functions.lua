@@ -9,6 +9,10 @@ local gilsi = GetItemLinkSetInfo
 
 local getItemSetCollectionsSlotKey = libSets.GetItemSetCollectionsSlotKey
 
+local currentDisplayName = GetDisplayName()
+local currentPlayerName = zo_strformat("<<C:1>>", GetUnitName("player"))
+
+
 local allowedItemTypes = WL.checkItemTypes
 --Only body armor parts
 local isBodyArmorPart = {
@@ -94,7 +98,7 @@ local getSavedVarsServer = WL.getSavedVarsServer
 
 local function buildSVLastCharacterNameEntry(charId, accName)
     if charId == nil then return false end
-    accName = accName or GetDisplayName()
+    accName = accName or currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     if WishList_Data and WishList_Data[savedVarsServer] and WishList_Data[savedVarsServer][accName]
@@ -115,7 +119,7 @@ end
 
 function WL.checkIfWLSavedVarsExist(charId)
     if charId == nil then return false end
-    local accName = GetDisplayName()
+    local accName = currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
@@ -143,7 +147,7 @@ function WL.getWishListSaveVars(charData, calledBy, noFallBackToLoggedIn)
     noFallBackToLoggedIn = noFallBackToLoggedIn or false
 --d("[WL]getWishListSaveVars | Called by: " ..tostring(calledBy))
     local wishListSavedVars = {}
-    local accName = GetDisplayName()
+    local accName = currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
@@ -181,7 +185,7 @@ end
 
 function WL.checkIfHistorySavedVarsExist(charId)
     if charId == nil then return false end
-    local accName = GetDisplayName()
+    local accName = currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     if    WishList_Data ~= nil and WishList_Data[savedVarsServer] ~= nil and WishList_Data[savedVarsServer][accName] ~= nil
@@ -209,7 +213,7 @@ function WL.getHistorySaveVars(charData, calledBy, noFallBackToLoggedIn)
     noFallBackToLoggedIn = noFallBackToLoggedIn or false
 --d("[WL]getHistorySaveVars | Called by: " ..tostring(calledBy))
     local historySavedVars = {}
-    local accName = GetDisplayName()
+    local accName = currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     if charData ~= nil and charData.id ~= nil and charData.id ~= WL.LoggedInCharData.id then
@@ -898,14 +902,36 @@ end
 local function isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey)
     if itemSetCollectionKey ~= nil and item and item.itemLink then
         local itemSetCollectionKeyOfWLItem = getItemSetCollectionsSlotKey(item.itemLink)
-        if itemSetCollectionKeyOfWLItem and itemSetCollectionKeyOfWLItem ~= "" and itemSetCollectionKey == itemSetCollectionKeyOfWLItem then
-            return true
-        end
+        return (itemSetCollectionKeyOfWLItem ~= nil and itemSetCollectionKeyOfWLItem ~= "" and itemSetCollectionKey == itemSetCollectionKeyOfWLItem) or false
     end
     return false
 end
 
---Checksi fi the item is already on trhe WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
+local function isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, setId)
+    local itemCopyTraitFixed
+    local doAbort = false
+    if not itemSetCollectionKey or not itemLink then doAbort = true end
+    if not doAbort and setId ~= nil then
+        if not item.setId or item.setId ~= setId then doAbort = true end
+    end
+    if doAbort then
+        itemCopyTraitFixed = traitFix(item, traitType)
+        return false, itemId, itemCopyTraitFixed
+    end
+    local setIdStr = (setId ~= nil and "SetParam: " .. tostring(setId)) or "Set: " .. tostring(item.setId)
+
+    --Is an itemSetCollection setItem on the WishList, with the same "slot key": e.g. a ring
+    itemCopyTraitFixed = itemCopyTraitFixed or traitFix(item, traitType)
+    if isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
+        local itemIdOfSameSetCollectionDropSlotItem = item.itemId or GetItemLinkItemId(item.itemLink)
+d("[WishList]" .. setIdStr .. " - " .. itemLink .. " - set collection - matches Wishlist item " .. item.itemLink)
+        return true, itemIdOfSameSetCollectionDropSlotItem, itemCopyTraitFixed
+    end
+    return false, itemId, itemCopyTraitFixed
+end
+
+
+--Checks if the item is already on the WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
 function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality, itemSetCollectionKey)
     scanByDetails = scanByDetails or false
 --d("[WL.isItemAlreayOnWishlist] " .. itemLink)
@@ -928,15 +954,9 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
+            local itemCopy
             if scanByDetails == true then
                 if item.setId == setId then
-
-                    if isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
-                        isAlreadyOnWishList = true
-                        local itemCopy = traitFix(item, traitType)
-                        return isAlreadyOnWishList, itemId, itemCopy
-                    end
-
                     if item.itemType == itemType then
                         if item.armorOrWeaponType == armorOrWeaponType then
                             if item.slot == slotType then
@@ -949,14 +969,28 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                         local qualitiesToCheck = WL.mapWLQualityToItemQualityTypes(item.quality)
                                         if qualitiesToCheck ~= nil then
                                             local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
+                                            if isQualityToCheckOnItem == true then
+                                                isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
+                                                if isAlreadyOnWishList == true then
+                                                    return isAlreadyOnWishList, itemId, item
+                                                end
+                                            end
                                             return isQualityToCheckOnItem, itemId, item
                                         else
+                                            isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
+                                            if isAlreadyOnWishList == true then
+                                                return isAlreadyOnWishList, itemId, itemCopy
+                                            end
                                             isAlreadyOnWishList = false
                                         end
                                     else
+                                        isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
+                                        if isAlreadyOnWishList == true then
+                                            return isAlreadyOnWishList, itemId, itemCopy
+                                        end
                                         isAlreadyOnWishList = true
                                     end
-                                    local itemCopy = traitFix(item, traitType)
+                                    itemCopy = traitFix(item, traitType)
                                     return isAlreadyOnWishList, itemId, itemCopy
                                 end
                             end
@@ -964,8 +998,8 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                     end
                 end
             else
-                if item.setId == setId and isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
-                    isAlreadyOnWishList = true
+                isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, setId)
+                if isAlreadyOnWishList == true then
                     return isAlreadyOnWishList, itemId, item
                 end
                 if item.id == itemId then
@@ -994,7 +1028,7 @@ function WL.IfItemIsOnWishlist(item, itemId, itemLink, setName, isLootedByPlayer
     local charOrAccountName = ""
     if isLootedByPlayer then
         charName    = WL.LoggedInCharData.nameClean
-        accountName = ZO_CachedStrFormat(SI_UNIT_NAME, GetDisplayName())
+        accountName = ZO_CachedStrFormat(SI_UNIT_NAME, currentDisplayName)
     else
         charName    = ZO_CachedStrFormat(SI_UNIT_NAME, charName)
         accountName = ZO_CachedStrFormat(SI_UNIT_NAME, accountName)
@@ -1329,7 +1363,7 @@ function WL.scanWishListForAlreadyKnownSetItemCollectionEntries(charData, noRelo
     charData = charData or WL.LoggedInCharData
     wishList = wishList or WL.getWishListSaveVars(charData, "WL.scanWishListForAlreadyKnownSetItemCollectionEntries")
     if wishList == nil then return false end
-    local displayName = GetDisplayName()
+    local displayName = currentDisplayName
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
 	local countChanged = 0
@@ -1681,6 +1715,17 @@ local function buildSetWayshrinesContextMenuEntries(data)
     end
 end
 
+local function whisperNow(p_username, p_itemLink)
+    currentPlayerName = currentPlayerName or zo_strformat("<<C:1>>", GetUnitName("player"))
+    if p_username ~= nil and p_username ~= "" and p_username ~= "???" and p_username ~= currentDisplayName and p_username ~= currentPlayerName then
+        local whisperText = WL.data.askForItemWhisperText
+        if whisperText == nil or whisperText == "" then
+            whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
+        end
+        StartChatInput("/w " .. tostring(p_username) .. " " .. zo_strformat(whisperText, p_username, p_itemLink))
+    end
+end
+
 --Set list/wishList row right click context menu
 function WL.showContextMenu(control, button, upInside)
     --AddCustomMenuItem(mytext, myfunction, itemType, myFont, normalColor, highlightColor, itemYPad, horizontalAlignment)
@@ -1789,13 +1834,7 @@ function WL.showContextMenu(control, button, upInside)
             data = control.data
             itemLink = data.itemLink
             if button == MOUSE_BUTTON_INDEX_LEFT then
-                if username ~= nil and username ~= "" and userName ~= "???" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
-                    local whisperText = WL.data.askForItemWhisperText
-                    if whisperText == nil or whisperText == "" then
-                        whisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION)
-                    end
-                    StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(whisperText, username, itemLink))
-                end
+                whisperNow(username, itemLink)
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
                 if control and control.data then
                     ClearMenu()
@@ -1812,8 +1851,8 @@ function WL.showContextMenu(control, button, upInside)
                     local slot = WL.SlotTypes[data.slot]
                     local traitText = WL.TraitTypes[data.trait]
                     local trait = WL.buildItemTraitIconText(traitText, data.trait)
-                    if username ~= nil and username ~= "" and username ~= GetDisplayName() and username ~= zo_strformat("<<C:1>>", GetUnitName("player")) then
-                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() StartChatInput("/w " .. tostring(username) .. " " .. zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER_QUESTION), username, itemLink)) end) -- Whisper and ask for item
+                    if username ~= nil and username ~= "" and username ~= currentDisplayName and username ~= currentUserName then
+                        AddCustomMenuItem(zo_strformat(GetString(WISHLIST_WHISPER_RECEIVER), username, itemLink), function() whisperNow(username, itemLink) end) -- Whisper and ask for item
                     end
                     AddCustomMenuItem(GetString(WISHLIST_LINK_ITEM_TO_CHAT), function() StartChatInput(CHAT_SYSTEM.textEntry:GetText()..itemLink) end) -- Link item
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_REMOVE_ITEM), function()
@@ -1896,9 +1935,8 @@ function WL.GetAllSetData(silent)
     WL.setNames = {}
 
     --Get all sets using LibSets
-    if WL.LibSets == nil then WL.LibSets = LibSets end
+    libSets = libSets or WL.LibSets
     if WL.LibSets == nil then d("[WishList]Needed library \'LibSets\' is missing or not activated!") return end
-    libSets = WL.LibSets
     local libSetsVersion = libSets.version
     local setCount = 0
     local allSetIds = libSets.GetAllSetIds()
@@ -2312,17 +2350,36 @@ function WL.openSetItemCollectionBrowser()
 end
 
 function WL.openSetItemCollectionBrowserForCurrentZone(useParentZone)
+    libSets = libSets or WL.LibSets
     if useParentZone == true then
-        return WL.LibSets.OpenItemSetCollectionBookOfCurrentParentZone()
+        return libSets.OpenItemSetCollectionBookOfCurrentParentZone()
     else
-        return WL.LibSets.OpenItemSetCollectionBookOfCurrentZone()
+        return libSets.OpenItemSetCollectionBookOfCurrentZone()
     end
 end
 
 --Returns the "set collections slot" of the itemLink, e.g. "Ring" for rings so that one is able to put any ring of the set,
 --named or not (e.g. "Pulsing Dremora Ring" or "Leviathan Ring") to the WishList but recognize all of them dropping to your
 --inventory
+--Returns key like setId:slotID64 (where slotId64 is a string of a ZOs id64 representing the slot where the item can be equipped
+--e.g. ring, head, etc.
 function WL.getSetItemSlotKey(itemLink)
+    --[[
+    --Returns string itemSetCollectionKey "setId:itemSetCollectionSlotId" of the itemLink
+    --identifying a set item by setId and the equipment slot (e.g. hands, chest, ...) which potentially could have different
+    --itemIds
+    function lib.GetItemSetCollectionsSlotKey(itemLink)
+        if not itemLink then return nil end
+        local setId = select(6, gilsi(itemLink))
+        if not setId or setId <= 0 then
+            return
+        end
+        local itemSetCollectionSlot = giliscs(itemLink)
+        if not itemSetCollectionSlot or itemSetCollectionSlot == "" then return end
+        return strfor("%d:%s", setId, id64tos(itemSetCollectionSlot))
+    end
+]]
+    libSets = libSets or WL.LibSets
     getItemSetCollectionsSlotKey = getItemSetCollectionsSlotKey or libSets.GetItemSetCollectionsSlotKey
     return getItemSetCollectionsSlotKey(itemLink)
 end
