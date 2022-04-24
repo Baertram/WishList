@@ -1,6 +1,21 @@
 WishList = WishList or {}
 local WL = WishList
 
+--[[
+-- ==================Error messages===================
+
+--#1, 2022-04-24, Grahtwood, Baertram, somewhere overland looting items
+user:/AddOns/WishList/WishList.lua:200: attempt to index a function value
+|rstack traceback:
+user:/AddOns/WishList/WishList.lua:200: in function 'lootReceivedWishListCheck'
+|caaaaaa<Locals> itemId = 97670, itemLink = "|H0:item:97670:359:50:0:0:0:0:...", isLootedByPlayer = T, receivedByCharName = "Allesklebär Bärenfreund^Fx", whereWasItLootedData = [table:1]{1 = F}, debug = F, settings = [table:2]{}, charData = [table:3]{}, receivedBy = [table:4]{}, itemType = 2, isSet = T, setName = "grüner Pakt^mdc", _ = 4, _ = 0, _ = 5, setId = 287, doGoOn = T </Locals>|r
+user:/AddOns/WishList/WishList.lua:339: in function 'WL.LootReceived'
+|caaaaaa<Locals> _ = 131193, receivedBy = "Allesklebär Bärenfreund^Fx", itemLink = "|H0:item:97670:359:50:0:0:0:0:...", _ = 1, _ = 10,
+lootType = 1, isLootedByPlayer = T, _ = F, _ = "", itemId = 97670, _ = F, whereWasItLootedData = [table:1] </Locals>|r
+
+]]
+
+
 --LibSets
 local libSets = WL.LibSets
 local isCraftedSet = libSets.IsCraftedSet --needs to be updated as LibSets was loaded properly
@@ -197,7 +212,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         libSetsCraftedUpdated = true
     end
     local itemSetCollectionKey
-    local isCraftedSetItem = isCraftedSet[setId]
+    local isCraftedSetItem = isCraftedSet(setId) --error #1 ???
     if not isCraftedSetItem then
         itemSetCollectionKey = getSetItemSlotKey(itemLink)
     end
