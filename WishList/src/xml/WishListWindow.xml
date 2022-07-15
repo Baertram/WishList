@@ -222,7 +222,7 @@
 					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="14" />
 					<Dimensions x="250" />
 					<Controls>
-						<EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText"/>
+						<EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop"/>
 					</Controls>
 				</Backdrop>
 

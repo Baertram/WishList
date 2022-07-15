@@ -2,16 +2,15 @@ WishList = WishList or {}
 local WL = WishList
 
 --[[
+-- ==================Changelog===================
+--Fixed context menu to whisper players from the history tab
+--Working on: setItemCollection item detection via setId and the slot (e.g. a ring of a set is on the wishList and you
+-- drop the similar "named" ring from a dungeon (e.g. "Pulsing Dremora Ring" or "Leviathan Ring") where the trait etc.
+-- matches your WishList items but the itemId differs: Detect this by the same setId and slot (itemSetCollection slot id64)
+-- then to find it on your WishList
+-- > TODO: function isItemAlreadyOnWishlist
 -- ==================Error messages===================
 
---#1, 2022-04-24, Grahtwood, Baertram, somewhere overland looting items
-user:/AddOns/WishList/WishList.lua:200: attempt to index a function value
-|rstack traceback:
-user:/AddOns/WishList/WishList.lua:200: in function 'lootReceivedWishListCheck'
-|caaaaaa<Locals> itemId = 97670, itemLink = "|H0:item:97670:359:50:0:0:0:0:...", isLootedByPlayer = T, receivedByCharName = "Allesklebär Bärenfreund^Fx", whereWasItLootedData = [table:1]{1 = F}, debug = F, settings = [table:2]{}, charData = [table:3]{}, receivedBy = [table:4]{}, itemType = 2, isSet = T, setName = "grüner Pakt^mdc", _ = 4, _ = 0, _ = 5, setId = 287, doGoOn = T </Locals>|r
-user:/AddOns/WishList/WishList.lua:339: in function 'WL.LootReceived'
-|caaaaaa<Locals> _ = 131193, receivedBy = "Allesklebär Bärenfreund^Fx", itemLink = "|H0:item:97670:359:50:0:0:0:0:...", _ = 1, _ = 10,
-lootType = 1, isLootedByPlayer = T, _ = F, _ = "", itemId = 97670, _ = F, whereWasItLootedData = [table:1] </Locals>|r
 
 ]]
 
@@ -204,17 +203,21 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     --2022-03-07
     --Check if the item's key is on a WishList
     -->Only for non craftable set items which belong to setItemCollections!
-    -->Check via the slot the item is defiend for, e.g. rings could drop for a slot "ring" and thus the slot type should be
+    -->Check via the slot the item is defined for, e.g. rings could drop for a slot "ring" and thus the slot type should be
     -->enough to apply a valid dropped item which is with the same other data on your wishlsit, but the itemId does not match in detail
-    -->e.g. a named ring from a boss dungeon of set A vs. the normal non named ring of the same set A
+    -->e.g. a named ring from a boss dungeon of set A vs. the normal non-named ring of the same set A
+    -->itemSetCollectionKey will be setId:id64OfItemSetCollectionSlot
     if not libSetsCraftedUpdated and libSets.fullyLoaded == true then
         isCraftedSet = libSets.IsCraftedSet --Updated here once after LibSets was loaded
         libSetsCraftedUpdated = true
     end
     local itemSetCollectionKey
-    local isCraftedSetItem = isCraftedSet(setId) --error #1 ???
+    local isCraftedSetItem = isCraftedSet(setId)
     if not isCraftedSetItem then
         itemSetCollectionKey = getSetItemSlotKey(itemLink)
+        if debug then
+            d("[WL]No crafted set! setId: " .. itemLink .. ", slotKey: " .. tostring(itemSetCollectionKey))
+        end
     end
 
 
@@ -327,11 +330,13 @@ function WL.simulateLootReceived(bagId, slotIndex, receivedBy, isLootedByPlayer)
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
+    d(">===================================>")
     d("WL.SimulateLootReceived: " .. tostring(itemLink) .. ", itemId: " ..tostring(itemId) .. ", receivedBy: " ..tostring(receivedBy) .. ", isLootedByPlayer: " .. tostring(isLootedByPlayer))
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, receivedBy, whereWasItLootedData, true, bagId, slotIndex)
+    d("<===================================<")
 end
 
 --EVENT_LOOT_RECEIVED (number eventCode, string receivedBy, string itemName, number quantity, ItemUISoundCategory soundCategory, LootItemType lootType, boolean self, boolean isPickpocketLoot, string questItemIcon, number itemId, boolean isStolen)

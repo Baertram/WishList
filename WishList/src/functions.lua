@@ -7,6 +7,7 @@ local gilsi = GetItemLinkSetInfo
 --local giliscs = GetItemLinkItemSetCollectionSlot
 --local id64tos = Id64ToString
 
+local WL_getSetItemSlotKey
 local getItemSetCollectionsSlotKey = libSets.GetItemSetCollectionsSlotKey
 
 local currentDisplayName = GetDisplayName()
@@ -900,41 +901,60 @@ local function traitFix(item, traitType)
 end
 
 local function isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey)
-    if itemSetCollectionKey ~= nil and item and item.itemLink then
-        local itemSetCollectionKeyOfWLItem = getItemSetCollectionsSlotKey(item.itemLink)
-        return (itemSetCollectionKeyOfWLItem ~= nil and itemSetCollectionKeyOfWLItem ~= "" and itemSetCollectionKey == itemSetCollectionKeyOfWLItem) or false
+--d("[WL]isItemSetCollectionItemAndSameSlotKey")
+    if itemSetCollectionKey ~= nil and item ~= nil and item.itemLink ~= nil then
+        WL_getSetItemSlotKey = WL_getSetItemSlotKey or WL.getSetItemSlotKey
+        local itemSetCollectionKeyOfWLItem = WL_getSetItemSlotKey(item.itemLink)
+--d(">compare to slotKey: " ..tostring(itemSetCollectionKeyOfWLItem) .. ": " ..tostring(itemSetCollectionKey == itemSetCollectionKeyOfWLItem))
+        return (itemSetCollectionKeyOfWLItem ~= nil and itemSetCollectionKeyOfWLItem ~= "" and itemSetCollectionKey == itemSetCollectionKeyOfWLItem and true) or false
     end
+--d("<isItemSetCollectionItemAndSameSlotKey - return false")
     return false
 end
 
 local function isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, setId)
+--d("[WL]isItemSetCollectionItemOnWishList")
     local itemCopyTraitFixed
     local doAbort = false
-    if not itemSetCollectionKey or not itemLink then doAbort = true end
+    if not itemSetCollectionKey or not itemLink then
+--d(">doAbort1")
+        doAbort = true
+    end
     if not doAbort and setId ~= nil then
-        if not item.setId or item.setId ~= setId then doAbort = true end
+        if not item.setId or item.setId ~= setId then
+--d(">doAbort2")
+            doAbort = true
+        end
     end
-    if doAbort then
-        itemCopyTraitFixed = traitFix(item, traitType)
-        return false, itemId, itemCopyTraitFixed
-    end
+
     local setIdStr = (setId ~= nil and "SetParam: " .. tostring(setId)) or "Set: " .. tostring(item.setId)
 
+    if doAbort then
+        itemCopyTraitFixed = traitFix(item, traitType)
+--d("><[WL]isItemSetCollectionItemOnWishList !!!ABORT!!! " .. setIdStr .. " - " .. itemLink)
+        return false, itemId, itemCopyTraitFixed
+    end
     --Is an itemSetCollection setItem on the WishList, with the same "slot key": e.g. a ring
     itemCopyTraitFixed = itemCopyTraitFixed or traitFix(item, traitType)
+
     if isItemSetCollectionItemAndSameSlotKey(item, itemSetCollectionKey) then
         local itemIdOfSameSetCollectionDropSlotItem = item.itemId or GetItemLinkItemId(item.itemLink)
-d("[WishList]" .. setIdStr .. " - " .. itemLink .. " - set collection - matches Wishlist item " .. item.itemLink)
+
+--d(">[WL]isItemSetCollectionItemOnWishList" .. setIdStr .. " - " .. itemLink .. " - collection matches Wishlist entry " .. item.itemLink)
         return true, itemIdOfSameSetCollectionDropSlotItem, itemCopyTraitFixed
+    else
+--d("<[WL]isItemSetCollectionItemOnWishList" .. setIdStr .. " - " .. itemLink .. " not matching")
     end
+--d("<isItemSetCollectionItemOnWishList - return false")
     return false, itemId, itemCopyTraitFixed
 end
 
 
 --Checks if the item is already on the WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
+--itemSetCollectionKey will be setId:id64OfItemSetCollectionSlot and only be filled if the setId is not a craftable one -> Comparison of items via ZOs' setItemCollection slotId 64 e.g. ring
 function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, setId, itemType, armorOrWeaponType, slotType, traitType, itemQuality, itemSetCollectionKey)
     scanByDetails = scanByDetails or false
---d("[WL.isItemAlreayOnWishlist] " .. itemLink)
+--d("[WL.isItemAlreayOnWishlist] ".. itemLink .. ", itemSetCollectionKey: " ..tostring(itemSetCollectionKey) )
     if scanByDetails and (setId == nil or itemType == nil or armorOrWeaponType == nil or slotType == nil or traitType == nil or itemQuality == nil) then return false, nil, nil end
     if charData == nil then return false, nil, nil end
     local wishList = WL.getWishListSaveVars(charData, "WL.isItemAlreadyOnWishlist")
@@ -950,17 +970,25 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
     local allTraits = WISHLIST_TRAIT_TYPE_ALL
 
     local item = {}
---d(">WL.isItemAlreayOnWishlist " .. itemLink .. ", itemId: " .. itemId .. ", char name: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType) .. ", quality: " ..tostring(itemQuality))
+--d(">itemId: " .. itemId .. ", charName: " .. tostring(charData.name) .. ", scanByDetails: " ..tostring(scanByDetails) .. ", setId: " .. tostring(setId) ..", itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " .. tostring(armorOrWeaponType) .. ", slotType: " ..tostring(slotType) .. ", traitType: " .. tostring(traitType) .. ", quality: " ..tostring(itemQuality))
     if itemId ~= nil then
         for i = 1, #wishList do
             item = wishList[i]
             local itemCopy
+            --Scan the item with setId and details like quality, trait, ..., and (itemId or itemSetCollectionKey)
             if scanByDetails == true then
+--d(">scan by details")
+--d(">>setId checks: " ..tostring(item.setId))
                 if item.setId == setId then
+--d(">>setId matches/itemType checks: " ..tostring(item.itemType))
                     if item.itemType == itemType then
+--d(">>itemType matches/item armorOrWeaponType checks: " ..tostring(item.armorOrWeaponType))
                         if item.armorOrWeaponType == armorOrWeaponType then
+--d(">>item armorOrWeaponType matches/item slot checks: " ..tostring(item.slot))
                             if item.slot == slotType then
+--d(">>item slot matches/item trait checks: " ..tostring(item.trait))
                                 if item.trait == traitType or item.trait == allTraits then
+--d(">>item trait matches/item quality checks: " ..tostring(item.quality))
                                     --Quality checks
                                     --Get the itemQuality
                                     itemQuality = itemQuality or GetItemLinkDisplayQuality(itemLink)
@@ -970,45 +998,58 @@ function WL.isItemAlreadyOnWishlist(itemLink, itemId, charData, scanByDetails, s
                                         if qualitiesToCheck ~= nil then
                                             local isQualityToCheckOnItem = qualitiesToCheck[itemQuality] or false
                                             if isQualityToCheckOnItem == true then
+--d(">>>item quality matches")
                                                 isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
                                                 if isAlreadyOnWishList == true then
+--d("<return isAlreadyOnWishList1")
                                                     return isAlreadyOnWishList, itemId, item
                                                 end
                                             end
+--d("<return isQualityToCheckOnItem")
                                             return isQualityToCheckOnItem, itemId, item
                                         else
                                             isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
                                             if isAlreadyOnWishList == true then
+--d("<return isAlreadyOnWishList2")
                                                 return isAlreadyOnWishList, itemId, itemCopy
                                             end
                                             isAlreadyOnWishList = false
                                         end
                                     else
+--d(">>item quality: ANY")
                                         isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, nil)
                                         if isAlreadyOnWishList == true then
+--d("<return isAlreadyOnWishList3")
                                             return isAlreadyOnWishList, itemId, itemCopy
                                         end
                                         isAlreadyOnWishList = true
                                     end
                                     itemCopy = traitFix(item, traitType)
+--d("<return isAlreadyOnWishList4")
                                     return isAlreadyOnWishList, itemId, itemCopy
                                 end
                             end
                         end
                     end
                 end
+            --Scan the item just by setId and (itemId or itemSetCollectionKey)
             else
+--d(">no detail checks")
                 isAlreadyOnWishList, itemId, itemCopy = isItemSetCollectionItemOnWishList(item, itemId, itemSetCollectionKey, itemLink, traitType, setId)
                 if isAlreadyOnWishList == true then
+--d("<return isAlreadyOnWishList5")
                     return isAlreadyOnWishList, itemId, item
                 end
                 if item.id == itemId then
+--d(">itemId matches")
                     isAlreadyOnWishList = true
+--d("<return isAlreadyOnWishList6")
                     return isAlreadyOnWishList, itemId, item
                 end
             end
         end
     end
+--d("<return isAlreadyOnWishList LAST")
     return isAlreadyOnWishList, itemId, item
 end
 
@@ -2360,7 +2401,7 @@ end
 
 --Returns the "set collections slot" of the itemLink, e.g. "Ring" for rings so that one is able to put any ring of the set,
 --named or not (e.g. "Pulsing Dremora Ring" or "Leviathan Ring") to the WishList but recognize all of them dropping to your
---inventory
+--inventory.
 --Returns key like setId:slotID64 (where slotId64 is a string of a ZOs id64 representing the slot where the item can be equipped
 --e.g. ring, head, etc.
 function WL.getSetItemSlotKey(itemLink)
@@ -2383,3 +2424,4 @@ function WL.getSetItemSlotKey(itemLink)
     getItemSetCollectionsSlotKey = getItemSetCollectionsSlotKey or libSets.GetItemSetCollectionsSlotKey
     return getItemSetCollectionsSlotKey(itemLink)
 end
+WL_getSetItemSlotKey = WL.getSetItemSlotKey

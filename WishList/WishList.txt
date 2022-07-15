@@ -9,10 +9,10 @@
 ## Author: Meai & Baertram
 ## Version: 3.02
 ## AddOnVersion: 302
-## APIVersion: 101033 101034
+## APIVersion: 101034 101035
 ## SavedVariables: WishList_Data WishList_Data_All_Servers
-## DependsOn: LibSets>=000404
-## DependsOn: LibAddonMenu-2.0>=33 LibCustomMenu>=712 LibMainMenu-2.0>=40400
+## DependsOn: LibSets>=000407
+## DependsOn: LibAddonMenu-2.0>=34 LibCustomMenu>=713 LibMainMenu-2.0>=40400
 ## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver
 
 ##Libraries
