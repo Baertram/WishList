@@ -3,12 +3,15 @@ local WL = WishList
 
 --[[
 -- ==================Changelog===================
---Fixed context menu to whisper players from the history tab
---Working on: setItemCollection item detection via setId and the slot (e.g. a ring of a set is on the wishList and you
--- drop the similar "named" ring from a dungeon (e.g. "Pulsing Dremora Ring" or "Leviathan Ring") where the trait etc.
--- matches your WishList items but the itemId differs: Detect this by the same setId and slot (itemSetCollection slot id64)
--- then to find it on your WishList
--- > TODO: function isItemAlreadyOnWishlist
+WishList v3.02
+-Fixed whisper player text initiated from history
+-Fixed add set dialog lua error
+-Fixed PTS API101035 XML defaultText
+-Added support for itemSetCollection "slot" checks:
+ Only for non craftable set items which belong to setItemCollections!
+ -->Check via the slot the item is defined for, e.g. rings could drop for a slot "ring" and thus the slot type should be
+ -->enough to apply a valid dropped item with identical data (except the itemId) on your WishList.
+ -->e.g. a named ring from a boss dungeon of set A vs. the normal non-named ring of the same set A: "Pulsing Dremora Ring" or "Leviathan Ring"
 -- ==================Error messages===================
 
 
@@ -204,7 +207,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     --Check if the item's key is on a WishList
     -->Only for non craftable set items which belong to setItemCollections!
     -->Check via the slot the item is defined for, e.g. rings could drop for a slot "ring" and thus the slot type should be
-    -->enough to apply a valid dropped item which is with the same other data on your wishlsit, but the itemId does not match in detail
+    -->enough to apply a valid dropped item which is with the same other data on your wishlist, but the itemId does not match in detail
     -->e.g. a named ring from a boss dungeon of set A vs. the normal non-named ring of the same set A
     -->itemSetCollectionKey will be setId:id64OfItemSetCollectionSlot
     if not libSetsCraftedUpdated and libSets.fullyLoaded == true then
