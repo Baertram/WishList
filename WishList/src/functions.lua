@@ -13,6 +13,7 @@ local getItemSetCollectionsSlotKey = libSets.GetItemSetCollectionsSlotKey
 local currentDisplayName = GetDisplayName()
 local currentPlayerName = zo_strformat("<<C:1>>", GetUnitName("player"))
 
+local gearMarkerTextures = WL.gearMarkerTextures
 
 local allowedItemTypes = WL.checkItemTypes
 --Only body armor parts
@@ -2425,3 +2426,11 @@ function WL.getSetItemSlotKey(itemLink)
     return getItemSetCollectionsSlotKey(itemLink)
 end
 WL_getSetItemSlotKey = WL.getSetItemSlotKey
+
+
+function WL.getGearMarkerTexture(gearMarkerTextureId)
+    if gearMarkerTextureId == nil then return "" end
+    local gearMarkerTexture = gearMarkerTextures[gearMarkerTextureId]
+    if gearMarkerTexture == nil then return "" end
+    return gearMarkerTexture
+end

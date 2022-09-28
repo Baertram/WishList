@@ -69,7 +69,18 @@
 							<Dimensions x="26" y="26" />
 						</Texture>
 					</Controls>
-					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-16" />
+					<!--<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-16" />-->
+                </Label>
+                <Label name="$(parent)Gear" inherits="WishListRowLabel">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)SetItemCollectionState"/>
+                    <Dimensions x="26" y="26" />
+					<Controls>
+						<Texture name="$(parent)Marker" tier="HIGH">
+							<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Gear" />
+							<Dimensions x="26" y="26" />
+						</Texture>
+					</Controls>
+					<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="-4" />
                 </Label>
 			</Controls>
 		</Control>
@@ -369,7 +380,15 @@
                                 ZO_SortHeader_Initialize(self, zo_iconTextFormatNoSpace(WISHLIST_TEXTURE_SETITEMCOLLECTION, 28, 28, "", nil), "knownInSetItemCollectionBook", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Quality"/>
-							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-16" />
+							<!--<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-16" />-->
+                            <Dimensions x="30" y="32" />
+                        </Control>
+                        <Control name="$(parent)Gear" inherits="WhisListSortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, "Gear", "gearMarkerTextureId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetItemCollectionState"/>
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />
                             <Dimensions x="30" y="32" />
                         </Control>
 					</Controls>

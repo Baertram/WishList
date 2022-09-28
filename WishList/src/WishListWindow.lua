@@ -7,6 +7,8 @@ WL.searchBoxLastSelected = {}
 -- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 -- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
 
+local getGearMarkerTexture = WL.getGearMarkerTexture
+
 ------------------------------------------------
 --- WishList Window -> ZO_SortFilterList
 ------------------------------------------------
@@ -106,6 +108,7 @@ function WishListWindow:Setup( )
 	self.headers = self.frame:GetNamedChild("Headers")
     self.headerDate = self.headers:GetNamedChild("DateTime")
     self.headerSetItemCollectionState = self.headers:GetNamedChild("SetItemCollectionState")
+    self.headerGear = self.headers:GetNamedChild("Gear")
     self.headerName = self.headers:GetNamedChild("Name")
 	self.headerArmorOrWeaponType = self.headers:GetNamedChild("ArmorOrWeaponType")
 	self.headerSlot = self.headers:GetNamedChild("Slot")
@@ -190,7 +193,10 @@ function WishListWindow:updateSortHeaderAnchorsAndPositions(wlTab, nameHeaderWid
         self.headerLocality:ClearAnchors()
         self.headerSetItemCollectionState:ClearAnchors()
         self.headerSetItemCollectionState:SetAnchor(TOPLEFT, self.headerQuality, TOPRIGHT, 0, 0)
-        self.headerSetItemCollectionState:SetAnchor(RIGHT, self.headers, RIGHT, -16, 0)
+        --self.headerSetItemCollectionState:SetAnchor(RIGHT, self.headers, RIGHT, -16, 0)
+        self.headerGear:ClearAnchors()
+        self.headerGear:SetAnchor(TOPLEFT, self.headerSetItemCollectionState, TOPRIGHT, 0, 0)
+        self.headerGear:SetAnchor(RIGHT, self.headers, RIGHT, -4, 0)
     elseif wlTab == WISHLIST_TAB_HISTORY then
         self.headerDate:ClearAnchors()
         self.headerDate:SetAnchor(TOPLEFT, self.headers, nil, 0, 0)
@@ -249,6 +255,7 @@ function WishListWindow:UpdateUI(state)
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
             self.headerSetItemCollectionState:SetHidden(true)
+            self.headerGear:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -291,6 +298,7 @@ function WishListWindow:UpdateUI(state)
             self.frame:GetNamedChild("Headers"):SetHidden(true)
             self.headerDate:SetHidden(true)
             self.headerSetItemCollectionState:SetHidden(true)
+            self.headerGear:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -335,6 +343,7 @@ function WishListWindow:UpdateUI(state)
             self.frame:GetNamedChild("Headers"):SetHidden(false)
             self.headerDate:SetHidden(true)
             self.headerSetItemCollectionState:SetHidden(true)
+            self.headerGear:SetHidden(true)
             self.headerArmorOrWeaponType:SetHidden(true)
             self.headerSlot:SetHidden(true)
             self.headerTrait:SetHidden(true)
@@ -385,6 +394,7 @@ function WishListWindow:UpdateUI(state)
         self.frame:GetNamedChild("Headers"):SetHidden(false)
         self.headerDate:SetHidden(false)
         self.headerSetItemCollectionState:SetHidden(false)
+        self.headerGear:SetHidden(false)
 		self.headerArmorOrWeaponType:SetHidden(false)
 		self.headerSlot:SetHidden(false)
 		self.headerTrait:SetHidden(false)
@@ -435,6 +445,7 @@ function WishListWindow:UpdateUI(state)
         self.frame:GetNamedChild("Headers"):SetHidden(false)
         self.headerDate:SetHidden(false)
         self.headerSetItemCollectionState:SetHidden(true)
+        self.headerGear:SetHidden(true)
         self.headerArmorOrWeaponType:SetHidden(false)
         self.headerSlot:SetHidden(false)
         self.headerTrait:SetHidden(false)
@@ -519,8 +530,12 @@ function WishListWindow:SetupItemRow( control, data )
     --d(">>>      [WishListWindow:SetupItemRow] " ..tostring(data.names[clientLang]))
     control.data = data
     --local updateSortHeaderDimensionsAndAnchors = false
-    local setItemCollectionStateColumn = control:GetNamedChild("SetItemCollectionState")
-    local markerTexture = setItemCollectionStateColumn:GetNamedChild("Marker")
+    --SetItemCollection marker
+    local setItemCollectionStateColumn   = control:GetNamedChild("SetItemCollectionState")
+    local markerTextureSetItemCollection = setItemCollectionStateColumn:GetNamedChild("Marker")
+    --Gear marker
+    local gearColumn = control:GetNamedChild("Gear")
+    local markerTextureGear = gearColumn:GetNamedChild("Marker")
     local nameColumn = control:GetNamedChild("Name")
     nameColumn.normalColor = ZO_DEFAULT_TEXT
     if not data.columnWidth then data.columnWidth = 200 end
@@ -539,9 +554,14 @@ function WishListWindow:SetupItemRow( control, data )
         --d(">WISHLIST_TAB_SEARCH")
         setItemCollectionStateColumn:SetHidden(true)
         setItemCollectionStateColumn:ClearAnchors()
-        markerTexture:SetHidden(true)
-        markerTexture:SetTexture("")
-        markerTexture:SetMouseEnabled(false)
+        gearColumn:SetHidden(true)
+        gearColumn:ClearAnchors()
+        markerTextureSetItemCollection:SetHidden(true)
+        markerTextureSetItemCollection:SetTexture("")
+        markerTextureSetItemCollection:SetMouseEnabled(false)
+        markerTextureGear:SetHidden(true)
+        markerTextureGear:SetTexture("")
+        markerTextureGear:SetMouseEnabled(false)
         dateColumn:SetHidden(true)
         dateColumn:ClearAnchors()
         nameColumn:ClearAnchors()
@@ -614,22 +634,40 @@ function WishListWindow:SetupItemRow( control, data )
         setItemCollectionStateColumn:ClearAnchors()
         setItemCollectionStateColumn:SetAnchor(LEFT, qualityColumn, RIGHT, 0, 0)
         if data.knownInSetItemCollectionBook and data.knownInSetItemCollectionBook == 1 then
-            markerTexture:SetTexture(WISHLIST_TEXTURE_SETITEMCOLLECTION)
-            markerTexture:SetDimensions(26, 26)
-            markerTexture:SetColor(1, 1, 1, 1)
-            markerTexture:SetMouseEnabled(true)
-            markerTexture:SetHidden(false)
+            markerTextureSetItemCollection:SetTexture(WISHLIST_TEXTURE_SETITEMCOLLECTION)
+            markerTextureSetItemCollection:SetDimensions(26, 26)
+            markerTextureSetItemCollection:SetColor(1, 1, 1, 1)
+            markerTextureSetItemCollection:SetMouseEnabled(true)
+            markerTextureSetItemCollection:SetHidden(false)
         else
-            markerTexture:SetTexture("")
-            markerTexture:SetHidden(true)
+            markerTextureSetItemCollection:SetTexture("")
+            markerTextureSetItemCollection:SetHidden(true)
         end
-        setItemCollectionStateColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
+        --setItemCollectionStateColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
+        gearColumn:SetHidden(false)
+        gearColumn:ClearAnchors()
+        gearColumn:SetAnchor(LEFT, setItemCollectionStateColumn, RIGHT, 0, 0)
+        local gearMarkerTexture = getGearMarkerTexture(data.gearMarkerTextureId)
+        if gearMarkerTexture ~= "" then
+            markerTextureGear:SetTexture(gearMarkerTexture)
+            markerTextureGear:SetDimensions(26, 26)
+            markerTextureGear:SetColor(1, 1, 1, 1)
+            markerTextureGear:SetMouseEnabled(true)
+            markerTextureGear:SetHidden(false)
+        else
+            markerTextureGear:SetTexture("")
+            markerTextureGear:SetHidden(true)
+        end
+        gearColumn:SetAnchor(RIGHT, control, RIGHT, -4, 0)
         ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         --d(">WISHLIST_TAB_HISTORY")
         setItemCollectionStateColumn:SetHidden(true)
-        markerTexture:SetHidden(true)
-        markerTexture:SetMouseEnabled(false)
+        gearColumn:SetHidden(true)
+        markerTextureSetItemCollection:SetHidden(true)
+        markerTextureSetItemCollection:SetMouseEnabled(false)
+        markerTextureGear:SetHidden(true)
+        markerTextureGear:SetMouseEnabled(false)
         local dateTimeStamp = data.timestamp
         local dateTimeStr = WL.getDateTimeFormatted(dateTimeStamp)
         dateColumn:ClearAnchors()
@@ -886,6 +924,8 @@ function WishListWindow:FilterScrollList()
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
                 data["timestamp"]               = wlDataOfCharId["timestamp"]
                 data["isKnownInSetItemCollectionBook"] = wlDataOfCharId["isKnownInSetItemCollectionBook"]
+                data["gearMarkerTextureId"]     = wlDataOfCharId["gearMarkerTextureId"]
+
                 --Masterlist data
                 if mlData then
                     data["setType"]         = mlData.setType
@@ -1020,6 +1060,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
     local baseDataForSortKeys = {
         ["timestamp"]               = { isId64          = true, }, --isNumeric = true
         ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
+        ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true },
         ["name"]                    = { caseInsensitive = true, },
         ["armorOrWeaponTypeName"]   = { caseInsensitive = true, },
         ["slotName"]                = { caseInsensitive = true, },
@@ -1082,6 +1123,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
         sortKeys = {
             ["timestamp"]               = { isId64          = true }, -- isNumeric = true
             ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
+            ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
             ["slotName"]                = { caseInsensitive = true },
@@ -1103,6 +1145,7 @@ function WishListWindow:BuildSortKeys()
         self.sortKeys = {
             ["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
             ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
+            ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
@@ -1217,6 +1260,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["displayName"]             = histDataOfCharId["displayName"]
     data["locality"]                = histDataOfCharId["locality"]
     data["knownInSetItemCollectionBook"] = histDataOfCharId["knownInSetItemCollectionBook"]
+    data["gearMarkerTextureId "]    = histDataOfCharId["gearMarkerTextureId"]
     --LibSets data
     data["setType"]         = mlData.setType
     data["traitsNeeded"]    = mlData.traitsNeeded

@@ -266,6 +266,29 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_HEADER  = "Auto-remove from " .. GetString(WISHLIST_TITLE),
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE         = "Auto-Remove found items",
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_TT      = "Automatically remove found items from your ".. GetString(WISHLIST_TITLE).." if you have looted them yourself.",
+
+    --Gear
+    WISHLIST_LAM_GEAR                           = "Gear setup",
+    WISHLIST_LAM_GEAR_DESC                      = "Define your own \'Gear\' marker icon and color, add a description and a comment.\nYou can assign this gear icon to your WishList items (context menu/add item dialog).",
+    WISHLIST_LAM_GEARS_DROPDOWN                 = "Available gear",
+    WISHLIST_LAM_GEARS_DROPDOWN_TT              = "Select one of your created gears to edit/delete it",
+    WISHLIST_LAM_GEARS_NAME_EDIT                = "Gear name",
+    WISHLIST_LAM_GEARS_NAME_EDIT_TT             = "Enter your gear\'s name. It will be shown at the tooltip of the gear icon at the WishList's items",
+    WISHLIST_LAM_GEARS_COMMENT_EDIT             = "Gear comment",
+    WISHLIST_LAM_GEARS_COMMENT_EDIT_TT          = "Enter your gear's comment. It will be shown at the tooltip of the gear icon at the WishList's items",
+
+    WISHLIST_LAM_GEARS_BUTTON_ADD               = "Add new",
+    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Click here to add a new gear. You need to fill in at least the name, but you can change the comment/icon/color too.\n\nAfter your gear ist setup according to your needs click the \'Save\' button!.",
+    WISHLIST_LAM_GEARS_BUTTON_SAVE              = "Save",
+    WISHLIST_LAM_GEARS_BUTTON_SAVE_TT           = "Click here to save the new added (via button \'Add new\') gear data.\nAlready existing gear data selected from the dropdown box will automatically save upon change of the settings.",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE            = "Delete",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE_TT         = "Delete the selected gear",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE_WARN       = "Do you want to delete the selected gear?\nAlready assigned items will loose this gear marker!",
+
+    WISHLIST_LAM_GEAR_MARKER_ICON               = "Gear icon",
+    WISHLIST_LAM_GEAR_MARKER_ICON_TT            = "Choose the icon of the gear",
+    WISHLIST_LAM_GEAR_MARKER_ICON_COLOR         = "Gear icon color",
+    WISHLIST_LAM_GEAR_MARKER_ICON_COLOR_TT      = "Choose the icon's color of the gear",
 }
 WL.stringsEN = strings
 

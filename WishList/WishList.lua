@@ -695,6 +695,7 @@ function WL.CreateWishListEntryForItem(item)
     qualityName             = itemQualityName,
     bonuses                 = bonuses,
     knownInSetItemCollectionBook = (item.knownInSetItemCollectionBook and 1) or 0,
+    gearMarkerTextureId     = item.gearMarkerTextureId,
     --LibSets data
     setType     = setType,
     traitsNeeded= traitsNeeded,
@@ -1670,6 +1671,36 @@ local function afterSettings()
     --WishList version 2.96: Added "Add dialog" history of last added data
     --Build characterId entries in the accountWide SavedVariables
     --settings.dialogAddHistory
+
+    --WishList version 3.03 - Gear data - Check for empty subtables in SV .gears table and fill them with default values
+    local gears = WL.data.gears
+    if gears ~= nil then
+        for gearId, gearData in pairs(gears) do
+            if gearData == nil or (gearData ~= nil and gearData.name == nil or gearData.gearMarkerTextureId == nil
+                or gearData.gearMarkerTextureColor == nil) then
+
+                --TODO check if the gearId is still used at any marker icon at the WishLists and if not remove it in total
+
+                --Else if still used: "Fix" the gear with missing data = default data
+                if gearData == nil then
+                    WL.data.gears[gearId] = {
+                        name =                  "Gear # " ..tostring(gearId),
+                        comment =               "",
+                        gearMarkerTextureId =   1,
+                        gearMarkerTextureColor= {["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1},
+                    }
+                else
+                    local oldGearData = ZO_ShallowTableCopy(gearData)
+                    WL.data.gears[gearId] = {
+                        name =                  (oldGearData.name ~= nil and oldGearData.name) or "Gear # " ..tostring(gearId),
+                        comment =               (oldGearData.comment ~= nil and oldGearData.comment) or "",
+                        gearMarkerTextureId =   (oldGearData.gearMarkerTextureId ~= nil and oldGearData.gearMarkerTextureId) or 1,
+                        gearMarkerTextureColor= (oldGearData.gearMarkerTextureColor ~= nil and oldGearData.gearMarkerTextureColor) or {["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1},
+                    }
+                end
+            end
+        end
+    end
 end
 
 --Migrate the SavedVariables from server non-dependent to server dependent ones
@@ -1742,7 +1773,7 @@ function WL.loadSettings()
 
     --Check, by help of basic version 999 settings, if the settings should be loaded for each character or account wide
     --Use the current addon version to read the settings now
-    if (WL.accData.saveMode == 1) then
+    if WL.accData.saveMode == 1 then
         --Load the character user settings
         WL.data = ZO_SavedVars:NewCharacterIdSettings(addonVars.addonSavedVars, addonVars.addonSavedVarsVersion, addonVars.addonSavedVarsDataTab, WL.defaultSettings, worldName)
         --------------------------------------------------------------------------------------------------------------------
@@ -2193,7 +2224,7 @@ function WL.init(_, addonName)
         end
     end
     --Scan the sets now silently?
-    if scanSetsNowSilently then
+    if scanSetsNowSilently == true then
         WL.GetAllSetData(true)
     end
     --Get the characters of the currently logged in account and list all available ones in a list (for the char selection dropdown at the WishList tab e.g.)

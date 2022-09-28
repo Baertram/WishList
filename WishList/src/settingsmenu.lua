@@ -1,6 +1,22 @@
 WishList = WishList or {}
 local WL = WishList
 
+local currentSettingsGearId --the currently selected gearId at the settings menu
+WL.currentSettingsGearId = currentSettingsGearId
+local nextFreeGearId
+local addNewGearEnabled = false
+local setupGearLAMControlsDone = false
+local editExistingGearEnabled = false
+local deleteExistingGearWasDone = false
+
+local gearsChoices = {}
+local gearsChoicesValues = {}
+local gearsChoicesTooltips = {}
+local gearMarkerTextures = WL.gearMarkerTextures
+local gearMarkerTexturesLookup = WL.gearMarkerTexturesLookup
+local gearMarkerTexturesValues = {}
+local gearMarkerTexturesTooltips = {}
+
 ------------------------------------------------------------------------------------------------------------
 -- LibAddonMenu (LAM) Settings panel
 ------------------------------------------------------------------------------------------------------------
@@ -36,6 +52,245 @@ local function CreateControl(ref, name, tooltip, data, disabledChecks, getFunc, 
     return data
 end
 
+local function buildGearsTexturesIconPickerEntries()
+    gearMarkerTexturesValues = {}
+    gearMarkerTexturesTooltips = {}
+
+    for iconId, iconTexturePath in ipairs(gearMarkerTextures) do
+        gearMarkerTexturesValues[iconId] = iconId
+        gearMarkerTexturesTooltips[iconId] = tostring(iconId)
+    end
+end
+
+local function buildGearsDropdownEntries(updateLAMDropdown)
+    updateLAMDropdown = updateLAMDropdown or false
+
+    gearsChoices = {}
+    gearsChoicesValues = {}
+    gearsChoicesTooltips = {}
+    local settings = WL.data
+    local gears = settings.gears
+    if not gears then return end
+
+    for gearId, gearData in pairs(gears) do
+        if gearData ~= nil then
+            local gearName = gearData.name
+            if gearName ~= nil and gearName ~= "" then
+                local newIndex = #gearsChoices + 1
+                local gearIcon = gearData.gearMarkerTextureId
+                local gearColor = gearData.gearMarkerTextureColor
+                local gearColorDef = ZO_ColorDef:New(gearColor.r,gearColor.g,gearColor.b,gearColor.a)
+                --local gearNameColored = gearColorDef:Colorize(gearName)
+                local gearNameTextureStr = gearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTextures[gearIcon], 28, 28)) .. " " .. gearName
+                gearsChoices[newIndex] = gearNameTextureStr
+                gearsChoicesValues[newIndex] = gearId
+                if gearData.comment ~= nil and gearData.comment ~= "" then
+                    gearsChoicesTooltips[newIndex] = gearNameTextureStr .."\n" .. gearData.comment
+                else
+                    gearsChoicesTooltips[newIndex] = gearNameTextureStr
+                end
+            end
+        end
+    end
+
+    if updateLAMDropdown == true then
+        local gearsDropdownCtrl = GetControl("WishList_Settings_GearsDropdownControl")
+        if gearsDropdownCtrl ~= nil and gearsDropdownCtrl.UpdateChoices ~= nil then
+            gearsDropdownCtrl:UpdateChoices(gearsChoices, gearsChoicesValues, gearsChoicesTooltips)
+        end
+    end
+end
+
+local function updateGearLAMControls(doClear, gearId)
+    doClear = doClear or false
+d("[WL]updateGearLAMControls-doClear: " ..tostring(doClear) .. ", gearId: " ..tostring(gearId) .. ", useTheControlsCurrentValue: " ..tostring(useTheControlsCurrentValue))
+
+    local gearIconCtrl = GetControl("WishList_Settings_GearIconPickerControl")
+    if gearIconCtrl ~= nil and gearIconCtrl.UpdateValue then
+d(">>update icon")
+        if doClear == true or gearId == nil then
+            gearIconCtrl:UpdateValue(true, nil)
+        else
+            gearIconCtrl:UpdateValue(false, gearMarkerTextures[gearId])
+        end
+    end
+
+    local gearColorCtrl = GetControl("WishList_Settings_GearColorPickerControl")
+    if gearColorCtrl ~= nil and gearColorCtrl.UpdateValue then
+d(">>update color")
+        if doClear == true or gearId == nil then
+            gearColorCtrl:UpdateValue(true, nil, nil, nil, nil)
+        else
+            gearColorCtrl:UpdateValue(false, 0, 0, 1, 1) --blue
+        end
+
+    end
+
+    local gearNameEditCtrl = GetControl("WishList_Settings_GearNameEditControl")
+    if gearNameEditCtrl ~= nil and gearNameEditCtrl.SetText then
+d(">>update name")
+        if doClear == true or gearId == nil then
+            gearNameEditCtrl:UpdateValue(true, nil)
+        else
+            gearNameEditCtrl:UpdateValue(false, "Gear #" .. tostring(gearId))
+            gearNameEditCtrl.editBox:TakeFocus()
+        end
+    end
+
+    local gearCommentCtrl = GetControl("WishList_Settings_GearCommentEditControl")
+    if gearCommentCtrl ~= nil and gearCommentCtrl.SetText then
+d(">>update comment")
+        if doClear == true or gearId == nil then
+            gearCommentCtrl:UpdateValue(true, nil)
+        else
+            gearCommentCtrl:UpdateValue(false, "")
+        end
+    end
+end
+
+local function saveCurrentGear()
+    if currentSettingsGearId == nil then return end
+    if WL.data.gears[currentSettingsGearId] == nil then
+        --Create the settings table entry for the gearId
+        WL.data.gears[currentSettingsGearId] = {}
+    end
+
+    --Enabling saving of the LAM data to the SV
+    -->Icon and color will be default values from the getFunc
+    local name =        WishList_Settings_GearNameEditControl.editbox:GetText()
+    local comment =     WishList_Settings_GearCommentEditControl.editbox:GetText()
+    local icon =        WishList_Settings_GearIconPickerControl.data:getFunc()
+    local iconId = gearMarkerTexturesLookup[icon]
+    local iconColor =   {WishList_Settings_GearColorPickerControl.data:getFunc()}
+    local iconColorForSV = {r=iconColor[1], g=iconColor[2], b=iconColor[3], a=iconColor[4]}
+
+    --Update the SavedVariables with the data of the current LAM controls
+    WL.data.gears[currentSettingsGearId].name = name
+    WL.data.gears[currentSettingsGearId].comment = comment
+    WL.data.gears[currentSettingsGearId].gearMarkerTextureId = iconId
+    WL.data.gears[currentSettingsGearId].gearMarkerTextureColor = iconColorForSV
+
+    --Reset the currently selected gearId
+    currentSettingsGearId = nil
+    WL.currentSettingsGearId = nil
+
+    --Create a new dropdown entry for the "available gears" by updating the total dropdown
+    buildGearsDropdownEntries(true)
+
+    --Unselect the selected entry at the gears dropdown and clear all LAM controls again
+    updateGearLAMControls(true, nil)
+
+    --Reset the "add" variable so the getFunc wont update the editbox texts with default values!
+    addNewGearEnabled = false
+end
+
+local function addNewGear()
+    --Reset some variables
+    currentSettingsGearId    = nil
+    WL.currentSettingsGearId = nil
+    addNewGearEnabled = false
+    editExistingGearEnabled = false
+    deleteExistingGearWasDone = false
+
+    local settings = WL.data
+    local gears = settings.gears
+    if not gears then return end
+
+    --Get the next free gearId
+    nextFreeGearId = nil
+    if ZO_IsTableEmpty(gears) then
+d(">1")
+        nextFreeGearId = 1
+    else
+        local lastGearId
+        local numChoices = #gearsChoicesValues
+d(">2-numChoices: " ..tostring(numChoices))
+        if numChoices == 0 then
+            nextFreeGearId = 1
+        else
+            if numChoices == 1 then
+                if gearsChoicesValues[1] > 1 then
+                    nextFreeGearId = 1
+                else
+                    nextFreeGearId = 2
+                end
+            else
+                local maxGearId
+                local sortedGearIdsASC = {}
+                --gearsChoicesValues could be in order [1]=2, [2]=1, so sort it first
+                for _, gearId in ipairs(gearsChoicesValues) do
+                    table.insert(sortedGearIdsASC, gearId)
+                end
+                table.sort(sortedGearIdsASC)
+
+
+                for _, gearId in ipairs(sortedGearIdsASC) do
+                    if nextFreeGearId == nil then
+                        if lastGearId == nil then
+                            lastGearId = gearId
+                        end
+d(">>gearId: " ..tostring(gearId) .. ", lastGearId+1: " ..tostring(lastGearId+1))
+                        if gearId > (lastGearId+1) then
+                            nextFreeGearId = lastGearId+1
+d("<<<nextFreeGearId: " ..tostring(nextFreeGearId))
+                            break
+                        end
+                        lastGearId = gearId
+                        if maxGearId == nil or gearId > maxGearId then
+                            maxGearId = gearId
+                        end
+                    end
+                end
+                if nextFreeGearId == nil and maxGearId ~= nil then
+                            nextFreeGearId = maxGearId+1
+d("!!!nextFreeGearId = max: " ..tostring(nextFreeGearId))
+                end
+            end
+        end
+    end
+
+    --Place the cursor into the name editbox and put the gear ID in there
+    if nextFreeGearId ~= nil then
+d(">add new gear #: " ..tostring(nextFreeGearId))
+        addNewGearEnabled = true
+        -->Allows to change the name/comment etc. fields now
+        -->Changing the name field to a value ~= "" will enable the save button as the currentSettingsGearId will be set then!
+        editExistingGearEnabled = false
+    end
+end
+
+local function deleteGear(gearId)
+    --Reset some variables
+    addNewGearEnabled = false
+    editExistingGearEnabled = false
+    currentSettingsGearId    = nil
+    WL.currentSettingsGearId = nil
+
+    local settings = WL.data
+    local gears = settings.gears
+    if not gears then return end
+    if gears[gearId] == nil then return end
+
+    WL.data.gears[gearId] = nil
+
+    deleteExistingGearWasDone = true
+
+    updateGearLAMControls(true, nil)
+    --Update the LAM dropdown with the gears so that the removed entry will be removed there too
+    buildGearsDropdownEntries(true)
+end
+
+local function updateGearMarkerIconPreviewColor(r,g,b,a)
+--d("[WL]updateGearMarkerIconPreviewColor")
+    if WishList_Settings_GearIconPickerControl ~= nil then
+        WishList_Settings_GearIconPickerControl.icon:SetColor(r,g,b,a)
+    end
+end
+
+local function panelControlsCreated(panel)
+    if WL.addonMenuPanel == nil or panel ~= WL.addonMenuPanel then return end
+    --updateGearMarkerIconPreviewColor()
+end
 
 function WL.buildAddonMenu()
     if WL.addonMenu == nil then return nil end
@@ -57,6 +312,10 @@ function WL.buildAddonMenu()
     --The sort header tiebraker (2nd sort group) columns and the values for the settings
     local sortTiebrakerChoices = WL.sortTiebrakerChoices
     local sortTiebrakerChoicesValues = WL.sortTiebrakerChoicesValues
+
+    --Set the variable to true to load the default values once, then set it to false again at the end of this function
+    -->Will be set to true once the gear lam controls have been build properly -> At the last gear LAM control's 1st getFunc call
+    setupGearLAMControlsDone = false
 
     --The LAM panel data
     local panelData    = {
@@ -138,6 +397,11 @@ function WL.buildAddonMenu()
         return retTable
     end
     local libSetsSetNameLanguages = buildLibSetsSetNameLanguagesCheckboxes()
+
+    --Create the needed dropdown entries and icon picker entries
+    --Gear
+    buildGearsTexturesIconPickerEntries()
+    buildGearsDropdownEntries(false)
 
     --The options panel data for the LAM settings of this addon
     local optionsData  = {
@@ -348,6 +612,237 @@ function WL.buildAddonMenu()
             default = defaults.askForItemWhisperText,
             width = "full",
         },
+
+        --==============================================================================
+        --Gear - Added 2022-09-27
+        {
+            type = 'header',
+            name = GetString(WISHLIST_LAM_GEAR),
+        },
+        {
+            type = 'description',
+            title = GetString(WISHLIST_LAM_GEAR_DESC),
+        },
+        {
+            type = 'dropdown',
+            name = GetString(WISHLIST_LAM_GEARS_DROPDOWN),
+            tooltip = GetString(WISHLIST_LAM_GEARS_DROPDOWN_TT),
+            choices =           gearsChoices,
+            choicesValues =     gearsChoicesValues,
+            choicesTooltips =   gearsChoicesTooltips,
+            getFunc = function()
+d("gears dropdown - GearId: " ..tostring(currentSettingsGearId))
+                if currentSettingsGearId == nil then return end
+                return currentSettingsGearId
+            end,
+            setFunc = function(value)
+d("gears dropdown - GearId: " ..tostring(currentSettingsGearId) .. ", value: " ..tostring(value))
+                currentSettingsGearId = nil
+                WL.currentSettingsGearId = nil
+                addNewGearEnabled = false
+                editExistingGearEnabled = false
+                deleteExistingGearWasDone = false
+                if value == nil then return end
+
+                editExistingGearEnabled = true
+                currentSettingsGearId = value
+                WL.currentSettingsGearId = currentSettingsGearId
+            end,
+            default = function() return 1 end,
+            disabled = function() return #gearsChoices == 0 end,
+            reference = "WishList_Settings_GearsDropdownControl",
+        },
+        {
+            type = "button",
+            name = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD),
+            tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_TT),
+            func = function()
+d("gear add - GearId: " ..tostring(currentSettingsGearId))
+                addNewGear()
+            end,
+            isDangerous = false,
+            disabled = function() return false end,
+            --warning = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_WARN),
+            width="half",
+        },
+        {
+            type = "button",
+            name = GetString(WISHLIST_LAM_GEARS_BUTTON_SAVE),
+            tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_SAVE_TT),
+            func = function()
+d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeGearId: " ..tostring(nextFreeGearId).. ", currentGearId: " ..tostring(currentSettingsGearId))
+                --currentSettingsGearId will be set at the setFunc of the "name" editBox control, if addNewGearEnabled was enabled.
+                --Else it will be set as the dropdown box selected an exisitng entry and editExistingGearEnabled was set to true there.
+                if addNewGearEnabled and currentSettingsGearId ~= nil then
+                    saveCurrentGear()
+                end
+            end,
+            isDangerous = false,
+            disabled = function() return not addNewGearEnabled
+                     or (currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil))
+            end,
+            --warning = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_WARN),
+            width="half",
+        },
+        {
+            type = "button",
+            name = GetString(WISHLIST_LAM_GEARS_BUTTON_DELETE),
+            tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_DELETE_TT),
+            func = function()
+d("gear delete - GearId: " ..tostring(currentSettingsGearId))
+                if currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
+                deleteGear(currentSettingsGearId)
+            end,
+            isDangerous = true,
+            disabled = function() return addNewGearEnabled or (currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil)) end,
+            warning = GetString(WISHLIST_LAM_GEARS_BUTTON_DELETE_WARN),
+            width="half",
+        },
+        {
+            type = "editbox",
+            name = GetString(WISHLIST_LAM_GEARS_NAME_EDIT),
+            tooltip = GetString(WISHLIST_LAM_GEARS_NAME_EDIT_TT),
+            isMultiline = false,
+            isExtraWide = true,
+            getFunc = function()
+d("gear name - get func - GearId: " ..tostring(currentSettingsGearId) ..", editExistingGearEnabled: " ..tostring(editExistingGearEnabled) ..", deleteExistingGearWasDone: " ..tostring(deleteExistingGearWasDone) ..", addNewGearEnabled: " ..tostring(addNewGearEnabled) .. ", nextFreeGearId: " ..tostring(nextFreeGearId))
+                if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].name == nil) then return "" end
+                if addNewGearEnabled and nextFreeGearId ~= nil then return "Gear #" ..tostring(nextFreeGearId) end
+                if not currentSettingsGearId then return "" end
+                return settings.gears[currentSettingsGearId].name
+            end,
+            setFunc = function(value)
+d("gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
+                if ((addNewGearEnabled and nextFreeGearId ~= nil) or (editExistingGearEnabled and currentSettingsGearId ~= nil)) then
+                    if (value ~= nil and value ~= "") then
+                        currentSettingsGearId = (addNewGearEnabled == true and nextFreeGearId) or currentSettingsGearId
+                        WL.currentSettingsGearId = currentSettingsGearId
+d(">gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
+                        settings.gears[currentSettingsGearId] = settings.gears[currentSettingsGearId] or {}
+                    else
+                        currentSettingsGearId = nil
+                        WL.currentSettingsGearId = currentSettingsGearId
+                    end
+                end
+                if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
+                if value ~= "" then
+                    settings.gears[currentSettingsGearId].name = value
+                    buildGearsDropdownEntries(true)
+                end
+            end,
+            default = "",
+            width = "full",
+            disabled = function()
+                if addNewGearEnabled or editExistingGearEnabled then return false end
+                return true
+            end,
+            reference = "WishList_Settings_GearNameEditControl",
+        },
+        {
+            type = "editbox",
+            name = GetString(WISHLIST_LAM_GEARS_COMMENT_EDIT),
+            tooltip = GetString(WISHLIST_LAM_GEARS_COMMENT_EDIT_TT),
+            isMultiline = true,
+            isExtraWide = true,
+            getFunc = function()
+d("gear comment - get func - GearId: " ..tostring(currentSettingsGearId))
+                if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].comment == nil) then return "" end
+                if addNewGearEnabled and nextFreeGearId ~= nil then return "" end
+                if not currentSettingsGearId then return "" end
+                return settings.gears[currentSettingsGearId].comment
+            end,
+            setFunc = function(value)
+                d("gear comment - Set func - GearId: " ..tostring(currentSettingsGearId))
+                if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
+                if currentSettingsGearId == nil then return end
+                if value ~= nil then
+                    settings.gears[currentSettingsGearId].comment = value
+                    buildGearsDropdownEntries(true)
+                end
+            end,
+            default = "",
+            width = "full",
+            disabled = function()
+                return (addNewGearEnabled or not editExistingGearEnabled)
+            end,
+            reference = "WishList_Settings_GearCommentEditControl",
+        },
+        {
+            type = "iconpicker",
+            name = GetString(WISHLIST_LAM_GEAR_MARKER_ICON),
+            tooltip = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_TT),
+            choices = gearMarkerTextures,
+            --choicesValues = gearMarkerTexturesValues, --does not exist yet in LAM 2.0 r34! 2022-09-27
+            choicesTooltips = gearMarkerTexturesTooltips,
+            getFunc = function()
+d("gear icon - get func - GearId: " ..tostring(currentSettingsGearId))
+                if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].gearMarkerTextureId == nil) then return gearMarkerTextures[1] end
+                if addNewGearEnabled and nextFreeGearId ~= nil then return gearMarkerTextures[1] end
+                if not currentSettingsGearId then return gearMarkerTextures[1] end
+                local textureId = settings.gears[currentSettingsGearId].gearMarkerTextureId
+                return gearMarkerTextures[textureId]
+            end,
+            setFunc = function(texturePath)
+d("gear icon - Set func - GearId: " ..tostring(currentSettingsGearId))
+                if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
+                local textureId = gearMarkerTexturesLookup[texturePath]
+                if textureId ~= nil then
+                    settings.gears[currentSettingsGearId].gearMarkerTextureId = textureId
+                    buildGearsDropdownEntries(true)
+                end
+            end,
+            maxColumns = 5,
+            visibleRows = 4,
+            iconSize = 48,
+            width = "half",
+            default = gearMarkerTextures[1],
+            disabled = function()
+                return (addNewGearEnabled or not editExistingGearEnabled)
+            end,
+            reference = "WishList_Settings_GearIconPickerControl",
+        },
+        {
+            type = "colorpicker",
+            name = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_COLOR),
+            tooltip = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_COLOR_TT),
+            getFunc = function()
+d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
+                if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil  or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].gearMarkerTextureColor == nil) then
+                    setupGearLAMControlsDone = true
+                    updateGearMarkerIconPreviewColor(1,1,1,1)
+
+                    --Reset the deleteWasDone flag here as it is the last LAM control of the gear controls, and the refresh
+                    --should reach it as last one
+                    if deleteExistingGearWasDone == true then deleteExistingGearWasDone = false end
+
+                    return 1, 1, 1, 1
+                end
+                if addNewGearEnabled and nextFreeGearId ~= nil then return 1, 1, 1, 1 end
+                if not currentSettingsGearId then return 1, 1, 1, 1 end
+                local currentColor = settings.gears[currentSettingsGearId].gearMarkerTextureColor
+                updateGearMarkerIconPreviewColor(currentColor.r, currentColor.g, currentColor.b, currentColor.a)
+                return currentColor.r, currentColor.g, currentColor.b, currentColor.a
+            end,
+            setFunc = function(r,g,b,a)
+                d("gear color - Set func - GearId: " ..tostring(currentSettingsGearId))
+                setupGearLAMControlsDone = true
+                if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
+                if currentSettingsGearId == nil then return end
+                settings.gears[currentSettingsGearId].gearMarkerTextureColor = { ["r"] = r, ["g"] = g, ["b"] = b, ["a"] = a}
+                buildGearsDropdownEntries(true)
+                zo_callLater(function()
+                    updateGearMarkerIconPreviewColor(r,g,b,a)
+                end, 5)
+
+            end,
+            width="half",
+            default = {1, 1, 1, 1},
+            disabled = function()
+                return (addNewGearEnabled or not editExistingGearEnabled)
+            end,
+            reference = "WishList_Settings_GearColorPickerControl",
+        },
+
         --==============================================================================
         {
             type = 'header',
@@ -423,6 +918,7 @@ function WL.buildAddonMenu()
     --Register the addon panel
     WL.addonMenuPanel = WL.addonMenu:RegisterAddonPanel(addonVars.addonName .. "_SettingsMenu", panelData)
     WL.addonMenu:RegisterOptionControls(addonVars.addonName .. "_SettingsMenu", optionsData)
+    --CALLBACK_MANAGER:RegisterCallback("LAM-PanelControlsCreated", panelControlsCreated)
     WL.preventerVars.addonMenuBuild = true
 end
 
