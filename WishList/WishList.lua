@@ -3,19 +3,13 @@ local WL = WishList
 
 --[[
 -- ==================Changelog===================
-WishList v3.02
--Fixed whisper player text initiated from history
--Fixed add set dialog lua error
--Fixed PTS API101035 XML defaultText
--Added support for itemSetCollection "slot" checks:
- Only for non craftable set items which belong to setItemCollections!
- -->Check via the slot the item is defined for, e.g. rings could drop for a slot "ring" and thus the slot type should be
- -->enough to apply a valid dropped item with identical data (except the itemId) on your WishList.
- -->e.g. a named ring from a boss dungeon of set A vs. the normal non-named ring of the same set A: "Pulsing Dremora Ring" or "Leviathan Ring"
+WishList v3.03
+--Added gear markers + settings enu + FCOItemSaver gear marker support (only visual + names)
 -- ==================Error messages===================
-
-
 ]]
+
+--Local speedup variables for lua functions
+local tos = tostring
 
 
 --LibSets
@@ -91,7 +85,7 @@ end
 function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpdateReason, _, debug)
     debug = debug or false
     if inventoryUpdateReason ~= INVENTORY_UPDATE_REASON_DEFAULT then return false end
-    if debug then d("[WL.Inv_Single_Slot_Update] " .. GetItemLink(bagId, slotId) .. ", isNew: " .. tostring(isNewItem)) end
+    if debug then d("[WL.Inv_Single_Slot_Update] " .. GetItemLink(bagId, slotId) .. ", isNew: " .. tos(isNewItem)) end
     if not isNewItem then return false end
     --Abort here if we are arrested by a guard (thief system) as it will scan our inventory for stolen items and destroy them.
     --We don't need to scan it with our functions too at this case
@@ -106,7 +100,7 @@ function WL.Inv_Single_Slot_Update(_, bagId, slotId, isNewItem, _, inventoryUpda
         if itemLink then
             WL.invSingleSlotUpdateData = WL.invSingleSlotUpdateData or {}
             WL.invSingleSlotUpdateData[itemLink] = slotId
-            if debug then d("[WishList]" .. itemLink .. " - Inv_Single_Slot_Update: Set the slotId " ..tostring(slotId) .. " to the WL internal variables!") end
+            if debug then d("[WishList]" .. itemLink .. " - Inv_Single_Slot_Update: Set the slotId " ..tos(slotId) .. " to the WL internal variables!") end
         end
     end
     --Are we in simulation mode or is DolgubonsLazyWritCreatorAddon not active? Abort here then
@@ -171,14 +165,14 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     --Compare some data like the itemType, weaponOrArmorType, slot, traut of itemLink of the looted item with your wishList
     local itemType = GetItemLinkItemType(itemLink)
     if debug then
-        d(">itemType: " ..tostring(itemType))
+        d(">itemType: " ..tos(itemType))
     end
     if not allowedItemTypes[itemType] then return false end
 
     --Check if the item is a set part
     local isSet, setName, _, _, _, setId = GetItemLinkSetInfo(itemLink, false)
     if debug then
-        d(">isSet: " ..tostring(isSet) .. ", setName: " .. tostring(setName) .. ", setId: " ..tostring(setId))
+        d(">isSet: " ..tos(isSet) .. ", setName: " .. tos(setName) .. ", setId: " ..tos(setId))
     end
     if not isSet then return false end
 
@@ -197,7 +191,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             end
         end
         if doGoOn == false then
-            if debug then d("<<<item level should be max CP but is only " ..tostring(requiredLevel) .. " and " .. tostring(itemReqCPLevel) .. " CP)") end
+            if debug then d("<<<item level should be max CP but is only " ..tos(requiredLevel) .. " and " .. tos(itemReqCPLevel) .. " CP)") end
             return
         end
     end
@@ -219,7 +213,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
     if not isCraftedSetItem then
         itemSetCollectionKey = getSetItemSlotKey(itemLink)
         if debug then
-            d("[WL]No crafted set! setId: " .. itemLink .. ", slotKey: " .. tostring(itemSetCollectionKey))
+            d("[WL]No crafted set! setId: " .. itemLink .. ", slotKey: " .. tos(itemSetCollectionKey))
         end
     end
 
@@ -232,22 +226,22 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         armorOrWeaponType = GetItemLinkWeaponType(itemLink)
     end
     if debug then
-        d(">armorOrWeaponType: " ..tostring(armorOrWeaponType))
+        d(">armorOrWeaponType: " ..tos(armorOrWeaponType))
     end
     --Get the slot type
     local slotType = GetItemLinkEquipType(itemLink)
     if debug then
-        d(">slotType: " ..tostring(slotType))
+        d(">slotType: " ..tos(slotType))
     end
     --Get the trait
     local traitType = GetItemLinkTraitInfo(itemLink)
     if debug then
-        d(">traitType: " ..tostring(traitType))
+        d(">traitType: " ..tos(traitType))
     end
     --Get the quality
     local quality = GetItemLinkDisplayQuality(itemLink)
     if debug then
-        d(">quality: " ..tostring(quality))
+        d(">quality: " ..tos(quality))
     end
 
     --Scan all characters or only the currently logged in?
@@ -261,14 +255,14 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
             charData.id = charId
             charData.name = charInfo.name
             if debug then
-                d(">>scanning char: " .. tostring(charData.name))
+                d(">>scanning char: " .. tos(charData.name))
             end
             charData.class = charInfo.class
             if charData ~= nil and charData.id ~= nil then
                 --Check if the item is on the wishlist
                 isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality, itemSetCollectionKey)
                 if debug then
-                    d(">>isOnWishList: " .. tostring(isOnWishList))
+                    d(">>isOnWishList: " .. tos(isOnWishList))
                 end
                 --Is the item on the wishlist?
                 if isOnWishList then
@@ -299,7 +293,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         --Check if the item is on the wishlist
         isOnWishList, itemIdOfSetPart, item = isItemAlreadyOnWishlist(itemLink, itemId, charData, true, setId, itemType, armorOrWeaponType, slotType, traitType, quality, itemSetCollectionKey)
         if debug then
-            d(">>isOnWishList: " .. tostring(isOnWishList))
+            d(">>isOnWishList: " .. tos(isOnWishList))
         end
         if not isOnWishList then return false end
         --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
@@ -334,7 +328,7 @@ function WL.simulateLootReceived(bagId, slotIndex, receivedBy, isLootedByPlayer)
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     d(">===================================>")
-    d("WL.SimulateLootReceived: " .. tostring(itemLink) .. ", itemId: " ..tostring(itemId) .. ", receivedBy: " ..tostring(receivedBy) .. ", isLootedByPlayer: " .. tostring(isLootedByPlayer))
+    d("WL.SimulateLootReceived: " .. tos(itemLink) .. ", itemId: " ..tos(itemId) .. ", receivedBy: " ..tos(receivedBy) .. ", isLootedByPlayer: " .. tos(isLootedByPlayer))
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
     --------------------------------------------------------------------------------------------------------------------
@@ -344,7 +338,7 @@ end
 
 --EVENT_LOOT_RECEIVED (number eventCode, string receivedBy, string itemName, number quantity, ItemUISoundCategory soundCategory, LootItemType lootType, boolean self, boolean isPickpocketLoot, string questItemIcon, number itemId, boolean isStolen)
 function WL.LootReceived(_, receivedBy, itemLink, _, _, lootType, isLootedByPlayer, _, _, itemId, _)
---d("WL.LootReceived: " .. tostring(itemLink) .. ", receivedBy: " .. tostring(receivedBy) .. ", isLootedByPlayer: " .. tostring(isLootedByPlayer))
+--d("WL.LootReceived: " .. tos(itemLink) .. ", receivedBy: " .. tos(receivedBy) .. ", isLootedByPlayer: " .. tos(isLootedByPlayer))
     --Only check if an item was looted
     if not lootType == LOOT_TYPE_ITEM then return false end
     --Are we looting writ reward containers, and cotainers in there? No set items will be looted so abort here until everything is looted
@@ -370,7 +364,7 @@ local lootReceived = WL.LootReceived
 --Check which language should be added first to the set name column (client language or standard language EN)
 -->This function should only be run once after reloadui, and once after the settings were changed (See variable WL.preventerVars.runSetNameLanguageChecks)
 local function checkLanguageToAddFirst()
-    --d("[WishList]checkLanguageToAddFirst, WL.langToAddFirst: " ..tostring(WL.langToAddFirst))
+    --d("[WishList]checkLanguageToAddFirst, WL.langToAddFirst: " ..tos(WL.langToAddFirst))
     if not WL.preventerVars.runSetNameLanguageChecks then return WL.langToAddFirst end
     --Checks which language should be added first to the setName output
     local clientLang = WL.clientLang or WL.fallbackSetLang
@@ -420,7 +414,7 @@ local function checkLanguageToAddFirst()
             doNotAddFirstLanguage = true
         end
     end
-    --d(">doNotAddFirstLanguage: " .. tostring(doNotAddFirstLanguage) .. ", langToAddFirst: " .. tostring(langToAddFirst) .. "-> clientLang: " ..tostring(clientLang)..", supported: " ..tostring(clientLangIsSupportedInLibSets)..", enabled: " ..tostring(clientLangIsEnabledInSetNameSettings) .. ", allDisabled: " ..tostring(allLanguagesDisabledInSetNameSettings))
+    --d(">doNotAddFirstLanguage: " .. tos(doNotAddFirstLanguage) .. ", langToAddFirst: " .. tos(langToAddFirst) .. "-> clientLang: " ..tos(clientLang)..", supported: " ..tos(clientLangIsSupportedInLibSets)..", enabled: " ..tos(clientLangIsEnabledInSetNameSettings) .. ", allDisabled: " ..tos(allLanguagesDisabledInSetNameSettings))
     if doNotAddFirstLanguage then langToAddFirst = nil end
     WL.preventerVars.runSetNameLanguageChecks = false
     WL.langToAddFirst = langToAddFirst
@@ -587,7 +581,7 @@ function WL.CreateEntryForSet( setId, setData )
 
     local maxNameColumnWidth = 200 + columnWidthAdd
     if WL.maxNameColumnWidth == nil or maxNameColumnWidth > WL.maxNameColumnWidth then
---d(">WL.maxNameColumnWidth changed to: " ..tostring(WL.maxNameColumnWidth))
+--d(">WL.maxNameColumnWidth changed to: " ..tos(WL.maxNameColumnWidth))
         WL.maxNameColumnWidth = maxNameColumnWidth
     end
 
@@ -627,7 +621,7 @@ function WL.CreateWishListEntryForItem(item)
     local bonuses = item.bonuses
     --local name = GetItemLinkName(itemLink)
     if setId == nil or setName == nil or bonuses == nil then
---df(">setId, name or bonuses not found. Trying to determine it via the itemid: %s of item %s", tostring(item.id), itemLink)
+--df(">setId, name or bonuses not found. Trying to determine it via the itemid: %s of item %s", tos(item.id), itemLink)
         local _, setLocName, numBonuses, _, _, setLocId = GetItemLinkSetInfo(itemLink, false)
         --Remove the gender stuff from the setname
         if setLocId ~= nil and setLocId > 0 then
@@ -637,7 +631,7 @@ function WL.CreateWishListEntryForItem(item)
         end
     end
     if setId == nil or setId == 0 then
-        df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing setId for set \'%s\'!", tostring(setId), tostring(setName))
+        df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing setId for set \'%s\'!", tos(setId), tos(setName))
         return
     end
 
@@ -669,11 +663,11 @@ function WL.CreateWishListEntryForItem(item)
     local setsData = WL.accData.sets[setId]
 
     if not setsData then
-    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tostring(setId))
+    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tos(setId))
     return
     end
     if not setsData.armorTypes then
-    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing armor types!", tostring(setId))
+    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing armor types!", tos(setId))
     end
 
     local wlEntryTable = {
@@ -716,7 +710,7 @@ end
 --ZO_SortFilterList - Item for the History tab's list (called within BuildMasterList)
 function WL.CreateHistoryEntryForItem(item)
     local itemLink = WL.buildItemLink(item.id, item.quality)
---d("[WL.CreateHistoryEntryForItem] " .. itemLink .. ", timestamp: " .. tostring(item.timestamp))
+--d("[WL.CreateHistoryEntryForItem] " .. itemLink .. ", timestamp: " .. tos(item.timestamp))
     local setId = item.setId
     local setName = item.setName
     local bonuses = item.bonuses
@@ -752,7 +746,7 @@ function WL.CreateHistoryEntryForItem(item)
     local setTypeName = libSets.GetSetTypeName(setType)
     --Get traits needed for craftable sets
     local traitsNeeded = libSets.GetTraitsNeeded(setId)
-    --d(">>>>itemType: " .. tostring(itemTypeName) .. ", armorOrWeaponType: " .. tostring(itemArmorOrWeaponTypeName) .. ", slot: " ..tostring(itemSlotName) .. ", trait: " .. tostring(itemTraitName))
+    --d(">>>>itemType: " .. tos(itemTypeName) .. ", armorOrWeaponType: " .. tos(itemArmorOrWeaponTypeName) .. ", slot: " ..tos(itemSlotName) .. ", trait: " .. tos(itemTraitName))
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     local setsData = WL.accData.sets[setId]
     local function getDisplayNameOfItem()
@@ -806,7 +800,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
     local wishList = WL.getWishListSaveVars(charData, "WishList:AddItem")
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
---d("[WL]AddItem, SV found for charName " .. tostring(charData.name) .. ", CharId: " .. tostring(charData.id))
+--d("[WL]AddItem, SV found for charName " .. tos(charData.name) .. ", CharId: " .. tos(charData.id))
     local charNameChat = charData.name
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
@@ -833,7 +827,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
             end
             --Insert the item to the character dependent WishList SavedVars global table WishList_Data[savedVarsServer][GetDisplayName()][charId]["Data"]["wishList"]
             --table.insert(wishList, item)
-            --d("[WishList]AddItem, item quality: " ..tostring(item.quality))
+            --d("[WishList]AddItem, item quality: " ..tos(item.quality))
             table.insert(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], item)
             count = count + 1
             local traitId = item.trait
@@ -844,7 +838,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
                 traitText = traitText or ""
             end
             if not noAddedChatOutput then
-                d(tostring(itemLink)..GetString(WISHLIST_ADDED) .. ", " .. traitText .. charNameChat)
+                d(tos(itemLink)..GetString(WISHLIST_ADDED) .. ", " .. traitText .. charNameChat)
             end
         end
 	end
@@ -857,7 +851,7 @@ end
 --Special ADD items function called from the item add dialog to add e.g. only monster helm and shoulders, or other special
 -- addTypes -> See constants WISHLIST_ADD_TYPE_*
 function WL.AddSetItems(addType)
-    --d("[WL.AddSetItems] addType: " .. tostring(addType))
+    --d("[WL.AddSetItems] addType: " .. tos(addType))
     --Close the add item dialog at first!
     WishListAddItemDialogCancel:callback()
 
@@ -900,7 +894,7 @@ function WL.AddSetItems(addType)
     local selectedItemQualityData = qualityComboBox.m_selectedItemData
     if selectedItemQualityData == nil or selectedItemQualityData.id == nil then return false end
 
---d(">selectedItemType: " ..tostring(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tostring(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tostring(selectedSlotData.id) .. ", selectedItemTrait: " ..tostring(selectedItemTraitData.id) .. ", selectedItemQuality: " ..tostring(selectedItemQualityData.id))
+--d(">selectedItemType: " ..tos(selectedItemTypeData.id) .. ", selectedItemArmorOrWeaponTypeData: " .. tos(selectedItemArmorOrWeaponTypeData.id) .. ", selectedSlotData: " ..tos(selectedSlotData.id) .. ", selectedItemTrait: " ..tos(selectedItemTraitData.id) .. ", selectedItemQuality: " ..tos(selectedItemQualityData.id))
     --The items to add table
     local items = {}
     --Get the set parts to add
@@ -952,7 +946,7 @@ function WishList:AddHistoryItem(items, charData)
             traitText = traitText or ""
         end
         if showItemFoundHistoryChatOutput then
-            d(tostring(itemLink)..GetString(WISHLIST_HISTORY_ADDED) .. ", " .. traitText .. charNameChat)
+            d(tos(itemLink)..GetString(WISHLIST_HISTORY_ADDED) .. ", " .. traitText .. charNameChat)
         end
     end
     if showItemFoundHistoryChatOutput then
@@ -995,7 +989,7 @@ function WishList:RemoveItem(item, charData)
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
         itemTraitText = itemTraitText or ""
-		d(tostring(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
+		d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
 	end
 
     WL.updateRemoveAllButon()
@@ -1031,7 +1025,7 @@ function WishList:RemoveHistoryItem(item, charData)
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
         itemTraitText = itemTraitText or ""
-        d(tostring(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat.. " (" .. WL.getHistoryItemCount(charData) .. ")")
+        d(tos(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat.. " (" .. WL.getHistoryItemCount(charData) .. ")")
     end
 
     WL.updateRemoveAllButon()
@@ -1058,7 +1052,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
     if criteria.knownInSetItemCollectionBook ~= nil then
         removeKnownSetItemCollection = criteria.knownInSetItemCollectionBook
     end
---d(">checkSetId: " ..tostring(checkSetId))
+--d(">checkSetId: " ..tos(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
@@ -1067,7 +1061,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
         local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
         --setId must match or wasn't given as criteria
         if removeKnownSetItemCollection ~= nil then
---d(">removeKnownSetItemCollection: " ..tostring(criteria.knownInSetItemCollectionBook) .. "/" .. tostring(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tostring(setIdGiven))
+--d(">removeKnownSetItemCollection: " ..tos(criteria.knownInSetItemCollectionBook) .. "/" .. tos(itm.knownInSetItemCollectionBook) ..", setIdGiven: " ..tos(setIdGiven))
             if checkSetId == false or setIdGiven then
                 if (itm.knownInSetItemCollectionBook ~= nil and itm.knownInSetItemCollectionBook == removeKnownSetItemCollection) then
                     removeItemNow = true
@@ -1076,7 +1070,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
         else
             if checkSetId == false or setIdGiven == true then
                 if removeItemNow == false and criteria.timestamp ~= nil then
-                    --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
+                    --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
                     if itm.timestamp == criteria.timestamp then
                         removeItemNow = true
                     else
@@ -1084,16 +1078,16 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                     end
                 end
                 if removeItemNow == false and criteria.itemType ~= nil then
---d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+--d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
                     if itm.itemType == criteria.itemType then
                         if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
                             removeItemNow = true
                         else
                             if criteria.armorOrWeaponType ~= nil then
---d(">>armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+--d(">>armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
                                 if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                                     if criteria.slot ~= nil then
---d(">>>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+--d(">>>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                                         if itm.slot == criteria.slot then
                                             removeItemNow = true
                                         else
@@ -1107,7 +1101,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                                 end
                             else
                                 if criteria.slot ~= nil then
---d(">>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+--d(">>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                                     if itm.slot == criteria.slot then
                                         removeItemNow = true
                                     else
@@ -1123,7 +1117,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                     end
                 end
                 if removeItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
-                    --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                    --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
                     if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                         removeItemNow = true
                     else
@@ -1131,7 +1125,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                     end
                 end
                 if removeItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
-                    --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                    --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                     if itm.slot == criteria.slot then
                         removeItemNow = true
                     else
@@ -1139,7 +1133,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
                     end
                 end
                 if removeItemNow == false and criteria.trait ~= nil then
-                    --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
+                    --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
                     if criteria.trait == allTraitsId or itm.trait == criteria.trait then
                         removeItemNow = true
                     else
@@ -1162,7 +1156,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
             itemTraitText = itemTraitText or ""
             --Remove the WishList entry of the current, or the selected char
             table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], i)
-            d(tostring(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
     end
@@ -1184,7 +1178,7 @@ end
 
 
 function WishList:RemoveAllItemsOfSet(setId, charData)
---d("[WhishList]RemoveAllItemsOfSet, setId: " ..tostring(setId))
+--d("[WhishList]RemoveAllItemsOfSet, setId: " ..tos(setId))
     if setId == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsOfSet")
     if wishList == nil then return true end
@@ -1211,7 +1205,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
             --Remove the WishList entry of the current, or the selected char
             --table.remove(wishList, i)
             table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], i)
-            d(tostring(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
     end
@@ -1252,7 +1246,7 @@ function WishList:ChangeQualityOfItem(item, charData, newQuality)
         local itemTraitText = WL.TraitTypes[traitId]
         itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
         itemTraitText = itemTraitText or ""
-        d(tostring(itemLink).. zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
+        d(tos(itemLink).. zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")")
     end
 
     WishList:ReloadItems()
@@ -1286,7 +1280,7 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
             local currentWishListEntryOfSetItem = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
             if currentWishListEntryOfSetItem ~= nil then
                 currentWishListEntryOfSetItem["quality"] = newQuality
-                d(tostring(itemLink)..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
+                d(tos(itemLink)..zo_strformat(GetString(WISHLIST_UPDATED), GetString(WISHLIST_HEADER_QUALITY)) .. ", " .. itemTraitText .. charNameChat)
                 cnt = cnt +1
             end
         end
@@ -1313,7 +1307,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
         if criteria.timestamp ~= nil then
-            --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
+            --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
             if itm.timestamp == criteria.timestamp then
                 removeItemNow = true
             else
@@ -1321,7 +1315,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             end
         end
         if criteria.itemType ~= nil then
-            --d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+            --d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
             if itm.itemType == criteria.itemType then
                 removeItemNow = true
             else
@@ -1329,7 +1323,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             end
         end
         if criteria.armorOrWeaponType ~= nil then
-            --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+            --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
             if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                 removeItemNow = true
             else
@@ -1337,7 +1331,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             end
         end
         if criteria.slot ~= nil then
-            --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+            --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
             if itm.slot == criteria.slot then
                 removeItemNow = true
             else
@@ -1345,7 +1339,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             end
         end
         if criteria.trait ~= nil then
-            --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
+            --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
             if itm.trait == criteria.trait then
                 removeItemNow = true
             else
@@ -1366,7 +1360,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
             itemTraitText = itemTraitText or ""
             --Remove the history entry of the current, or the selected char
             table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab], i)
-            d(tostring(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            d(tos(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt +1
         end
     end
@@ -1403,7 +1397,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
             --Remove the WishList entry of the current, or the selected char
             --table.remove(history, i)
             table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab], i)
-            d(tostring(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            d(tos(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             cnt = cnt + 1
         end
     end
@@ -1432,7 +1426,7 @@ function WishList:RemoveAllItems(charData)
         --Remove the WishList entry of the current, or the selected char
         --wishList[i] = nil
         WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i] = nil
-        d(tostring(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+        d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
         cnt = cnt + 1
     end
     --Clear the wishlist of the current, or the selected char
@@ -1453,7 +1447,7 @@ function WishList:ClearHistory(charData)
     local addonVars = WL.addonVars
     local charNameChat = charData.name
     local cnt = 0
---d("[WishList:ClearHistory]char: " .. tostring(charNameChat))
+--d("[WishList:ClearHistory]char: " .. tos(charNameChat))
     for i = #history, 1, -1 do
         local itm = history[i]
         local itemLink = WL.buildItemLink(itm.id, itm.quality)
@@ -1464,7 +1458,7 @@ function WishList:ClearHistory(charData)
         --Remove the History entry of the current, or the selected char
         --history[i] = nil
         WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsHistoryTab][i] = nil
-        d(tostring(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+        d(tos(itemLink)..GetString(WISHLIST_HISTORY_REMOVED) .. ", " .. itemTraitText .. charNameChat)
         cnt = cnt + 1
     end
     --Clear the wishlist of the current, or the selected char
@@ -1499,8 +1493,23 @@ end
 
 
 --Gear
-local function removeGearDataFromWishListEntry(wishListItem, gearData, removeAll)
-d("[WL.removeGearDataFromWishListEntry]")
+local function assignGearDataToWishListEntry(wishListItem, gearData)
+d("[WL.assignGearDataToWishListEntry]")
+    if wishListItem ~= nil and gearData ~= nil
+            and gearData.gearMarkerTextureId ~= nil and gearData.gearMarkerTextureColor ~= nil
+            and gearData.gearMarkerTextureColor.r~=nil and gearData.gearMarkerTextureColor.g ~= nil and gearData.gearMarkerTextureColor.b~=nil and gearData.gearMarkerTextureColor.a~=nil then
+d(">assigned!")
+        wishListItem.gearMarkerTextureId = gearData.gearMarkerTextureId
+        wishListItem.gearMarkerTextureColor = gearData.gearMarkerTextureColor
+        wishListItem.copiedFromFCOIS = nil
+        wishListItem.copiedFromFCOISTimestamp = nil
+        return WL_getGearMarkerTexture(nil, true, gearData, 28, 28)
+    end
+    return
+end
+
+local function removeGearDataFromWishListEntry(wishListItem, gearData)
+--d("[WL.removeGearDataFromWishListEntry]")
     if wishListItem ~= nil and gearData ~= nil then
         wishListItem.gearMarkerTextureId = nil
         wishListItem.gearMarkerTextureColor = nil
@@ -1510,6 +1519,88 @@ d("[WL.removeGearDataFromWishListEntry]")
     end
     return
 end
+
+function WishList:AddGearMarker(item, charData, gearData)
+d("WishList:AddGearMarker")
+    if gearData == nil or gearData.gearMarkerTextureId == nil then return end
+    local index = -1
+    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveGearMarker")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
+    local charNameChat = charData.name
+	for i = 1, #wishList do
+		local itm = wishList[i]
+		if itm.id == item.id then
+			index = i
+			break
+		end
+	end
+	if index ~= -1 then
+        local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index]
+        if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and itemAtWishList.gearMarkerTextureId ~= gearData.gearMarkerTextureId then
+            local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index], gearData)
+            if gearMarkerTextureOld ~= nil then
+                local itemLink
+                if item.itemLink ~= nil then
+                    itemLink = item.itemLink
+                else
+                    itemLink = WL.buildItemLink(item.id, item.quality)
+                end
+                local traitId = item.trait
+                local itemTraitText = WL.TraitTypes[traitId]
+                itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+                itemTraitText = itemTraitText or ""
+                d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_ADDED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")"))
+            end
+        end
+	end
+    WishList:ReloadItems()
+end
+
+function WishList:AddGearMarkerToSet(setId, charData, gearData, addAll)
+    addAll = addAll or false
+d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAll))
+    if setId == nil then return false end
+    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsOfSet")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
+    local charNameChat = charData.name
+    local setName = ""
+    local cnt = 0
+    for i = #wishList, 1, -1 do
+        local itm = wishList[i]
+        if itm.setId == setId then
+            local itemLink = WL.buildItemLink(itm.id, itm.quality)
+            if setName == "" then
+                local _, setLocName, _, _, _, _ = GetItemLinkSetInfo(itemLink, false)
+                --Remove the gender stuff from the setname
+                setName = zo_strformat("<<C:1>>", setLocName)
+            end
+                local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
+                if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and itemAtWishList.gearMarkerTextureId ~= gearData.gearMarkerTextureId then
+                    local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
+                    if gearMarkerTextureOld ~= nil then
+                        local traitId = itm.trait
+                        local itemTraitText = WL.TraitTypes[traitId]
+                        itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+                        itemTraitText = itemTraitText or ""
+                        d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_ADDED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText))
+                        cnt = cnt +1
+                    end
+                end
+            end
+    end
+    d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_ADDED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
+
+    WishList:ReloadItems()
+end
+
 
 function WishList:RemoveGearMarker(item, charData, gearData)
 --d("WishList:RemoveGearMarker")
@@ -1544,18 +1635,17 @@ function WishList:RemoveGearMarker(item, charData, gearData)
                 local itemTraitText = WL.TraitTypes[traitId]
                 itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
                 itemTraitText = itemTraitText or ""
-                d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tostring(itemLink) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")"))
+                d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")"))
             end
         end
 	end
-    WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
 
 function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFromWishListsInLoop, gearData, removeAll)
     removeFromWishListsInLoop = removeFromWishListsInLoop or false
     removeAll = removeAll or false
-    d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tostring(removeFromWishListsInLoop) .. ", removeAll: " ..tostring(removeAll))
+    --d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(removeFromWishListsInLoop) .. ", removeAll: " ..tos(removeAll))
     if criteria == nil then return false end
     if gearData == nil or gearData.gearMarkerTextureId == nil then return end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersWithCriteria")
@@ -1570,7 +1660,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
     if criteria.setId ~= nil then
         checkSetId = true
     end
-    --d(">checkSetId: " ..tostring(checkSetId))
+    --d(">checkSetId: " ..tos(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
@@ -1583,7 +1673,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                 removeItemNow = true
             end
             if removeItemNow == false and criteria.timestamp ~= nil then
-                --d(">timestamp: " ..tostring(criteria.timestamp) .. "/" .. tostring(itm.timestamp))
+                --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
                 if itm.timestamp == criteria.timestamp then
                     removeItemNow = true
                 else
@@ -1591,16 +1681,16 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                 end
             end
             if removeItemNow == false and criteria.itemType ~= nil then
-                --d(">itemType: " ..tostring(criteria.itemType) .. "/" .. tostring(itm.itemType))
+                --d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
                 if itm.itemType == criteria.itemType then
                     if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
                         removeItemNow = true
                     else
                         if criteria.armorOrWeaponType ~= nil then
-                            --d(">>armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                            --d(">>armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
                             if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                                 if criteria.slot ~= nil then
-                                    --d(">>>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                                    --d(">>>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                                     if itm.slot == criteria.slot then
                                         removeItemNow = true
                                     else
@@ -1614,7 +1704,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                             end
                         else
                             if criteria.slot ~= nil then
-                                --d(">>slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                                --d(">>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                                 if itm.slot == criteria.slot then
                                     removeItemNow = true
                                 else
@@ -1630,7 +1720,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                 end
             end
             if removeItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
-                --d(">armorOrWeaponType: " ..tostring(criteria.armorOrWeaponType) .. "/" .. tostring(itm.armorOrWeaponType))
+                --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
                 if itm.armorOrWeaponType == criteria.armorOrWeaponType then
                     removeItemNow = true
                 else
@@ -1638,7 +1728,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                 end
             end
             if removeItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
-                --d(">slot: " ..tostring(criteria.slot) .. "/" .. tostring(itm.slot))
+                --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                 if itm.slot == criteria.slot then
                     removeItemNow = true
                 else
@@ -1646,7 +1736,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                 end
             end
             if removeItemNow == false and criteria.trait ~= nil then
-                --d(">trait: " ..tostring(criteria.trait) .. "/" .. tostring(itm.trait))
+                --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
                 if criteria.trait == allTraitsId or itm.trait == criteria.trait then
                     removeItemNow = true
                 else
@@ -1668,12 +1758,12 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
             itemTraitText = itemTraitText or ""
             --Remove the gear marker
             --table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], i)
-            --d(tostring(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            --d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
             if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and (removeAll == true or (removeAll == false and itemAtWishList.gearMarkerTextureId == gearData.gearMarkerTextureId)) then
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                 if gearMarkerTextureOld ~= nil then
-                    d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tostring(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                    d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
                 end
             end
 
@@ -1691,14 +1781,13 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
         updateNow = true
     end
     if updateNow then
-        WL.updateRemoveAllButon()
         WishList:ReloadItems()
     end
 end
 
 
 function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
-    d("[WhishList]RemoveAllGearMarkersOfSet, setId: " ..tostring(setId) .. ", removeAll: " ..tostring(removeAll))
+    --d("[WhishList]RemoveAllGearMarkersOfSet, setId: " ..tos(setId) .. ", removeAll: " ..tos(removeAll))
     if setId == nil then return false end
     if gearData == nil or gearData.gearMarkerTextureId == nil then return end
     removeAll = removeAll or false
@@ -1729,14 +1818,13 @@ function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
             if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and (removeAll == true or (removeAll == false and itemAtWishList.gearMarkerTextureId == gearData.gearMarkerTextureId)) then
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                 if gearMarkerTextureOld ~= nil then
-                    d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tostring(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                    d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
                 end
             end
             cnt = cnt +1
         end
     end
     d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
-    WL.updateRemoveAllButon()
     WishList:ReloadItems()
 end
 
@@ -1801,8 +1889,8 @@ function WL.removeItemSetCollectionSinglePieceItemLinkFromWishList(itemLink, rem
     local equipType = GetItemLinkEquipType(itemLink)
     local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL --All traits
 
---d(">SetId: " ..tostring(setId) .. ", removeType: " ..tostring(removeType))
---d(">>itemType: " ..tostring(itemType) .. ", armorOrWeaponType: " ..tostring(armorOrWeaponType) .. ", slotType: " ..tostring(equipType))
+--d(">SetId: " ..tos(setId) .. ", removeType: " ..tos(removeType))
+--d(">>itemType: " ..tos(itemType) .. ", armorOrWeaponType: " ..tos(armorOrWeaponType) .. ", slotType: " ..tos(equipType))
 
     local criteriaToIdentifyItemsToRemove = {}
     if removeType == WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE_SLOT then
@@ -1891,7 +1979,7 @@ local function fixSVData()
         end
 
         if atLeastOneEntryFixed == true then
-            d("[WishList]Fixed " ..tostring(traitIdsFixedCount) .. " traitIds in the SavedVariables to the new ALL constant!")
+            d("[WishList]Fixed " ..tos(traitIdsFixedCount) .. " traitIds in the SavedVariables to the new ALL constant!")
             ReloadUI("ingame")
         end
     end
@@ -1927,7 +2015,7 @@ local function afterSettings()
                 --Else if still used: "Fix" the gear with missing data = default data
                 if gearData == nil then
                     WL.data.gears[gearId] = {
-                        name =                  "Gear # " ..tostring(gearId),
+                        name =                  "Gear # " ..tos(gearId),
                         comment =               "",
                         gearMarkerTextureId =   1,
                         gearMarkerTextureColor= {["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1},
@@ -1935,7 +2023,7 @@ local function afterSettings()
                 else
                     local oldGearData = ZO_ShallowTableCopy(gearData)
                     WL.data.gears[gearId] = {
-                        name =                  (oldGearData.name ~= nil and oldGearData.name) or "Gear # " ..tostring(gearId),
+                        name =                  (oldGearData.name ~= nil and oldGearData.name) or "Gear # " ..tos(gearId),
                         comment =               (oldGearData.comment ~= nil and oldGearData.comment) or "",
                         gearMarkerTextureId =   (oldGearData.gearMarkerTextureId ~= nil and oldGearData.gearMarkerTextureId) or 1,
                         gearMarkerTextureColor= (oldGearData.gearMarkerTextureColor ~= nil and oldGearData.gearMarkerTextureColor) or {["r"] = 1, ["g"] = 1, ["b"] = 1, ["a"] = 1},
@@ -2033,7 +2121,7 @@ function WL.loadSettings()
         if migrateSavedVarsToServerDependent() == true then
             accDataServerIndependent.savedVarsWereMigratedToServerDependent = true
             accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp = os.date("%c")
-            d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL), tostring(accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp)))
+            d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_SUCCESSFULL), tos(accDataServerIndependent.savedVarsWereMigratedToServerDependentTimeStamp)))
             WL.SVrelated_doReloadUINow = true
         else
             d(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FAILED))
@@ -2182,7 +2270,7 @@ local function WL_Hooks()
                         if nameOfSortHeaderCtrl ~= nil and nameOfSortHeaderCtrl.GetText then
                             nameOfSortHeader = nameOfSortHeaderCtrl:GetText()
                         end
-                        d(string.format(GetString(WISHLIST_SORTHEADER_GROUP_CHANGED), tostring(nameOfSortHeader)))
+                        d(string.format(GetString(WISHLIST_SORTHEADER_GROUP_CHANGED), tos(nameOfSortHeader)))
                         newTiebrakerValue = newTiebrakerIndex
                         break
                     end
@@ -2210,7 +2298,7 @@ local function WL_Hooks()
 
     --Set collection item book: Determine unknown items of setId by help of the collectionCategoryIndex and the parent'S category data
     local function getUnknownSetItemsInCollection(setId)
---d("[WishList]getUnknownSetItemsInCollection - setId: " ..tostring(setId))
+--d("[WishList]getUnknownSetItemsInCollection - setId: " ..tos(setId))
         if setId == nil then return end
         local collectionCategoryIdCheck = GetItemSetCollectionCategoryId(setId)
         local parentCategoryId = GetItemSetCollectionCategoryParentId(setId)
@@ -2507,7 +2595,7 @@ function WL.init(_, addonName)
                 if accDataServerIndependent.savedVarsWereMigratedToServerDependent == true and accDataServerIndependent.savedVarsWereMigratedFinished == true then
                     WL.accDataServerIndependent.savedVarsWereMigratedFinished = nil
                     --Show an onscreen message + chat message
-                    d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED), tostring(GetDisplayName()), tostring(GetWorldName())))
+                    d(string.format(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_FINISHED), tos(GetDisplayName()), tos(GetWorldName())))
                     WL.CSA(GetString(WISHLIST_SV_MIGRATED_TO_SERVER))
                 end
             end

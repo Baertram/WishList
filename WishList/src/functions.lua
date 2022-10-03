@@ -2553,6 +2553,9 @@ function WL.buildGearContextMenuEntries(data)
         AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON), gearContextMenuEntries)
         AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON_SET), gearContextMenuEntriesSet)
         AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON_ALL), gearContextMenuEntriesAll)
+
+
+        --WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION
     end
     --Is any gear selected already?
     if removeGearMarkerEnabled == true then
