@@ -385,7 +385,7 @@
                         </Control>
                         <Control name="$(parent)Gear" inherits="WhisListSortHeader">
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, "Gear", "gearMarkerTextureId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, "Gear", "gearId", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SetItemCollectionState"/>
 							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)" offsetX="-4" />

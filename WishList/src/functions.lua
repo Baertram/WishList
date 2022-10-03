@@ -2451,25 +2451,27 @@ function WL.getGearNameAndComment(gearId)
     return gearData.name, gearData.comment
 end
 
-function WL.getGearMarkerTexture(gearMarkerTextureId, doColorize, gearData, width, height)
+function WL.getGearMarkerTexture(gearData, doColorize, width, height)
     doColorize = doColorize or false
     width = width or 28
     height = height or 28
+    local defaultColor = {r=1, g=1, b=1, a=1}
+    if gearData == nil or gearData.gearId == nil then return nil, nil end
+    local gearsData =  WL.data.gears[gearData.gearId]
+    local gearMarkerTextureId = gearData.gearMarkerTextureId
     if gearMarkerTextureId == nil then
-        if gearData ~= nil then
-            gearMarkerTextureId = gearData.gearMarkerTextureId
-        end
-        if gearMarkerTextureId == nil then return "" end
+        gearMarkerTextureId = gearsData.gearMarkerTextureId
     end
+    if gearMarkerTextureId == nil then return nil, nil end
     local gearMarkerTexture = gearMarkerTextures[gearMarkerTextureId]
-    if gearMarkerTexture == nil then return "" end
-
+    if gearMarkerTexture == nil then return nil, nil end
+    local gearMarkerTextureColor = gearsData.gearMarkerTextureColor
+    if gearMarkerTextureColor == nil then gearMarkerTextureColor = defaultColor end
     if doColorize == true and gearData ~= nil then
-        local currentGearColor = gearData.gearMarkerTextureColor or {r=1, g=1, b=1, a=1}
-        local currentGearColorDef = ZO_ColorDef:New(currentGearColor.r,currentGearColor.g,currentGearColor.b,currentGearColor.a)
+        local currentGearColorDef = ZO_ColorDef:New(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
         gearMarkerTexture = currentGearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTexture, 28, 28))
     end
-    return gearMarkerTexture
+    return gearMarkerTexture, gearMarkerTextureColor
 end
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
@@ -2489,7 +2491,7 @@ local WL_removeGearMarkerTexture = WL.removeGearMarkerTexture
 function WL.buildGearContextMenuEntries(data)
     local gears = WL.data.gears
     if gears == nil then return end
-    local currentGearIcon = data.gearMarkerTextureId
+    local currentGearId = data.gearId
     local currentGearNameTextureStr = ""
 
     local gearsSorted = {}
@@ -2513,9 +2515,9 @@ function WL.buildGearContextMenuEntries(data)
 
             local gearName = gearDataNew.name
             --Do not add already marked gear
-            local gearIcon = gearDataNew.gearMarkerTextureId
-            if currentGearIcon ~= nil then
-                if gearDataNew.gearMarkerTextureId == currentGearIcon then
+            if currentGearId ~= nil then
+                local currentGearData = WL.data.gears[currentGearId]
+                if currentGearData ~= nil and gearDataNew.gearId == currentGearId then
                     if not removeGearMarkerEnabled then
                         removeGearMarkerEnabled = true
                         --data, gearData, removeWholeSet, comingFromWishListWindow, removeType
@@ -2525,30 +2527,33 @@ function WL.buildGearContextMenuEntries(data)
                         removeAllGearMarkerFunc =           function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL) end
 
                         if currentGearNameTextureStr == "" then
-                            currentGearNameTextureStr = WL_getGearMarkerTexture(currentGearIcon, true, gearData, 28, 28)
+                            currentGearNameTextureStr = WL_getGearMarkerTexture(currentGearData, true, 28, 28)
+                            if currentGearNameTextureStr == nil then currentGearNameTextureStr = "" end
                         end
                     end
                     gearName = nil
                 end
             end
             if gearName ~= nil then
-                local gearNameTextureStr = WL_getGearMarkerTexture(gearIcon, true, gearDataNew, 28, 28)
-                --data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists
-                local subMenuEntry = {
-                    label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,  WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
-                }
-                table.insert(gearContextMenuEntries, subMenuEntry)
-                local subMenuEntry1 = {
-                    label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, true,  true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
-                }
-                table.insert(gearContextMenuEntriesSet, subMenuEntry1)
-                local subMenuEntry2 = {
-                    label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL, false) end
-                }
-                table.insert(gearContextMenuEntriesAll, subMenuEntry2)
+                local gearNameTextureStr = WL_getGearMarkerTexture(gearDataNew, true, 28, 28)
+                if gearNameTextureStr ~= nil and gearNameTextureStr ~= "" then
+                    --data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists
+                    local subMenuEntry = {
+                        label 		    = gearNameTextureStr,
+                        callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,  WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
+                    }
+                    table.insert(gearContextMenuEntries, subMenuEntry)
+                    local subMenuEntry1 = {
+                        label 		    = gearNameTextureStr,
+                        callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, true,  true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
+                    }
+                    table.insert(gearContextMenuEntriesSet, subMenuEntry1)
+                    local subMenuEntry2 = {
+                        label 		    = gearNameTextureStr,
+                        callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL, false) end
+                    }
+                    table.insert(gearContextMenuEntriesAll, subMenuEntry2)
+                end
             end
         end
     end

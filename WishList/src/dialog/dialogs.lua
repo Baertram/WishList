@@ -1242,8 +1242,8 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
             local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
             local gearData = data.gearData
             if not gearData.gearId then return end
-            local gearMarkerTextureStr = WL_getGearMarkerTexture(nil, true, gearData, 28, 28)
-d(">gearMarkerTextureStr: " ..tostring(gearMarkerTextureStr))
+            local gearMarkerTextureStr = WL_getGearMarkerTexture(gearData, true, 28, 28)
+            if gearMarkerTextureStr == nil then gearMarkerTextureStr = "" end
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
             local charNameText = WL.CurrentCharData.name
             charNameText = WL.addCharBrackets(charNameText)
@@ -1258,7 +1258,7 @@ d(">gearMarkerTextureStr: " ..tostring(gearMarkerTextureStr))
                     noDataCall = true
                 end
             end
-d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataCall).. ", assignType: " ..tostring(assignType).. ", addToAllWishLists: " ..tostring(addToAllWishLists))
+            --d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataCall).. ", assignType: " ..tostring(assignType).. ", addToAllWishLists: " ..tostring(addToAllWishLists))
 
             --Add gear marker from item / whole set
             if data.wholeSet then
@@ -1386,10 +1386,10 @@ d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataC
                                     linkHandlerItem.id = tonumber(WL.GetItemIDFromLink(itemLink))
                                     local traitId = GetItemLinkTraitInfo(itemLink)
                                     linkHandlerItem.trait = traitId
-d(">link handler")
+--d(">link handler")
                                     WishList:AddGearMarker(linkHandlerItem, WL.LoggedInCharData, gearData)
                                 else
-d(">WishList window")
+--d(">WishList window")
                                     --Coming from the WishList window
                                     WishList:AddGearMarker(WL.CurrentItem, WL.CurrentCharData, gearData)
                                 end
@@ -1460,7 +1460,8 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
             local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
             local gearData = data.gearData
             if not gearData.gearId then return end
-            local gearMarkerTextureStr = WL_getGearMarkerTexture(nil, true, gearData, 28, 28)
+            local gearMarkerTextureStr = WL_getGearMarkerTexture(gearData, true, 28, 28)
+            if gearMarkerTextureStr == nil then gearMarkerTextureStr = "" end
 
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
             local charNameText = WL.CurrentCharData.name

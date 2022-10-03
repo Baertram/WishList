@@ -585,7 +585,7 @@ function WishListWindow:SetupItemRow( control, data )
         localityColumn:SetText(data.locality)
         localityColumn.localityName = data.locality
         localityColumn:SetAnchor(RIGHT, control, RIGHT, -16, 0)
-    ------------------------------------------------------------------------------------------------------------------------
+        ------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
         --d(">WISHLIST_TAB_WISHLIST")
         local dateTimeStamp = data.timestamp
@@ -649,17 +649,18 @@ function WishListWindow:SetupItemRow( control, data )
         gearColumn:SetHidden(false)
         gearColumn:ClearAnchors()
         gearColumn:SetAnchor(LEFT, setItemCollectionStateColumn, RIGHT, 0, 0)
-        local gearMarkerTexture = getGearMarkerTexture(data.gearMarkerTextureId, false, nil, nil, nil)
-        if gearMarkerTexture ~= "" then
-            markerTextureGear:SetTexture(gearMarkerTexture)
-            markerTextureGear:SetDimensions(26, 26)
-            local gearMarkerTextureColor = data.gearMarkerTextureColor
-            if gearMarkerTextureColor == nil or gearMarkerTextureColor.r==nil or gearMarkerTextureColor.g==nil or gearMarkerTextureColorb==nil or gearMarkerTextureColor.a==nil then
-                gearMarkerTextureColor = {r=1, g=1, b=1, a=1}
+        if data.gearId ~= nil then
+            local gearMarkerTexture, gearMarkerTextureColor = getGearMarkerTexture(data, false, nil, nil)
+            if gearMarkerTexture ~= nil and gearMarkerTextureColor ~= nil then
+                markerTextureGear:SetTexture(gearMarkerTexture)
+                markerTextureGear:SetDimensions(26, 26)
+                markerTextureGear:SetColor(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
+                markerTextureGear:SetMouseEnabled(true)
+                markerTextureGear:SetHidden(false)
+            else
+                markerTextureGear:SetTexture("")
+                markerTextureGear:SetHidden(true)
             end
-            markerTextureGear:SetColor(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
-            markerTextureGear:SetMouseEnabled(true)
-            markerTextureGear:SetHidden(false)
         else
             markerTextureGear:SetTexture("")
             markerTextureGear:SetHidden(true)
@@ -930,7 +931,7 @@ function WishListWindow:FilterScrollList()
                 data["bonuses"]                 = numBonuses -- the number of the bonuses of the set
                 data["timestamp"]               = wlDataOfCharId["timestamp"]
                 data["isKnownInSetItemCollectionBook"] = wlDataOfCharId["isKnownInSetItemCollectionBook"]
-                data["gearMarkerTextureId"]     = wlDataOfCharId["gearMarkerTextureId"]
+                data["gearId"]     = wlDataOfCharId["gearId"]
 
                 --Masterlist data
                 if mlData then
@@ -1066,7 +1067,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
     local baseDataForSortKeys = {
         ["timestamp"]               = { isId64          = true, }, --isNumeric = true
         ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
-        ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true },
+        ["gearId"]                  = { caseInsensitive = true, isNumeric = true },
         ["name"]                    = { caseInsensitive = true, },
         ["armorOrWeaponTypeName"]   = { caseInsensitive = true, },
         ["slotName"]                = { caseInsensitive = true, },
@@ -1129,7 +1130,7 @@ function WL.getSortKeysWithTiebrakerFromSettings()
         sortKeys = {
             ["timestamp"]               = { isId64          = true }, -- isNumeric = true
             ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true },
-            ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true },
+            ["gearId"]                  = { caseInsensitive = true, isNumeric = true },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true },
             ["slotName"]                = { caseInsensitive = true },
@@ -1151,7 +1152,7 @@ function WishListWindow:BuildSortKeys()
         self.sortKeys = {
             ["timestamp"]               = { isId64          = true, tiebreaker = "name"  }, --isNumeric = true
             ["knownInSetItemCollectionBook"] = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
-            ["gearMarkerTextureId"]     = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
+            ["gearId"]                  = { caseInsensitive = true, isNumeric = true, tiebreaker = "name" },
             ["name"]                    = { caseInsensitive = true },
             ["armorOrWeaponTypeName"]   = { caseInsensitive = true, tiebreaker = "name" },
             ["slotName"]                = { caseInsensitive = true, tiebreaker = "name" },
@@ -1266,7 +1267,7 @@ function WishListWindow:SearchByCriteria(data, searchInput, searchType)
     data["displayName"]             = histDataOfCharId["displayName"]
     data["locality"]                = histDataOfCharId["locality"]
     data["knownInSetItemCollectionBook"] = histDataOfCharId["knownInSetItemCollectionBook"]
-    data["gearMarkerTextureId "]    = histDataOfCharId["gearMarkerTextureId"]
+    data["gearId "]    = histDataOfCharId["gearId"]
     --LibSets data
     data["setType"]         = mlData.setType
     data["traitsNeeded"]    = mlData.traitsNeeded
