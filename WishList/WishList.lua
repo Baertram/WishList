@@ -1521,17 +1521,18 @@ local function removeGearDataFromWishListEntry(wishListItem, gearData)
 end
 
 function WishList:AddGearMarker(item, charData, gearData)
-d("WishList:AddGearMarker")
+d("WishList:AddGearMarker-item.id: " ..tos(item.id))
     if gearData == nil or gearData.gearMarkerTextureId == nil then return end
 d(">1")
     local index = -1
-    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveGearMarker")
+    local wishList = WL.getWishListSaveVars(charData, "WishList:AddGearMarker")
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
     local addonVars = WL.addonVars
     local charNameChat = charData.name
+d(">charNameChat: " ..tos(charNameChat))
 	for i = 1, #wishList do
 		local itm = wishList[i]
 		if itm.id == item.id then
@@ -1539,6 +1540,7 @@ d(">1")
 			break
 		end
 	end
+d(">>index: " ..tos(index))
 	if index ~= -1 then
         local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index]
         if itemAtWishList ~= nil then
@@ -1565,7 +1567,7 @@ function WishList:AddGearMarkerToSet(setId, charData, gearData, addAll)
     addAll = addAll or false
 d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAll))
     if setId == nil then return false end
-    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllItemsOfSet")
+    local wishList = WL.getWishListSaveVars(charData, "WishList:AddGearMarkerToSet")
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()

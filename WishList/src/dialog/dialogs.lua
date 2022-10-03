@@ -1378,7 +1378,7 @@ d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataC
                             local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
                             --Removing one selected item?
                             if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
-                                if isLinkHandlerItem then
+                                if isLinkHandlerItem == true then
                                     --Coming from the link handler
                                     local linkHandlerItem = {}
                                     linkHandlerItem = dialog.data.itemData
@@ -1386,8 +1386,10 @@ d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataC
                                     linkHandlerItem.id = tonumber(WL.GetItemIDFromLink(itemLink))
                                     local traitId = GetItemLinkTraitInfo(itemLink)
                                     linkHandlerItem.trait = traitId
+d(">link handler")
                                     WishList:AddGearMarker(linkHandlerItem, WL.LoggedInCharData, gearData)
                                 else
+d(">WishList window")
                                     --Coming from the WishList window
                                     WishList:AddGearMarker(WL.CurrentItem, WL.CurrentCharData, gearData)
                                 end

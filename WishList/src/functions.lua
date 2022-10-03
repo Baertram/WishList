@@ -2474,7 +2474,7 @@ end
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
 function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
-d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tostring(addToAllWishLists))
+d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", comingFromWishListWindow: " .. tostring(comingFromWishListWindow) ..", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tostring(addToAllWishLists))
     WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
 end
 local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture
@@ -2536,17 +2536,17 @@ function WL.buildGearContextMenuEntries(data)
                 --data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists
                 local subMenuEntry = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data,   gearDataNew, false, false,  WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,  WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
                 }
                 table.insert(gearContextMenuEntries, subMenuEntry)
                 local subMenuEntry1 = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, true,  true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, true,  true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL, false) end
                 }
                 table.insert(gearContextMenuEntriesSet, subMenuEntry1)
                 local subMenuEntry2 = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL, false) end
                 }
                 table.insert(gearContextMenuEntriesAll, subMenuEntry2)
             end
