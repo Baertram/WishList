@@ -2502,7 +2502,7 @@ function WL.buildGearContextMenuEntries(data)
     table.sort(gearsSorted)
 
     local removeGearMarkerEnabled = false
-    local removeGearMarkerFunc, removeSetGearMarkerFunc, removeAllGearMarkerFunc
+    local removeGearMarkerFunc, removeSetGearMarkerFunc, removeAllFromSetGearMarkerFunc, removeAllGearMarkerFunc
 
     --Build a sorted gears table
     for _, gearId in ipairs(gearsSorted) do
@@ -2519,9 +2519,10 @@ function WL.buildGearContextMenuEntries(data)
                     if not removeGearMarkerEnabled then
                         removeGearMarkerEnabled = true
                         --data, gearData, removeWholeSet, comingFromWishListWindow, removeType
-                        removeGearMarkerFunc    = function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, nil) end
-                        removeSetGearMarkerFunc = function() WL_removeGearMarkerTexture(data, gearDataNew, true, true, nil) end
-                        removeAllGearMarkerFunc = function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL) end
+                        removeGearMarkerFunc    =           function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                        removeSetGearMarkerFunc =           function() WL_removeGearMarkerTexture(data, gearDataNew, true,  true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                        removeAllFromSetGearMarkerFunc =    function() WL_removeGearMarkerTexture(data, gearDataNew, true,  true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL) end
+                        removeAllGearMarkerFunc =           function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL) end
 
                         if currentGearNameTextureStr == "" then
                             currentGearNameTextureStr = WL_getGearMarkerTexture(currentGearIcon, true, gearData, 28, 28)
@@ -2532,7 +2533,6 @@ function WL.buildGearContextMenuEntries(data)
             end
             if gearName ~= nil then
                 local gearNameTextureStr = WL_getGearMarkerTexture(gearIcon, true, gearDataNew, 28, 28)
-
                 local subMenuEntry = {
                     label 		    = gearNameTextureStr,
                     callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, false) end
@@ -2562,6 +2562,9 @@ function WL.buildGearContextMenuEntries(data)
         end
         if removeSetGearMarkerFunc ~= nil then
             AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ICON_FROM_SET), currentGearNameTextureStr), removeSetGearMarkerFunc)
+        end
+        if removeAllFromSetGearMarkerFunc ~= nil then
+            AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ALL_ICONS_FROM_SET), currentGearNameTextureStr), removeAllFromSetGearMarkerFunc)
         end
         if removeAllGearMarkerFunc ~= nil then
             AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ICON_FROM_ALL), currentGearNameTextureStr), removeAllGearMarkerFunc)

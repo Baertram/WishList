@@ -1732,10 +1732,7 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
             local setName = data.itemData and data.itemData.name
             --Coming from context menu of e.g. Set Item Collection UI
             local removeType = dialog.data.removeType
-            local removeFromAllWishLists = false
-            if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
-                removeFromAllWishLists = true
-            end
+            local removeFromAllWishLists = data.removeFromAllWishLists
             local noDataCall = false
             if wlWindow == false then
                 if data.itemData == nil then
@@ -1743,10 +1740,16 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
                     noDataCall = true
                 end
             end
-            --Remove item from WishList or history?
+            --Remove gear marker from item / whole set
             if data.wholeSet then
                 title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET), setName))
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+                --Remove all gear markes of the set
+                if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                    descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
+                else
+                    --Remove only selected gear marker of the set
+                    descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
+                end
             else
                 --[[
                 local timeStamp
@@ -1836,11 +1839,18 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
                     if dialog.data and dialog.data.gearData and dialog.data.gearData.gearId then
                         local gearData = dialog.data.gearData
                         local noDataCall = (not wlWindow and dialog.data.itemData == nil) or false
+                        local removeType = dialog.data.removeType
                         local setId = noDataCall == false and dialog.data and dialog.data.itemData and dialog.data.itemData.setId
                         if dialog.data.wholeSet then
-                            WishList:RemoveAllGearMarkersOfSet(setId, WL.CurrentCharData, gearData)
+                            if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                --Remove all gear markers from the set
+                                WishList:RemoveGearMarkerOfSet(setId, WL.CurrentCharData, gearData, true)
+                            elseif removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                                --Remove only selected gear marker from the set
+                                WishList:RemoveGearMarkerOfSet(setId, WL.CurrentCharData, gearData, false)
+                            end
+
                         else
-                            local removeType = dialog.data.removeType
                             local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
                             --Removing one selected item?
                             if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
@@ -1860,29 +1870,33 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
 
                             --Remove several gear markers (e.g. all)
                             else
+                                local removeAllGearMarkers = false
                                 local criteriaToIdentifyItemsToRemove = {}
-                                local removeFromAllWishLists = false
+                                local removeFromAllWishLists = dialog.data.removeFromAllWishLists
+                                removeFromAllWishLists = removeFromAllWishLists or false
                                 if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
-                                    removeFromAllWishLists = true
+                                    removeAllGearMarkers = true
                                 end
                                 if noDataCall == false then
                                     local data = dialog.data.itemData
                                     if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        removeAllGearMarkers = true
                                         criteriaToIdentifyItemsToRemove.setId = nil
-                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = removeFromAllWishLists
                                     end
                                 else
                                     if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        removeAllGearMarkers = true
                                         criteriaToIdentifyItemsToRemove.setId = nil
-                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = removeFromAllWishLists
                                     end
                                 end
                                 if removeFromAllWishLists == true then
                                     for _, charDataInLoop in pairs(WL.charsData) do
-                                        WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop, true, gearData)
+                                        WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop, true, gearData, removeAllGearMarkers)
                                     end
                                 else
-                                    WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData, false, gearData)
+                                    WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData, false, gearData, removeAllGearMarkers)
                                 end
                             end
                         end
@@ -2088,12 +2102,13 @@ function WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWish
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {setData=data, gearData=gearData, wholeSet=assignWholeSet, wlWindow=comingFromWishListWindow, assignType=assignType})
 end
 
-function WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
+function WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType, removeFromAllWishLists)
     if removeType == nil then removeType = WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL end
     removeWholeSet = removeWholeSet or false
     comingFromWishListWindow = comingFromWishListWindow or false
+    removeFromAllWishLists = removeFromAllWishLists or false
     WL.createWindow(false)
     WL.CurrentItem = data
     WL.checkCurrentCharData()
-    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_REMOVE_GEAR_MARKER_DIALOG", {itemData=data, gearData=gearData, wholeSet=removeWholeSet, wlWindow=comingFromWishListWindow, removeType=removeType})
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_REMOVE_GEAR_MARKER_DIALOG", {itemData=data, gearData=gearData, wholeSet=removeWholeSet, wlWindow=comingFromWishListWindow, removeType=removeType, removeFromAllWishLists=removeFromAllWishLists})
 end

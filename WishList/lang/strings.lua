@@ -300,10 +300,13 @@ local strings = {
 
     WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon %s",
     WISHLIST_GEAR_REMOVE_ICON_FROM_SET          = "Remove gear icon %s from set",
+    WISHLIST_GEAR_REMOVE_ALL_ICONS_FROM_SET     = "Remove all gear icons from set",
     WISHLIST_GEAR_REMOVE_ICON_FROM_ALL          = "Remove gear icon %s from all",
 
     WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET         = "Remove gear - whole set \"<<1>>\"",
     WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION= "Really remove all gear markers at set \"<<1>>\"?",
+    WISHLIST_DIALOG_REMOVE_SELECTED_GEAR_WHOLE_SET_QUESTION= "Really remove gear marker <<1>> at set \"<<2>>\"?",
+
     WISHLIST_BUTTON_REMOVE_GEAR_ALL_TT            = "Remove all gear markers of selected character from " .. GetString(WISHLIST_TITLE),
     WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL        = "Remove all gear markers",
     WISHLIST_DIALOG_REMOVE_GEAR_ALL_QUESTION      = "Really remove all gear markers?",
