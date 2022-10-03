@@ -1724,7 +1724,7 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
             local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
             local gearData = data.gearData
             if not gearData.gearId then return end
-            local gearMarkerTextureStr = WL_getGearMarkerTexture(gearData.gearMarkerTextureId)
+            local gearMarkerTextureStr = WL_getGearMarkerTexture(nil, true, gearData, 28, 28)
 
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
             local charNameText = WL.CurrentCharData.name
@@ -1748,13 +1748,15 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
                 title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET), setName))
                 descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
             else
+                --[[
                 local timeStamp
                 local dateAndTime
                 local itemType
                 local armorOrWeaponType
                 local slot
-                local itemLink
                 local traitId
+                ]]
+                local itemLink
                 --Coming from link handler or inventory context menu e.g.??
                 if not wlWindow and data ~= nil and data.itemData ~= nil and data.itemData.itemLink ~= nil then
                     itemLink = data.itemData.itemLink
