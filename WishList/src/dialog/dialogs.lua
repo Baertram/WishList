@@ -1829,8 +1829,9 @@ function WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWish
     addToAllWishLists = addToAllWishLists or false
     WL.createWindow(false)
     local clientLang = WL.clientLang or WL.fallbackSetLang
+    WL.CurrentItem = data
     WL.currentSetId = data.setId
-    WL.currentSetName = data.names[clientLang]
+    WL.currentSetName = (data.names ~= nil and data.names[clientLang]) or data.name
     WL.checkCurrentCharData()
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {setData=data, gearData=gearData, wholeSet=assignWholeSet, wlWindow=comingFromWishListWindow, assignType=assignType, addToAllWishLists=addToAllWishLists})
 end

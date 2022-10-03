@@ -2535,11 +2535,11 @@ function WL.buildGearContextMenuEntries(data)
                 local gearNameTextureStr = WL_getGearMarkerTexture(gearIcon, true, gearDataNew, 28, 28)
                 local subMenuEntry = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, false) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, false, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
                 }
                 table.insert(gearContextMenuEntries, subMenuEntry)
                 --data, gearData, assignWholeSet, comingFromWishListWindow, assignType
-                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, true, true, nil) end
+                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, true, true, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
                 table.insert(gearContextMenuEntriesSet, subMenuEntry)
                 subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL) end
                 table.insert(gearContextMenuEntriesAll, subMenuEntry)
