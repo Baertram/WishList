@@ -296,11 +296,12 @@ local strings = {
 
     WISHLIST_GEAR_ASSIGN_ICON                   = "Assign gear icon",
     WISHLIST_GEAR_ASSIGN_ICON_SET               = "Assign gear icon to set",
-    WISHLIST_GEAR_ASSIGN_ICON_ALL               = "Assign gear icon to all",
+    WISHLIST_GEAR_ASSIGN_ICON_ALL               = "Assign gear icon to all items",
     WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET         = "Assign gear - whole set \"<<1>>\"",
     WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION= "Really assign gear marker <<1>> to set \"<<2>>\"?",
     WISHLIST_DIALOG_ADD_GEAR_MARKER            = "Assign gear marker",
     WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION   = "Assign gear marker <<1>>",
+    WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL        = "Assign gear marker to all items",
 
     WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon %s",
     WISHLIST_GEAR_REMOVE_ICON_FROM_SET          = "Remove gear icon %s from set",

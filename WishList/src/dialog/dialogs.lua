@@ -1308,8 +1308,8 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                 --Title of the dialog
                 local addItemTitles = {
                     [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL] = GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER),
-                    --[[
                     [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL]    = GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL),
+                    --[[
                     [WISHLIST_ADD_ITEM_TYPE_DATEANDTIME]         = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_DATETIME), dateAndTime),
                     [WISHLIST_ADD_ITEM_TYPE]                     = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_TYPE), itemType),
                     [WISHLIST_ADD_ITEM_TYPE_ARMORANDWEAPONTYPE]  = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_ARMORORWEAPONTYPE), armorOrWeaponTypeText),

@@ -2473,15 +2473,15 @@ function WL.getGearMarkerTexture(gearMarkerTextureId, doColorize, gearData, widt
 end
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
-function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType)
-d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType))
-    WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType)
+function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
+d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tos(addToAllWishLists))
+    WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
 end
 local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture
 
-function WL.removeGearMarkerTexture(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
-d(">Remove gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId).. ", removeWholeSet: " ..tostring(removeWholeSet) .. ", removeType: " .. tostring(removeType))
-    WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
+function WL.removeGearMarkerTexture(data, gearData, removeWholeSet, comingFromWishListWindow, removeType, removeFromAllWishLists)
+--d(">Remove gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId).. ", removeWholeSet: " ..tostring(removeWholeSet) .. ", removeType: " .. tostring(removeType) .. ", removeFromAllWishLists: " ..tos(removeFromAllWishLists))
+    WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType, removeFromAllWishLists)
 end
 local WL_removeGearMarkerTexture = WL.removeGearMarkerTexture
 
@@ -2533,16 +2533,22 @@ function WL.buildGearContextMenuEntries(data)
             end
             if gearName ~= nil then
                 local gearNameTextureStr = WL_getGearMarkerTexture(gearIcon, true, gearDataNew, 28, 28)
+                --data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists
                 local subMenuEntry = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, false, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data,   gearDataNew, false, false,  WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
                 }
                 table.insert(gearContextMenuEntries, subMenuEntry)
-                --data, gearData, assignWholeSet, comingFromWishListWindow, assignType
-                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, true, true, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
-                table.insert(gearContextMenuEntriesSet, subMenuEntry)
-                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL) end
-                table.insert(gearContextMenuEntriesAll, subMenuEntry)
+                local subMenuEntry1 = {
+                    label 		    = gearNameTextureStr,
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, true,  true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL) end
+                }
+                table.insert(gearContextMenuEntriesSet, subMenuEntry1)
+                local subMenuEntry2 = {
+                    label 		    = gearNameTextureStr,
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true,   WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL) end
+                }
+                table.insert(gearContextMenuEntriesAll, subMenuEntry2)
             end
         end
     end
