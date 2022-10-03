@@ -653,7 +653,10 @@ function WishListWindow:SetupItemRow( control, data )
         if gearMarkerTexture ~= "" then
             markerTextureGear:SetTexture(gearMarkerTexture)
             markerTextureGear:SetDimensions(26, 26)
-            local gearMarkerTextureColor = data.gearMarkerTextureColor or {r=1, g=1, b=1, a=1}
+            local gearMarkerTextureColor = data.gearMarkerTextureColor
+            if gearMarkerTextureColor == nil or gearMarkerTextureColor.r==nil or gearMarkerTextureColor.g==nil or gearMarkerTextureColorb==nil or gearMarkerTextureColor.a==nil then
+                gearMarkerTextureColor = {r=1, g=1, b=1, a=1} 
+            end
             markerTextureGear:SetColor(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
             markerTextureGear:SetMouseEnabled(true)
             markerTextureGear:SetHidden(false)
