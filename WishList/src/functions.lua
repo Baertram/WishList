@@ -2474,7 +2474,7 @@ end
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
 function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
-d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tos(addToAllWishLists))
+d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tostring(addToAllWishLists))
     WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
 end
 local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture

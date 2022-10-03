@@ -1322,7 +1322,7 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                     [WISHLIST_ADD_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS] = ZO_CachedStrFormat(GetString(WISHLIST_CONTEXTMENU_ADD_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
                     ]]
                 }
-                local titelForAddItem = addItemTitles[data.addType]
+                local titelForAddItem = addItemTitles[data.assignType]
                 if titelForAddItem == "" then titelForAddItem = addItemTitles[WISHLIST_ADD_GEAR_MARKER_ITEM_TYPE_NORMAL] end
                 title:SetText(titelForAddItem)
 
