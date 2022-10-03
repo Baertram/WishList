@@ -237,6 +237,7 @@ WL.defaultSettings = {
     notifyOnFoundItemsOnlyInDungeons = false,
     dialogAddHistory = {},
     askForItemWhisperText = GetString(WISHLIST_WHISPER_RECEIVER_QUESTION),
+    --Added with WishList v3.03 - 2022-09-27
     gears = {},
 }
 

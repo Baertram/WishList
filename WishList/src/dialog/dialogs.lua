@@ -1400,3 +1400,24 @@ function WL.getAddItemDialogButtonTexture(specialAddType, buttonType)
     end
     return textureFileName
 end
+
+function WL.showAddGearMarkerIcon(setData, comingFromWishListWindow)
+    comingFromWishListWindow = comingFromWishListWindow or false
+    WL.createWindow(false)
+    local clientLang = WL.clientLang or WL.fallbackSetLang
+    WL.currentSetId = setData.setId
+    WL.currentSetName = setData.names[clientLang]
+    WL.checkCurrentCharData()
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_MARKER_DIALOG", {setData=setData, wlWindow=comingFromWishListWindow})
+end
+
+function WL.showRemoveGearMarkerIcon(item, removeWholeSet, comingFromWishListWindow, removeFromHistory, removeType)
+    if removeType == nil then removeType = WISHLIST_REMOVE_ITEM_TYPE_NORMAL end
+    removeWholeSet = removeWholeSet or false
+    comingFromWishListWindow = comingFromWishListWindow or false
+    removeFromHistory = removeFromHistory or false
+    WL.createWindow(false)
+    WL.CurrentItem = item
+    WL.checkCurrentCharData()
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_REMOVE_MARKER_DIALOG", {itemData=item, wholeSet=removeWholeSet, wlWindow=comingFromWishListWindow, removeFromHistory=removeFromHistory, removeType=removeType})
+end

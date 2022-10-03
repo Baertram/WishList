@@ -103,11 +103,11 @@ end
 
 local function updateGearLAMControls(doClear, gearId)
     doClear = doClear or false
-d("[WL]updateGearLAMControls-doClear: " ..tostring(doClear) .. ", gearId: " ..tostring(gearId) .. ", useTheControlsCurrentValue: " ..tostring(useTheControlsCurrentValue))
+--d("[WL]updateGearLAMControls-doClear: " ..tostring(doClear) .. ", gearId: " ..tostring(gearId) .. ", useTheControlsCurrentValue: " ..tostring(useTheControlsCurrentValue))
 
     local gearIconCtrl = GetControl("WishList_Settings_GearIconPickerControl")
     if gearIconCtrl ~= nil and gearIconCtrl.UpdateValue then
-d(">>update icon")
+--d(">>update icon")
         if doClear == true or gearId == nil then
             gearIconCtrl:UpdateValue(true, nil)
         else
@@ -117,7 +117,7 @@ d(">>update icon")
 
     local gearColorCtrl = GetControl("WishList_Settings_GearColorPickerControl")
     if gearColorCtrl ~= nil and gearColorCtrl.UpdateValue then
-d(">>update color")
+--d(">>update color")
         if doClear == true or gearId == nil then
             gearColorCtrl:UpdateValue(true, nil, nil, nil, nil)
         else
@@ -128,7 +128,7 @@ d(">>update color")
 
     local gearNameEditCtrl = GetControl("WishList_Settings_GearNameEditControl")
     if gearNameEditCtrl ~= nil and gearNameEditCtrl.SetText then
-d(">>update name")
+--d(">>update name")
         if doClear == true or gearId == nil then
             gearNameEditCtrl:UpdateValue(true, nil)
         else
@@ -139,7 +139,7 @@ d(">>update name")
 
     local gearCommentCtrl = GetControl("WishList_Settings_GearCommentEditControl")
     if gearCommentCtrl ~= nil and gearCommentCtrl.SetText then
-d(">>update comment")
+--d(">>update comment")
         if doClear == true or gearId == nil then
             gearCommentCtrl:UpdateValue(true, nil)
         else
@@ -184,27 +184,19 @@ local function saveCurrentGear()
     addNewGearEnabled = false
 end
 
-local function addNewGear()
-    --Reset some variables
-    currentSettingsGearId    = nil
-    WL.currentSettingsGearId = nil
-    addNewGearEnabled = false
-    editExistingGearEnabled = false
-    deleteExistingGearWasDone = false
+local function getNextFreeGearId()
+    --Get the next free gearId
+    nextFreeGearId = nil
 
     local settings = WL.data
     local gears = settings.gears
     if not gears then return end
 
-    --Get the next free gearId
-    nextFreeGearId = nil
     if ZO_IsTableEmpty(gears) then
-d(">1")
         nextFreeGearId = 1
     else
         local lastGearId
         local numChoices = #gearsChoicesValues
-d(">2-numChoices: " ..tostring(numChoices))
         if numChoices == 0 then
             nextFreeGearId = 1
         else
@@ -229,10 +221,8 @@ d(">2-numChoices: " ..tostring(numChoices))
                         if lastGearId == nil then
                             lastGearId = gearId
                         end
-d(">>gearId: " ..tostring(gearId) .. ", lastGearId+1: " ..tostring(lastGearId+1))
                         if gearId > (lastGearId+1) then
                             nextFreeGearId = lastGearId+1
-d("<<<nextFreeGearId: " ..tostring(nextFreeGearId))
                             break
                         end
                         lastGearId = gearId
@@ -243,15 +233,30 @@ d("<<<nextFreeGearId: " ..tostring(nextFreeGearId))
                 end
                 if nextFreeGearId == nil and maxGearId ~= nil then
                             nextFreeGearId = maxGearId+1
-d("!!!nextFreeGearId = max: " ..tostring(nextFreeGearId))
                 end
             end
         end
     end
+end
+
+local function resetGearAddAndDeleteVariables()
+    --Reset some variables
+    currentSettingsGearId    = nil
+    WL.currentSettingsGearId = nil
+    addNewGearEnabled = false
+    editExistingGearEnabled = false
+    deleteExistingGearWasDone = false
+end
+
+local function addNewGear()
+    --Reset some variables
+    resetGearAddAndDeleteVariables()
+
+    --Get the next free gear id at the SV
+    nextFreeGearId = getNextFreeGearId()
 
     --Place the cursor into the name editbox and put the gear ID in there
     if nextFreeGearId ~= nil then
-d(">add new gear #: " ..tostring(nextFreeGearId))
         addNewGearEnabled = true
         -->Allows to change the name/comment etc. fields now
         -->Changing the name field to a value ~= "" will enable the save button as the currentSettingsGearId will be set then!
@@ -261,10 +266,7 @@ end
 
 local function deleteGear(gearId)
     --Reset some variables
-    addNewGearEnabled = false
-    editExistingGearEnabled = false
-    currentSettingsGearId    = nil
-    WL.currentSettingsGearId = nil
+    resetGearAddAndDeleteVariables()
 
     local settings = WL.data
     local gears = settings.gears
@@ -287,10 +289,86 @@ local function updateGearMarkerIconPreviewColor(r,g,b,a)
     end
 end
 
+local function updateWishListGearsWithFCOISGearMarkerIcons()
+    if FCOIS == nil then return end
+
+    --Reset some variables
+    resetGearAddAndDeleteVariables()
+
+    local settings = WL.data
+    local gears = settings.gears
+    if not gears then return end
+
+    local textureVars = FCOIS.textureVars.MARKER_TEXTURES
+    if textureVars == nil then return end
+    if FCOIS.settingsVars == nil or FCOIS.settingsVars.settings == nil then return end
+    local settingsIcon = FCOIS.settingsVars.settings.icon
+    if settingsIcon == nil then return end
+
+    local anyFCOISgearWasAdded = false
+    --Get the FCOIS static and dynamic gear markers info, name, texture etc.
+    local gearSetIconsTable = FCOIS.GetGearIcons(false)
+    for gearIconId, isGear in pairs(gearSetIconsTable) do
+        if isGear == true and gearIconId ~= nil then
+            --Get the FCOIS gear name
+            local gearNameStr = FCOIS.GetIconText(gearIconId, false, false, false)
+            if gearNameStr ~= nil and gearNameStr ~= "" then
+                --Add the FCOIS gear to the SavedVariables gears table
+                --Get the next free gear id at the SV
+                getNextFreeGearId()
+                if nextFreeGearId ~= nil then
+                    local iconSettings = settingsIcon[gearIconId]
+                    if iconSettings ~= nil then
+                        local iconColorForSV = iconSettings.color
+                        local iconTextureString = textureVars[iconSettings.texture]
+                        if iconTextureString ~= nil and iconTextureString ~= ""
+                                and iconColorForSV ~= nil and iconColorForSV.r ~= nil and iconColorForSV.g ~= nil and iconColorForSV.b ~= nil and iconColorForSV.a ~= nil then
+                            local timeStamp = GetTimeStamp()
+                            local addedDateStr = os.date("%c", timeStamp)
+                            --Create the SV table entry
+                            WL.data.gears[nextFreeGearId] = {
+                                name = gearNameStr,
+                                comment = "Added from FCOIS: " .. addedDateStr,
+                                gearMarkerTextureId = gearIconId, --icon/txture Ids need to be the same within WL and FCOIS!
+                                gearMarkerTextureColor = iconColorForSV,
+                                ------------------------
+                                copiedFromFCOIS = true,
+                                copiedFromFCOISTimestamp = timeStamp,
+                            }
+                            anyFCOISgearWasAdded = true
+                            nextFreeGearId = nil
+                            buildGearsDropdownEntries(false)
+                        end
+                    end
+                end
+            end
+        end
+        nextFreeGearId = nil
+    end
+    --if any FCOIS gear was added to the SV: Rebuild the dropdown with available gears now
+    if anyFCOISgearWasAdded == true then
+        buildGearsDropdownEntries(true)
+    end
+end
+
+--[[
 local function panelControlsCreated(panel)
     if WL.addonMenuPanel == nil or panel ~= WL.addonMenuPanel then return end
     --updateGearMarkerIconPreviewColor()
 end
+
+local firstOpen = true
+local function panelOpened(panel)
+    if WL.addonMenuPanel == nil or panel ~= WL.addonMenuPanel then return end
+    if firstOpen == true then
+        firstOpen = false
+        return
+    end
+    --Rebuild the gear marker icons dropdown entries
+    updateWishListGearsWithFCOISGearMarkerIcons()
+    buildGearsDropdownEntries(true)
+end
+]]
 
 function WL.buildAddonMenu()
     if WL.addonMenu == nil then return nil end
@@ -631,12 +709,12 @@ function WL.buildAddonMenu()
             choicesValues =     gearsChoicesValues,
             choicesTooltips =   gearsChoicesTooltips,
             getFunc = function()
-d("gears dropdown - GearId: " ..tostring(currentSettingsGearId))
+                --d("gears dropdown - GearId: " ..tostring(currentSettingsGearId))
                 if currentSettingsGearId == nil then return end
                 return currentSettingsGearId
             end,
             setFunc = function(value)
-d("gears dropdown - GearId: " ..tostring(currentSettingsGearId) .. ", value: " ..tostring(value))
+                --d("gears dropdown - GearId: " ..tostring(currentSettingsGearId) .. ", value: " ..tostring(value))
                 currentSettingsGearId = nil
                 WL.currentSettingsGearId = nil
                 addNewGearEnabled = false
@@ -654,10 +732,23 @@ d("gears dropdown - GearId: " ..tostring(currentSettingsGearId) .. ", value: " .
         },
         {
             type = "button",
+            name = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS),
+            tooltip = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_TT),
+            func = function()
+                updateWishListGearsWithFCOISGearMarkerIcons()
+            end,
+            isDangerous = true,
+            disabled = function() return not FCOISenabled end,
+            warning = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_WARN),
+            width="full",
+        },
+
+        {
+            type = "button",
             name = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD),
             tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_TT),
             func = function()
-d("gear add - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear add - GearId: " ..tostring(currentSettingsGearId))
                 addNewGear()
             end,
             isDangerous = false,
@@ -670,7 +761,7 @@ d("gear add - GearId: " ..tostring(currentSettingsGearId))
             name = GetString(WISHLIST_LAM_GEARS_BUTTON_SAVE),
             tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_SAVE_TT),
             func = function()
-d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeGearId: " ..tostring(nextFreeGearId).. ", currentGearId: " ..tostring(currentSettingsGearId))
+                --d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeGearId: " ..tostring(nextFreeGearId).. ", currentGearId: " ..tostring(currentSettingsGearId))
                 --currentSettingsGearId will be set at the setFunc of the "name" editBox control, if addNewGearEnabled was enabled.
                 --Else it will be set as the dropdown box selected an exisitng entry and editExistingGearEnabled was set to true there.
                 if addNewGearEnabled and currentSettingsGearId ~= nil then
@@ -679,7 +770,7 @@ d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeG
             end,
             isDangerous = false,
             disabled = function() return not addNewGearEnabled
-                     or (currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil))
+                    or (currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil))
             end,
             --warning = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_WARN),
             width="half",
@@ -689,7 +780,7 @@ d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeG
             name = GetString(WISHLIST_LAM_GEARS_BUTTON_DELETE),
             tooltip = GetString(WISHLIST_LAM_GEARS_BUTTON_DELETE_TT),
             func = function()
-d("gear delete - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear delete - GearId: " ..tostring(currentSettingsGearId))
                 if currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
                 deleteGear(currentSettingsGearId)
             end,
@@ -705,19 +796,19 @@ d("gear delete - GearId: " ..tostring(currentSettingsGearId))
             isMultiline = false,
             isExtraWide = true,
             getFunc = function()
-d("gear name - get func - GearId: " ..tostring(currentSettingsGearId) ..", editExistingGearEnabled: " ..tostring(editExistingGearEnabled) ..", deleteExistingGearWasDone: " ..tostring(deleteExistingGearWasDone) ..", addNewGearEnabled: " ..tostring(addNewGearEnabled) .. ", nextFreeGearId: " ..tostring(nextFreeGearId))
+                --d("gear name - get func - GearId: " ..tostring(currentSettingsGearId) ..", editExistingGearEnabled: " ..tostring(editExistingGearEnabled) ..", deleteExistingGearWasDone: " ..tostring(deleteExistingGearWasDone) ..", addNewGearEnabled: " ..tostring(addNewGearEnabled) .. ", nextFreeGearId: " ..tostring(nextFreeGearId))
                 if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].name == nil) then return "" end
                 if addNewGearEnabled and nextFreeGearId ~= nil then return "Gear #" ..tostring(nextFreeGearId) end
                 if not currentSettingsGearId then return "" end
                 return settings.gears[currentSettingsGearId].name
             end,
             setFunc = function(value)
-d("gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
                 if ((addNewGearEnabled and nextFreeGearId ~= nil) or (editExistingGearEnabled and currentSettingsGearId ~= nil)) then
                     if (value ~= nil and value ~= "") then
                         currentSettingsGearId = (addNewGearEnabled == true and nextFreeGearId) or currentSettingsGearId
                         WL.currentSettingsGearId = currentSettingsGearId
-d(">gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
+                        --d(">gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
                         settings.gears[currentSettingsGearId] = settings.gears[currentSettingsGearId] or {}
                     else
                         currentSettingsGearId = nil
@@ -745,14 +836,14 @@ d(">gear name - Set func - GearId: " ..tostring(currentSettingsGearId))
             isMultiline = true,
             isExtraWide = true,
             getFunc = function()
-d("gear comment - get func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear comment - get func - GearId: " ..tostring(currentSettingsGearId))
                 if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].comment == nil) then return "" end
                 if addNewGearEnabled and nextFreeGearId ~= nil then return "" end
                 if not currentSettingsGearId then return "" end
                 return settings.gears[currentSettingsGearId].comment
             end,
             setFunc = function(value)
-                d("gear comment - Set func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear comment - Set func - GearId: " ..tostring(currentSettingsGearId))
                 if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
                 if currentSettingsGearId == nil then return end
                 if value ~= nil then
@@ -775,7 +866,7 @@ d("gear comment - get func - GearId: " ..tostring(currentSettingsGearId))
             --choicesValues = gearMarkerTexturesValues, --does not exist yet in LAM 2.0 r34! 2022-09-27
             choicesTooltips = gearMarkerTexturesTooltips,
             getFunc = function()
-d("gear icon - get func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear icon - get func - GearId: " ..tostring(currentSettingsGearId))
                 if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].gearMarkerTextureId == nil) then return gearMarkerTextures[1] end
                 if addNewGearEnabled and nextFreeGearId ~= nil then return gearMarkerTextures[1] end
                 if not currentSettingsGearId then return gearMarkerTextures[1] end
@@ -783,7 +874,7 @@ d("gear icon - get func - GearId: " ..tostring(currentSettingsGearId))
                 return gearMarkerTextures[textureId]
             end,
             setFunc = function(texturePath)
-d("gear icon - Set func - GearId: " ..tostring(currentSettingsGearId))
+                 --d("gear icon - Set func - GearId: " ..tostring(currentSettingsGearId))
                 if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
                 local textureId = gearMarkerTexturesLookup[texturePath]
                 if textureId ~= nil then
@@ -806,7 +897,7 @@ d("gear icon - Set func - GearId: " ..tostring(currentSettingsGearId))
             name = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_COLOR),
             tooltip = GetString(WISHLIST_LAM_GEAR_MARKER_ICON_COLOR_TT),
             getFunc = function()
-d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
                 if (not setupGearLAMControlsDone or editExistingGearEnabled or deleteExistingGearWasDone) and (currentSettingsGearId == nil  or settings.gears[currentSettingsGearId] == nil or settings.gears[currentSettingsGearId].gearMarkerTextureColor == nil) then
                     setupGearLAMControlsDone = true
                     updateGearMarkerIconPreviewColor(1,1,1,1)
@@ -824,7 +915,7 @@ d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
                 return currentColor.r, currentColor.g, currentColor.b, currentColor.a
             end,
             setFunc = function(r,g,b,a)
-                d("gear color - Set func - GearId: " ..tostring(currentSettingsGearId))
+                --d("gear color - Set func - GearId: " ..tostring(currentSettingsGearId))
                 setupGearLAMControlsDone = true
                 if not editExistingGearEnabled or currentSettingsGearId == nil or (currentSettingsGearId ~= nil and settings.gears[currentSettingsGearId] == nil) then return end
                 if currentSettingsGearId == nil then return end
@@ -898,19 +989,19 @@ d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
     for _, charsData in ipairs(charsOfAccount) do
         if charsData and charsData.nameClean and charsData.id then
             local lamDropdownTable = {
-                    type = 'dropdown',
-                    name = charsData.nameClean,
-                    tooltip = GetString(WISHLIST_LAM_FCOIS_MARK_ITEM_ICON),
-                    choices = fcoisMarkerIconsList,
-                    choicesValues = fcoisMarkerIconsListValues,
-                    scrollable = true,
-                    getFunc = function() return settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] end,
-                    setFunc = function(value)
-                        settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] = value
-                    end,
-                    default = defaults.fcoisMarkerIconLootedSetPart,
-                    disabled = function() return (not FCOISenabled or not settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar) or settings.fcoisMarkerIconAutoMarkLootedSetPart end,
-                    width = "half",
+                type = 'dropdown',
+                name = charsData.nameClean,
+                tooltip = GetString(WISHLIST_LAM_FCOIS_MARK_ITEM_ICON),
+                choices = fcoisMarkerIconsList,
+                choicesValues = fcoisMarkerIconsListValues,
+                scrollable = true,
+                getFunc = function() return settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] end,
+                setFunc = function(value)
+                    settings.fcoisMarkerIconLootedSetPartPerChar[charsData.id] = value
+                end,
+                default = defaults.fcoisMarkerIconLootedSetPart,
+                disabled = function() return (not FCOISenabled or not settings.fcoisMarkerIconAutoMarkLootedSetPartPerChar) or settings.fcoisMarkerIconAutoMarkLootedSetPart end,
+                width = "half",
             }
             table.insert(optionsData, lamDropdownTable)
         end
@@ -919,6 +1010,7 @@ d("gear color - get func - GearId: " ..tostring(currentSettingsGearId))
     WL.addonMenuPanel = WL.addonMenu:RegisterAddonPanel(addonVars.addonName .. "_SettingsMenu", panelData)
     WL.addonMenu:RegisterOptionControls(addonVars.addonName .. "_SettingsMenu", optionsData)
     --CALLBACK_MANAGER:RegisterCallback("LAM-PanelControlsCreated", panelControlsCreated)
+    --CALLBACK_MANAGER:RegisterCallback("LAM-PanelOpened", panelOpened)
     WL.preventerVars.addonMenuBuild = true
 end
 

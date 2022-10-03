@@ -289,6 +289,13 @@ local strings = {
     WISHLIST_LAM_GEAR_MARKER_ICON_TT            = "Choose the icon of the gear",
     WISHLIST_LAM_GEAR_MARKER_ICON_COLOR         = "Gear icon color",
     WISHLIST_LAM_GEAR_MARKER_ICON_COLOR_TT      = "Choose the icon's color of the gear",
+
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS     = "Add FCOIS gear",
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_TT  = "If enabled your \'Available gears\' will be enhanced by the gear markers enabled within FCOItemSaver, so that you can use these marker icons to mark your WishList gear too.\nThis is only a \'visual copy\' of the FCOIS gear marker icons and does not provide any FCOIS benefits!\n\nMarkers will only be added. Already added gear markers will be kept!\nYou need to manually clean duplicates/wrong!",
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_WARN = "Do you want to add the FCOIS gear markers to your gear?\nMarkers will only be added. Already added gear markers will be kept!\nYou need to manually clean duplicates/wrong!",
+
+    WISHLIST_GEAR_ASSIGN_ICON                   = "Assign gear icon",
+    WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon",
 }
 WL.stringsEN = strings
 

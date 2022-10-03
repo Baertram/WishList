@@ -15,6 +15,8 @@ local currentPlayerName = zo_strformat("<<C:1>>", GetUnitName("player"))
 
 local gearMarkerTextures = WL.gearMarkerTextures
 
+local buildGearContextMenuEntries
+
 local allowedItemTypes = WL.checkItemTypes
 --Only body armor parts
 local isBodyArmorPart = {
@@ -1775,6 +1777,7 @@ function WL.showContextMenu(control, button, upInside)
     local setName = ""
     local data
     local itemLink
+
     if WL.CurrentTab == WISHLIST_TAB_SEARCH then
         if upInside then
             if button == MOUSE_BUTTON_INDEX_LEFT then
@@ -1795,16 +1798,17 @@ function WL.showContextMenu(control, button, upInside)
                 end
             end
         end
+--------------------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_WISHLIST then
         if upInside then
+            data = control.data
+            setName = data.name
+            itemLink = data.itemLink
             if button == MOUSE_BUTTON_INDEX_LEFT then
-                StartChatInput(CHAT_SYSTEM.textEntry:GetText()..control.data.itemLink)
+                StartChatInput(CHAT_SYSTEM.textEntry:GetText()..itemLink)
             elseif button == MOUSE_BUTTON_INDEX_RIGHT then
                 if control and control.data then
                     ClearMenu()
-                    data = control.data
-                    setName = data.name
-                    itemLink = data.itemLink
                     local dateAndTime = WL.getDateTimeFormatted(data.timestamp)
                     local armorOrWeaponType = ""
                     if data.itemType == ITEMTYPE_WEAPON then
@@ -1854,6 +1858,9 @@ function WL.showContextMenu(control, button, upInside)
                     AddCustomMenuItem(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET),
                         function() WL.showChangeQuality(data, true, true)
                     end)  -- Change quality of whole set
+                    --Gear
+                    buildGearContextMenuEntries = buildGearContextMenuEntries or WL.buildGearContextMenuEntries
+                    buildGearContextMenuEntries(data)
                     AddCustomMenuItem("-", function() end)
                     --LibSets data
                     --Got drop zones of the item?
@@ -1864,6 +1871,7 @@ function WL.showContextMenu(control, button, upInside)
                 ShowMenu()
             end
         end
+--------------------------------------------------------------------------------------------------------------------------------------
     elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
         if upInside then
             local username
@@ -2427,6 +2435,20 @@ function WL.getSetItemSlotKey(itemLink)
 end
 WL_getSetItemSlotKey = WL.getSetItemSlotKey
 
+------------------------------------------------------------------------------------------------------------------------
+--- Gears
+------------------------------------------------------------------------------------------------------------------------
+function WL.getGears()
+    local gears = WL.data.gears
+    if gears == nil then return {} end
+    return ZO_ShallowTableCopy(gears)
+end
+
+function WL.getGearNameAndComment(gearId)
+    local gearData = WL.data.gears[gearId]
+    if gearData == nil then return nil, nil end
+    return gearData.name, gearData.comment
+end
 
 function WL.getGearMarkerTexture(gearMarkerTextureId)
     if gearMarkerTextureId == nil then return "" end
@@ -2434,3 +2456,54 @@ function WL.getGearMarkerTexture(gearMarkerTextureId)
     if gearMarkerTexture == nil then return "" end
     return gearMarkerTexture
 end
+
+function WL.assignGearMarkerTexture(data, gearData)
+    d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId))
+    --WL.showAddGearMarkerIcon(data, true)
+    --WL.showRemoveGearMarkerIcon
+end
+local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture
+
+function WL.buildGearContextMenuEntries(data)
+    local gears = WL.data.gears
+    if gears == nil then return end
+    local gearMarkerTextureId = data.gearMarkerTextureId
+
+    local gearsSorted = {}
+    local gearContextMenuEntries = {}
+    for gearId, gearData in pairs(gears) do
+        table.insert(gearsSorted, gearId)
+    end
+    table.sort(gearsSorted)
+
+    --Build a sorted gears table
+    for _, gearId in ipairs(gearsSorted) do
+        local gearData = gears[gearId]
+        if gearData ~= nil then
+            local gearName = gearData.name
+            --Do not add already marked gear
+            if gearMarkerTextureId ~= nil and gearData.gearMarkerTextureId == gearMarkerTextureId then
+                gearName = nil
+            end
+            if gearName ~= nil then
+                local gearDataNew = ZO_ShallowTableCopy(gearData)
+                gearDataNew.gearId = gearId
+                local subMenuEntry = {
+                    label 		    = gearName,
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew) end
+                }
+                table.insert(gearContextMenuEntries, subMenuEntry)
+            end
+        end
+    end
+    --Add submenu in contextmenus howing the different zoneId names as each new row
+    if gearContextMenuEntries and #gearContextMenuEntries > 0 then
+        AddCustomMenuItem("-", function() end)
+        AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON), gearContextMenuEntries)
+    end
+    --Is any gear selected already?
+    if gearMarkerTextureId ~= nil then
+        AddCustomMenuItem(GetString(WISHLIST_GEAR_REMOVE_ICON), function() d(">remove gear texture ID: " ..tostring(gearMarkerTextureId)) end)
+    end
+end
+buildGearContextMenuEntries = WL.buildGearContextMenuEntries

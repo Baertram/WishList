@@ -13,7 +13,7 @@
 ## SavedVariables: WishList_Data WishList_Data_All_Servers
 ## DependsOn: LibSets>=000450
 ## DependsOn: LibAddonMenu-2.0>=34 LibCustomMenu>=713 LibMainMenu-2.0>=40400
-## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver
+## OptionalDependsOn: DolgubonsLazyWritCreator FCOItemSaver>=239
 
 ##Libraries
 ##Libraries are not included anymore. For further details please read the addon comments at http://www.esoui.com/downloads/info1641-WishList.html
