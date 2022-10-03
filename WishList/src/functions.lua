@@ -6,6 +6,7 @@ local libSets = WL.LibSets
 local gilsi = GetItemLinkSetInfo
 --local giliscs = GetItemLinkItemSetCollectionSlot
 --local id64tos = Id64ToString
+local strfor = string.format
 
 local WL_getSetItemSlotKey
 local getItemSetCollectionsSlotKey = libSets.GetItemSetCollectionsSlotKey
@@ -2450,54 +2451,98 @@ function WL.getGearNameAndComment(gearId)
     return gearData.name, gearData.comment
 end
 
-function WL.getGearMarkerTexture(gearMarkerTextureId)
-    if gearMarkerTextureId == nil then return "" end
+function WL.getGearMarkerTexture(gearMarkerTextureId, doColorize, gearData, width, height)
+    doColorize = doColorize or false
+    width = width or 28
+    height = height or 28
+    if gearMarkerTextureId == nil then
+        if gearData ~= nil then
+            gearMarkerTextureId = gearData.gearMarkerTextureId
+        end
+        if gearMarkerTextureId == nil then return "" end
+    end
     local gearMarkerTexture = gearMarkerTextures[gearMarkerTextureId]
     if gearMarkerTexture == nil then return "" end
+
+    if doColorize == true and gearData ~= nil then
+        local currentGearColor = gearData.gearMarkerTextureColor or {r=1, g=1, b=1, a=1}
+        local currentGearColorDef = ZO_ColorDef:New(currentGearColor.r,currentGearColor.g,currentGearColor.b,currentGearColor.a)
+        currentGearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTexture, 28, 28))
+    end
     return gearMarkerTexture
 end
+local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
-function WL.assignGearMarkerTexture(data, gearData)
-    d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId))
-    --WL.showAddGearMarkerIcon(data, true)
-    --WL.showRemoveGearMarkerIcon
+function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType)
+d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", assignType: " .. tostring(assignType))
+    WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType)
 end
 local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture
+
+function WL.removeGearMarkerTexture(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
+d(">Remove gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId).. ", removeWholeSet: " ..tostring(removeWholeSet) .. ", removeType: " .. tostring(removeType))
+    WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
+end
+local WL_removeGearMarkerTexture = WL.removeGearMarkerTexture
+
 
 function WL.buildGearContextMenuEntries(data)
     local gears = WL.data.gears
     if gears == nil then return end
     local currentGearIcon = data.gearMarkerTextureId
+    local currentGearNameTextureStr = ""
 
     local gearsSorted = {}
     local gearContextMenuEntries = {}
+    local gearContextMenuEntriesSet = {}
+    local gearContextMenuEntriesAll = {}
     for gearId, gearData in pairs(gears) do
         table.insert(gearsSorted, gearId)
     end
     table.sort(gearsSorted)
 
+    local removeGearMarkerEnabled = false
+    local removeGearMarkerFunc, removeSetGearMarkerFunc, removeAllGearMarkerFunc
+
     --Build a sorted gears table
     for _, gearId in ipairs(gearsSorted) do
         local gearData = gears[gearId]
         if gearData ~= nil then
-            local gearName = gearData.name
+            local gearDataNew = ZO_ShallowTableCopy(gearData)
+            gearDataNew.gearId = gearId
+
+            local gearName = gearDataNew.name
             --Do not add already marked gear
-            local gearIcon = gearData.gearMarkerTextureId
-            if currentGearIcon ~= nil and gearData.gearMarkerTextureId == currentGearIcon then
-                gearName = nil
+            local gearIcon = gearDataNew.gearMarkerTextureId
+            if currentGearIcon ~= nil then
+                if gearDataNew.gearMarkerTextureId == currentGearIcon then
+                    if not removeGearMarkerEnabled then
+                        removeGearMarkerEnabled = true
+                        --data, gearData, removeWholeSet, comingFromWishListWindow, removeType
+                        removeGearMarkerFunc    = function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, nil) end
+                        removeSetGearMarkerFunc = function() WL_removeGearMarkerTexture(data, gearDataNew, true, true, nil) end
+                        removeAllGearMarkerFunc = function() WL_removeGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL) end
+
+                        if currentGearNameTextureStr == "" then
+                            currentGearNameTextureStr = WL_getGearMarkerTexture(currentGearIcon, true, gearData, 28, 28)
+                        end
+                    end
+                    gearName = nil
+                end
             end
             if gearName ~= nil then
-                local gearColor = gearData.gearMarkerTextureColor
-                local gearColorDef = ZO_ColorDef:New(gearColor.r,gearColor.g,gearColor.b,gearColor.a)
-                local gearNameTextureStr = gearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTextures[gearIcon], 28, 28)) .. " " .. gearName
+                local gearNameTextureStr = WL_getGearMarkerTexture(gearIcon, true, gearDataNew, 28, 28)
 
-                local gearDataNew = ZO_ShallowTableCopy(gearData)
-                gearDataNew.gearId = gearId
                 local subMenuEntry = {
                     label 		    = gearNameTextureStr,
-                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew) end
+                    callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew, false, false) end
                 }
                 table.insert(gearContextMenuEntries, subMenuEntry)
+                --data, gearData, assignWholeSet, comingFromWishListWindow, assignType
+                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, true, true, nil) end
+                table.insert(gearContextMenuEntriesSet, subMenuEntry)
+                subMenuEntry.callback = function() WL_assignGearMarkerTexture(data, gearDataNew, false, true, WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL) end
+                table.insert(gearContextMenuEntriesAll, subMenuEntry)
             end
         end
     end
@@ -2506,10 +2551,21 @@ function WL.buildGearContextMenuEntries(data)
     if gearContextMenuEntries and #gearContextMenuEntries > 0 then
         AddCustomMenuItem("-", function() end)
         AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON), gearContextMenuEntries)
+        AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON_SET), gearContextMenuEntriesSet)
+        AddCustomSubMenuItem(GetString(WISHLIST_GEAR_ASSIGN_ICON_ALL), gearContextMenuEntriesAll)
     end
     --Is any gear selected already?
-    if gearMarkerTextureId ~= nil then
-        AddCustomMenuItem(GetString(WISHLIST_GEAR_REMOVE_ICON), function() d(">remove gear texture ID: " ..tostring(gearMarkerTextureId)) end)
+    if removeGearMarkerEnabled == true then
+        AddCustomMenuItem("-", function() end)
+        if removeGearMarkerFunc ~= nil then
+            AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ICON), currentGearNameTextureStr), removeGearMarkerFunc)
+        end
+        if removeSetGearMarkerFunc ~= nil then
+            AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ICON_FROM_SET), currentGearNameTextureStr), removeSetGearMarkerFunc)
+        end
+        if removeAllGearMarkerFunc ~= nil then
+            AddCustomMenuItem(strfor(GetString(WISHLIST_GEAR_REMOVE_ICON_FROM_ALL), currentGearNameTextureStr), removeAllGearMarkerFunc)
+        end
     end
 end
 buildGearContextMenuEntries = WL.buildGearContextMenuEntries

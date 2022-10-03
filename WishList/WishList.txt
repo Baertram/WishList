@@ -45,6 +45,8 @@ src/dialog/WishListReloadItemsDialog.xml
 src/dialog/WishListChooseCharDialog.xml
 src/dialog/WishListClearHistoryDialog.xml
 src/dialog/WishListChangeQualityDialog.xml
+src/dialog/WishListAddGearMarkerDialog.xml
+src/dialog/WishListRemoveGearMarkerDialog.xml
 
 ##XML
 src/xml/WishListWindow.xml

@@ -1,6 +1,7 @@
 WishList = WishList or {}
 local WL = WishList
 
+local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
 ------------------------------------------------
 --- Dialog local function
@@ -1225,6 +1226,679 @@ function WL.WishListWindowChangeQualityInitialize(control)
     })
 end
 
+--Gear markers
+function WL.WishListWindowAddGearMarkerInitialize(control)
+    local content   = GetControl(control, "Content")
+    local acceptBtn = GetControl(control, "Accept")
+    local cancelBtn = GetControl(control, "Cancel")
+    local descLabel = GetControl(content, "Text")
+    local labelLastAddedHistory = GetControl(content, "LastAddedHistoryLabel")
+    local comboBoxBaseControlLastAddedHistory = content:GetNamedChild("LastAddedHistoryCombo")
+    local comboLastAddedHistory = ZO_ComboBox_ObjectFromContainer(comboBoxBaseControlLastAddedHistory)
+    local textureLastAddedHistory = content:GetNamedChild("LastAddedHistoryTexture")
+    local labelItemType = GetControl(content, "ItemTypeText")
+    local comboItemType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ItemTypeCombo")) --GetControl(content, "ItemTypeCombo")
+    local labelArmorOrWeaponType = GetControl(content, "ArmorOrWeaponTypeText")
+    local comboArmorOrWeaponType = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("ArmorOrWeaponTypeCombo")) --GetControl(content, "ArmorOrWeaponTypeCombo")
+    local labelSlot = GetControl(content, "SlotText")
+    local comboSlot = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("SlotCombo")) --GetControl(content, "SlotCombo")
+    local labelTrait = GetControl(content, "TraitText")
+    local comboTrait = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("TraitCombo")) --GetControl(content, "TraitCombo")
+    local labelQuality = GetControl(content, "QualityText")
+    local comboQuality = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("QualityCombo")) --GetControl(content, "QualityCombo")
+    local labelChars = GetControl(content, "CharsText")
+    local comboChars = ZO_ComboBox_ObjectFromContainer(content:GetNamedChild("CharsCombo")) --GetControl(content, "CharsCombo")
+
+    ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {
+        customControl = control,
+        title = { text = GetString(WISHLIST_DIALOG_ADD_ITEM) },
+        mainText = { text = "???" },
+        setup = function(dialog, data)
+            --local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
+            descLabel:SetText(WL.currentSetName)
+
+            labelLastAddedHistory:SetText(GetString(WISHLIST_HEADER_LAST_ADDED))
+            labelItemType:SetText(GetString(WISHLIST_HEADER_TYPE))
+            --labelArmorOrWeaponType:SetText("Armor/Weapon Type")
+            labelTrait:SetText(GetString(WISHLIST_HEADER_TRAIT))
+            labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
+            labelSlot:SetText(GetString(WISHLIST_HEADER_SLOT))
+            labelChars:SetText(GetString(WISHLIST_HEADER_CHARS))
+
+            WL.checkCharsData()
+
+
+            --Last added history combobox: Selected entry callback
+            local lastAddedHistoryCallback = function( comboBox, entryText, entry, selectionChanged )
+                --d("[WL]lastAddedHistoryCallback-"..entryText)
+                --Get the lastAddedData via the id
+                textureLastAddedHistory:SetTexture("")
+                textureLastAddedHistory:SetHidden(true)
+                if entry.id == nil then return end
+                local lastAddedViaDialogData = WL.accData.lastAddedViaDialog
+                if not lastAddedViaDialogData or not lastAddedViaDialogData[entry.id] then return end
+                local entryData = lastAddedViaDialogData[entry.id]
+                local specialAddedType = entryData.specialAddedType
+                if specialAddedType ~= nil then
+                    local specialAddedTypeToTextureFile = WL.addDialogButtonTextures
+                    if specialAddedTypeToTextureFile[specialAddedType] ~= nil then
+                        textureLastAddedHistory:SetTexture(string.format(specialAddedTypeToTextureFile[specialAddedType], "up"))
+                        textureLastAddedHistory:SetHidden(false)
+                        textureLastAddedHistory:SetDimensions(28, 28)
+                    end
+                end
+
+                --Close the current dialog and reload a new one with the correct setData, if the current setId is not
+                --the same as of the chosen "lastAdded" combobox
+                local delayBeforeChange = 0
+                if WL.currentSetId ~= entryData.setId then
+                    --Close the dialog, as it needs to be re-opened for a new setId
+                    WishListAddItemDialogCancel:callback()
+                    local clientLang = WL.clientLang or WL.fallbackSetLang
+                    local libSets = WishList.LibSets
+                    --Reopen it with the correct setId
+                    local setData = {
+                        setId       = entryData.setId,
+                        names       = libSets.GetSetNames(entryData.setId),
+                    }
+                    delayBeforeChange = 10
+                    WL.lastSelectedLastAddedHistoryEntry = entry
+                    WL.showAddItem(setData, true)
+                end
+                --Call delayed if poup dialog was closed, and re-opened for another setId
+                zo_callLater(function()
+                    --Set the comboboxes to the rows of the last added entry data
+                    --Quality
+                    comboQuality:SelectItemByIndex(entryData.quality, false)
+                    --Character
+                    local charIdx
+                    for idx, charData in ipairs(comboChars.m_sortedItems) do
+                        if charData and charData.id == entryData.charId then
+                            charIdx = idx
+                            break
+                        end
+                    end
+                    if charIdx and charIdx ~= nil and charIdx > 0 then
+                        comboChars:SelectItemByIndex(charIdx, false)
+                    end
+                    --ItemType
+                    local itemTypeIdx
+                    for idx, itemTypeData in ipairs(comboItemType.m_sortedItems) do
+                        if itemTypeData and itemTypeData.id == entryData.itemTypeId then
+                            itemTypeIdx = idx
+                            break
+                        end
+                    end
+                    if itemTypeIdx and itemTypeIdx ~= nil and itemTypeIdx > 0 then
+                        comboItemType:SelectItemByIndex(itemTypeIdx, false)
+                        zo_callLater(function()
+                            --ArmorOrWeaponTyp
+                            local armorOrWeaponTypeIdx
+                            for idx, armorOrWeaponTypeData in ipairs(comboArmorOrWeaponType.m_sortedItems) do
+                                if armorOrWeaponTypeData and armorOrWeaponTypeData.id == entryData.armorOrWeaponType then
+                                    armorOrWeaponTypeIdx = idx
+                                    break
+                                end
+                            end
+                            if armorOrWeaponTypeIdx and armorOrWeaponTypeIdx ~= nil and armorOrWeaponTypeIdx > 0 then
+                                comboArmorOrWeaponType:SelectItemByIndex(armorOrWeaponTypeIdx, false)
+                                zo_callLater(function()
+                                    --SlotType
+                                    local slotTypeIdx
+                                    for idx, slotTypeData in ipairs(comboSlot.m_sortedItems) do
+                                        if slotTypeData and slotTypeData.id == entryData.slotType then
+                                            slotTypeIdx = idx
+                                            break
+                                        end
+                                    end
+                                    if slotTypeIdx and slotTypeIdx ~= nil and slotTypeIdx > 0 then
+                                        comboSlot:SelectItemByIndex(slotTypeIdx, false)
+                                        zo_callLater(function()
+                                            --Trait
+                                            local traitTypeIdx
+                                            for idx, traitTypeData in ipairs(comboTrait.m_sortedItems) do
+                                                if traitTypeData and traitTypeData.id == entryData.trait then
+                                                    traitTypeIdx = idx
+                                                    break
+                                                end
+                                            end
+                                            if traitTypeIdx and traitTypeIdx ~= nil and traitTypeIdx > 0 then
+                                                comboTrait:SelectItemByIndex(traitTypeIdx, false)
+                                            end
+                                        end, 10)
+                                    end
+                                end, 10)
+                            end
+                        end, 10)
+                    end
+                    --Show the tooltip now
+                    WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
+                end, delayBeforeChange)
+
+            end
+
+            local function createdLastAddedHistoryComboBoxEntries()
+                --Last added history combobox
+                comboLastAddedHistory:SetSortsItems(false)
+                comboLastAddedHistory:ClearItems()
+                local lastAddedHistoryData = WL.GetLastAddedHistory()
+                --Create a sorted table with non-gap integer index
+                local lastAddedHistoryDataSortedByTimeStamp = {}
+                for timestamp, lastAddedData in pairs(lastAddedHistoryData) do
+                    table.insert(lastAddedHistoryDataSortedByTimeStamp, lastAddedData)
+                end
+                table.sort(lastAddedHistoryDataSortedByTimeStamp, function(a, b)
+                    return a.dateTime < b.dateTime
+                end)
+                --Add 1 empty entry
+                local entry = ZO_ComboBox:CreateItemEntry(" ", function()
+                    textureLastAddedHistory:SetTexture("")
+                    textureLastAddedHistory:SetHidden(true)
+                end)
+                entry.id = -1
+                comboLastAddedHistory:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                for idx, lastAddedData in ipairs(lastAddedHistoryDataSortedByTimeStamp) do
+                    local entryText = buildLastAddedEntryText(lastAddedData)
+                    if entryText ~= nil and entryText ~= "" then
+                        local lastAddedEntry = ZO_ComboBox:CreateItemEntry(entryText, lastAddedHistoryCallback)
+                        lastAddedEntry.id = lastAddedData.dateTime
+                        comboLastAddedHistory:AddItem(lastAddedEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                    end
+                end
+                if not WL.lastSelectedLastAddedHistoryEntry then
+                    comboLastAddedHistory:SelectItemByIndex(1, true)
+                else
+                    comboLastAddedHistory:SelectItem(WL.lastSelectedLastAddedHistoryEntry, true)
+                    WL.lastSelectedLastAddedHistoryEntry = nil
+                end
+            end
+            createdLastAddedHistoryComboBoxEntries()
+
+            --Add right click context menu to the lastAdded combobox
+            ZO_PreHookHandler(comboBoxBaseControlLastAddedHistory, "OnMouseUp", function(comboBoxCtrl, mouseButton, upInside, alt, shift, ctrl)
+                if mouseButton == MOUSE_BUTTON_INDEX_RIGHT and upInside then
+                    ClearMenu()
+                    --LibCustomMenu
+                    if comboLastAddedHistory.m_selectedItemData ~= nil and comboLastAddedHistory.m_selectedItemData.id ~= -1 then
+                        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_FROM_LAST_ADDED), function()
+                            local entry = comboLastAddedHistory.m_selectedItemData
+                            if WL.accData.lastAddedViaDialog and WL.accData.lastAddedViaDialog[entry.id] then
+                                textureLastAddedHistory:SetTexture("")
+                                textureLastAddedHistory:SetHidden(true)
+                                WL.accData.lastAddedViaDialog[entry.id] = nil
+                                --As there is no proper "remove item" function we totally need to rebuild the combobox entries...
+                                createdLastAddedHistoryComboBoxEntries()
+                            end
+                        end)
+                        AddCustomMenuItem("-", function() end)
+                    end
+                    if comboLastAddedHistory.m_sortedItems and #comboLastAddedHistory.m_sortedItems > 1 then
+                        AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_CLEAR_LAST_ADDED), function()
+                            --Show ask before clear dialog
+                            --But close the current dialog before as no dialog can be shown "above the other opened dialog" :-(
+                            textureLastAddedHistory:SetTexture("")
+                            textureLastAddedHistory:SetHidden(true)
+                            WishListAddItemDialogCancel:callback()
+                            WL.showQuestionDialog(GetString(WISHLIST_CLEAR_LAST_ADDED_TITLE), GetString(WISHLIST_CLEAR_LAST_ADDED_TEXT),
+                                    function(dialog)
+                                        --Clear combobox
+                                        comboLastAddedHistory:ClearItems()
+                                        --SavedVariables nun noch leeren
+                                        WL.accData.lastAddedViaDialog = nil
+                                        WL.accData.lastAddedViaDialog = {}
+                                    end,
+                                    function(dialog) end,
+                                    {}
+                            )
+                        end)
+                    end
+                    ShowMenu(comboBoxCtrl)
+
+                    return true --do not open the combobox if right clicked
+                end
+            end)
+
+
+            --Quality Callback
+            local callbackQuality = function( comboBox, entryText, entry, selectionChanged )
+                --Rebuild the itemLink to update the quality in the itemLink
+                WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
+            end
+
+            --Quality combobox
+            comboQuality:SetSortsItems(false)
+            comboQuality:ClearItems()
+            local qualityData = WL.quality
+            for quality, qualityDescription in ipairs(qualityData) do
+                local entry = ZO_ComboBox:CreateItemEntry(qualityDescription, callbackQuality)
+                entry.id = quality
+                comboQuality:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            end
+            comboQuality:SelectItemByIndex(1, true)
+
+
+            --Chars Callback
+            local callbackChars = function( comboBox, entryText, entry, selectionChanged ) end
+
+            --Characters dropdown box
+            --The name to compare for the pre-selection in the char dropdownbox (currently logged in, or currently chosen at WhishList tab?)
+            local charNameToCompare = ""
+            if WL.data.preSelectLoggedinCharAtItemAddDialog then
+                charNameToCompare = WL.LoggedInCharData.nameClean
+            else
+                charNameToCompare = WL.CurrentCharData.nameClean
+            end
+
+            comboChars:SetSortsItems(true)
+            comboChars:ClearItems()
+            local cnt = 0
+            local currentChar = 0
+            for _, charData in ipairs(WL.charsData) do
+                local classId = WL.accData.chars[charData.id].class
+                local charName = charData.name
+                --charName = zo_iconTextFormat(WL.getClassIcon(classId), 20, 20, charName)
+                local entry = ZO_ComboBox:CreateItemEntry(charName, callbackChars)
+                entry.id = charData.id
+                entry.name = charData.name
+                entry.nameClean = charData.nameClean
+                entry.class = classId
+                comboChars:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                cnt = cnt + 1
+                if charNameToCompare == charData.nameClean then
+                    currentChar = cnt
+                end
+            end
+            comboChars:SelectItemByIndex(currentChar, true)
+
+            --Traits Callback
+            local callbackTraitsTypes = function( comboBox, entryText, entry, selectionChanged )
+                WL.buildSetItemTooltipForDialog(WishListAddItemDialog, nil)
+            end
+
+            --Slots Callback
+            local callbackSlotsTypes = function( comboBox, entryText, entry, selectionChanged )
+                local itemTypeId = comboItemType:GetSelectedItemData().id
+                local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
+                local slotId = 0
+                local selectedSlotData = comboSlot:GetSelectedItemData()
+                if selectedSlotData == nil then
+                    return
+                else
+                    slotId = selectedSlotData.id
+                end
+
+                --Traits
+                local traits = {}
+                comboTrait:SetSortsItems(true)
+                comboTrait:ClearItems()
+
+                --Add 1st entry to trait combobox with "- All traits -"
+                local allTraitsTraitId = WISHLIST_TRAIT_TYPE_ALL
+                entry = ZO_ComboBox:CreateItemEntry(WL.TraitTypes[allTraitsTraitId], callbackTraitsTypes)
+                entry.id = allTraitsTraitId --Any/All traits of current chosen item
+                comboTrait:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+
+                local setsData = WL.accData.sets[WL.currentSetId]
+                for setItemId, _ in pairs(setsData) do
+                    if type(setItemId) == "number" then
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
+                        local itemType = GetItemLinkItemType(itemLink)
+                        local armorOrWeaponType
+                        if itemType == ITEMTYPE_ARMOR then
+                            armorOrWeaponType = GetItemLinkArmorType(itemLink)
+                        elseif itemType == ITEMTYPE_WEAPON then
+                            armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+                        end
+                        local equipType = GetItemLinkEquipType(itemLink)
+                        local traitType = GetItemLinkTraitInfo(itemLink)
+                        if itemType == itemTypeId and armorOrWeaponType == typeId and equipType == slotId then
+                            if traits[traitType] == nil then
+                                traits[traitType] = WL.TraitTypes[traitType]
+                                entry = ZO_ComboBox:CreateItemEntry(traits[traitType], callbackTraitsTypes)
+                                entry.id = traitType
+                                comboTrait:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                            end
+                        end
+                    end
+                end
+                comboTrait:SelectItemByIndex(1, true)
+                callbackTraitsTypes()
+            end
+
+            --Armor/Weapon Type Callback
+            local callbackArmorOrWeaponTypes = function( comboBox, entryText, entry, selectionChanged )
+                local itemTypeId = comboItemType:GetSelectedItemData().id
+                local typeId = comboArmorOrWeaponType:GetSelectedItemData().id
+
+                --Slots
+                local slots = {}
+                comboSlot:SetSortsItems(true)
+                comboSlot:ClearItems()
+
+                local setsData = WL.accData.sets[WL.currentSetId]
+                for setItemId, _ in pairs(setsData) do
+                    if type(setItemId) == "number" then
+                        local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
+                        local itemType = GetItemLinkItemType(itemLink)
+                        local armorOrWeaponType
+                        if itemType == ITEMTYPE_ARMOR then
+                            armorOrWeaponType = GetItemLinkArmorType(itemLink)
+                        elseif itemType == ITEMTYPE_WEAPON then
+                            armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+                        end
+                        local equipType = GetItemLinkEquipType(itemLink)
+                        if itemType == itemTypeId and armorOrWeaponType == typeId then
+                            if slots[equipType] == nil then
+                                slots[equipType] = WL.SlotTypes[equipType]
+                                entry = ZO_ComboBox:CreateItemEntry(slots[equipType], callbackSlotsTypes)
+                                entry.id = equipType
+                                comboSlot:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                            end
+                        end
+                    end
+                end
+
+                comboSlot:SelectItemByIndex(1, true)
+                callbackSlotsTypes()
+            end
+
+            --Item Types Callback
+            local callbackItemTypes = function( comboBox, entryText, entry, selectionChanged )
+                --Armor/Weapon Type
+                local armorOrWeaponTypes = {}
+                local itemTypeId = comboItemType:GetSelectedItemData().id
+                comboArmorOrWeaponType:SetSortsItems(true)
+                comboArmorOrWeaponType:ClearItems()
+
+                local setsData = WL.accData.sets[WL.currentSetId]
+                if itemTypeId == ITEMTYPE_ARMOR then
+                    labelArmorOrWeaponType:SetText(GetString(SI_ITEMTYPE2) .. " " .. GetString(SI_SMITHING_HEADER_ITEM) ) -- Armor Type
+
+                    for setItemId, _ in pairs(setsData) do
+                        if type(setItemId) == "number" then
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
+                            local itemType = GetItemLinkItemType(itemLink)
+                            if itemType == ITEMTYPE_ARMOR then --Armor
+                                local armorOrWeaponType = GetItemLinkArmorType(itemLink)
+                                if armorOrWeaponTypes[armorOrWeaponType] == nil then
+                                    armorOrWeaponTypes[armorOrWeaponType] = WL.ArmorTypes[armorOrWeaponType]
+                                    entry = ZO_ComboBox:CreateItemEntry(armorOrWeaponTypes[armorOrWeaponType], callbackArmorOrWeaponTypes)
+                                    entry.id = armorOrWeaponType
+                                    comboArmorOrWeaponType:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                                end
+                            end
+                        end
+                    end
+
+                else
+                    labelArmorOrWeaponType:SetText(GetString(SI_ITEMTYPE1) .. " " .. GetString(SI_SMITHING_HEADER_ITEM)) -- Weapon Type
+
+                    for setItemId, _ in pairs(setsData) do
+                        if type(setItemId) == "number" then
+                            local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
+                            local itemType = GetItemLinkItemType(itemLink)
+                            if itemType == ITEMTYPE_WEAPON then --Weapon
+                                local armorOrWeaponType = GetItemLinkWeaponType(itemLink)
+                                if armorOrWeaponTypes[armorOrWeaponType] == nil then
+                                    armorOrWeaponTypes[armorOrWeaponType] = WL.WeaponTypes[armorOrWeaponType]
+                                    entry = ZO_ComboBox:CreateItemEntry(armorOrWeaponTypes[armorOrWeaponType], callbackArmorOrWeaponTypes)
+                                    entry.id = armorOrWeaponType
+                                    comboArmorOrWeaponType:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                comboArmorOrWeaponType:SelectItemByIndex(1, true)
+                callbackArmorOrWeaponTypes()
+            end
+
+            --Item types
+            local itemTypes = {}
+            comboItemType:SetSortsItems(true)
+            comboItemType:ClearItems()
+
+            local setsData = WL.accData.sets[WL.currentSetId]
+            for setItemId, _ in pairs(setsData) do
+                if type(setItemId) == "number" then
+                    local itemLink = WL.buildItemLink(setItemId, WISHLIST_QUALITY_LEGENDARY) --Always use the legendary quality for the setData
+                    local itemType = GetItemLinkItemType(itemLink)
+                    if itemTypes[itemType] == nil then
+                        itemTypes[itemType] = WL.ItemTypes[itemType]
+                        local entry = ZO_ComboBox:CreateItemEntry(itemTypes[itemType], callbackItemTypes)
+                        entry.id = itemType
+                        comboItemType:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                    end
+                end
+            end
+            comboItemType:SelectItemByIndex(1, true)
+            callbackItemTypes()
+        end,
+        noChoiceCallback = function(dialog)
+            WL.hideItemLinkTooltip()
+        end,
+        buttons =
+        {
+            {
+                control = acceptBtn,
+                text = SI_DIALOG_ACCEPT,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    --local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
+                    WL.hideItemLinkTooltip()
+                    local items, selectedCharData = WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality)
+                    if items ~= nil and #items > 0 then
+                        --Add the currently selected values to the "Last added" history data of the SavedVariables, no special added type!
+                        WL.addLastAddedHistoryFromAddItemDialog(WL.currentSetId, comboItemType, comboArmorOrWeaponType, comboTrait, comboSlot, comboChars, comboQuality, nil)
+                        WishList:AddItem(items, selectedCharData)
+                    end
+                end,
+            },
+            {
+                control = cancelBtn,
+                text = SI_DIALOG_CANCEL,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    WL.hideItemLinkTooltip()
+                end,
+            },
+        },
+    })
+
+    WL.addItenDialog = control
+end
+
+function WL.WishListWindowRemoveGearMarkerInitialize(control)
+    local title     = GetControl(control, "Title")
+    local content   = GetControl(control, "Content")
+    local acceptBtn = GetControl(control, "Accept")
+    local cancelBtn = GetControl(control, "Cancel")
+    local descLabel = GetControl(content, "Text")
+
+    ZO_Dialogs_RegisterCustomDialog("WISHLIST_EVENT_REMOVE_GEAR_MARKER_DIALOG", {
+        customControl = control,
+        title = { text = "???" },
+        mainText = { text = "???" },
+        setup = function(dialog, data)
+            local wlWindow = (data ~= nil and data.wlWindow ~= nil and data.wlWindow == true) or false
+            local gearData = data.gearData
+            if not gearData.gearId then return end
+            local gearMarkerTextureStr = WL_getGearMarkerTexture(gearData.gearMarkerTextureId)
+
+            --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
+            local charNameText = WL.CurrentCharData.name
+            charNameText = WL.addCharBrackets(charNameText)
+            local setName = data.itemData and data.itemData.name
+            --Coming from context menu of e.g. Set Item Collection UI
+            local removeType = dialog.data.removeType
+            local removeFromAllWishLists = false
+            if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                removeFromAllWishLists = true
+            end
+            local noDataCall = false
+            if wlWindow == false then
+                if data.itemData == nil then
+                    --All items should be removed/changed etc.
+                    noDataCall = true
+                end
+            end
+            --Remove item from WishList or history?
+            if data.wholeSet then
+                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET), setName))
+                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+            else
+                local timeStamp
+                local dateAndTime
+                local itemType
+                local armorOrWeaponType
+                local slot
+                local itemLink
+                local traitId
+                --Coming from link handler or inventory context menu e.g.??
+                if not wlWindow and data ~= nil and data.itemData ~= nil and data.itemData.itemLink ~= nil then
+                    itemLink = data.itemData.itemLink
+                    --timeStamp = data.itemData.timestamp
+                    --dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    --itemType = data.itemData.itemType
+                    --armorOrWeaponType = data.itemData.armorOrWeaponType
+                    --slot = data.itemData.slot
+                    --traitId = GetItemLinkTraitInfo(itemLink)
+                elseif noDataCall == false then
+                    --Coming from WishList window
+                    itemLink = WL.buildItemLink(WL.CurrentItem.id, WL.CurrentItem.quality)
+                    --timeStamp = data.itemData.timestamp
+                    --dateAndTime = WL.getDateTimeFormatted(timeStamp)
+                    --itemType = data.itemData.itemType
+                    --armorOrWeaponType = data.itemData.armorOrWeaponType
+                    --slot = data.itemData.slot
+                    --traitId = data.itemData.trait
+                end
+                if noDataCall == false then
+                    --Description text of the dialog
+                    if data.removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                        descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
+                    end
+                end
+                --Title of the dialog
+                local removeItemTitles = {
+                    [WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL] = GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER),
+                    [WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL]    = GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL),
+                    --[[
+                    [WISHLIST_REMOVE_ITEM_TYPE_DATEANDTIME]         = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_DATETIME), dateAndTime),
+                    [WISHLIST_REMOVE_ITEM_TYPE]                     = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TYPE), itemType),
+                    [WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE]  = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_ARMORORWEAPONTYPE), armorOrWeaponTypeText),
+                    [WISHLIST_REMOVE_ITEM_TYPE_SLOT]                = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_SLOT), slotText),
+                    [WISHLIST_REMOVE_ITEM_TYPE_TRAIT]               = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TRAIT), itemTraitText),
+                    [WISHLIST_REMOVE_ITEM_TYPE_ARMORANDWEAPONTYPE_SLOT] = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TYPE_ARMORORWEAPONTYPE_SLOT), itemType, armorOrWeaponTypeText, slotText),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION] = GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET] = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET), setName),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS] = GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS),
+                    [WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS] = ZO_CachedStrFormat(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
+                    ]]
+                }
+                local titelForRemoveItem = removeItemTitles[data.removeType]
+                if titelForRemoveItem == "" then titelForRemoveItem = removeItemTitles[WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL] end
+                title:SetText(titelForRemoveItem)
+
+                --Build the tooltip data, but only if a single item will be removed
+                if data.removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                    local virtualListRowControl = {}
+                    local style = ""
+                    virtualListRowControl.data      = {}
+                    virtualListRowControl.data.itemLink   = itemLink
+                    virtualListRowControl.data.style      = style
+                    WL.buildSetItemTooltipForDialog(WishListRemoveGearMarkerDialog, virtualListRowControl)
+                else
+                    if removeFromAllWishLists == false then
+                        descLabel:SetText(titelForRemoveItem .. "?\n" .. charNameText)
+                    else
+                        descLabel:SetText(titelForRemoveItem .. "?\n" .. GetString(WISHLIST_ALL_WISHLISTS))
+                    end
+                end
+            end
+        end,
+        noChoiceCallback = function(dialog)
+            WL.hideItemLinkTooltip()
+        end,
+        buttons =
+        {
+            {
+                control = acceptBtn,
+                text = SI_DIALOG_ACCEPT,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    local wlWindow = (dialog.data ~= nil and dialog.data.wlWindow ~= nil and dialog.data.wlWindow == true) or false
+                    WL.hideItemLinkTooltip()
+                    --Remove a whole set
+                    if dialog.data and dialog.data.gearData and dialog.data.gearData.gearId then
+                        local gearData = dialog.data.gearData
+                        local noDataCall = (not wlWindow and dialog.data.itemData == nil) or false
+                        local setId = noDataCall == false and dialog.data and dialog.data.itemData and dialog.data.itemData.setId
+                        if dialog.data.wholeSet then
+                            WishList:RemoveAllGearMarkersOfSet(setId, WL.CurrentCharData, gearData)
+                        else
+                            local removeType = dialog.data.removeType
+                            local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
+                            --Removing one selected item?
+                            if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                                if isLinkHandlerItem then
+                                    --Coming from the link handler
+                                    local linkHandlerItem = {}
+                                    linkHandlerItem = dialog.data.itemData
+                                    local itemLink = linkHandlerItem.itemLink
+                                    linkHandlerItem.id = tonumber(WL.GetItemIDFromLink(itemLink))
+                                    local traitId = GetItemLinkTraitInfo(itemLink)
+                                    linkHandlerItem.trait = traitId
+                                    WishList:RemoveGearMarker(linkHandlerItem, WL.LoggedInCharData, gearData)
+                                else
+                                    --Coming from the WishList window
+                                    WishList:RemoveGearMarker(WL.CurrentItem, WL.CurrentCharData, gearData)
+                                end
+
+                            --Remove several gear markers (e.g. all)
+                            else
+                                local criteriaToIdentifyItemsToRemove = {}
+                                local removeFromAllWishLists = false
+                                if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                    removeFromAllWishLists = true
+                                end
+                                if noDataCall == false then
+                                    local data = dialog.data.itemData
+                                    if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        criteriaToIdentifyItemsToRemove.setId = nil
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
+                                    end
+                                else
+                                    if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        criteriaToIdentifyItemsToRemove.setId = nil
+                                        criteriaToIdentifyItemsToRemove.removeFromAllWishLists = true
+                                    end
+                                end
+                                if removeFromAllWishLists == true then
+                                    for _, charDataInLoop in pairs(WL.charsData) do
+                                        WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, charDataInLoop, true, gearData)
+                                    end
+                                else
+                                    WishList:RemoveAllGearMarkersWithCriteria(criteriaToIdentifyItemsToRemove, WL.CurrentCharData, false, gearData)
+                                end
+                            end
+                        end
+                    end
+                end,
+            },
+            {
+                control = cancelBtn,
+                text = SI_DIALOG_CANCEL,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    WL.hideItemLinkTooltip()
+                end,
+            },
+        },
+    })
+end
+
 ------------------------------------------------
 --- Dialog Functions
 ------------------------------------------------
@@ -1401,23 +2075,23 @@ function WL.getAddItemDialogButtonTexture(specialAddType, buttonType)
     return textureFileName
 end
 
-function WL.showAddGearMarkerIcon(setData, comingFromWishListWindow)
+function WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWishListWindow, assignType)
+    if assignType == nil then assignType = WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL end
     comingFromWishListWindow = comingFromWishListWindow or false
     WL.createWindow(false)
     local clientLang = WL.clientLang or WL.fallbackSetLang
-    WL.currentSetId = setData.setId
-    WL.currentSetName = setData.names[clientLang]
+    WL.currentSetId = data.setId
+    WL.currentSetName = data.names[clientLang]
     WL.checkCurrentCharData()
-    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_MARKER_DIALOG", {setData=setData, wlWindow=comingFromWishListWindow})
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {setData=data, gearData=gearData, wholeSet=assignWholeSet, wlWindow=comingFromWishListWindow, assignType=assignType})
 end
 
-function WL.showRemoveGearMarkerIcon(item, removeWholeSet, comingFromWishListWindow, removeFromHistory, removeType)
-    if removeType == nil then removeType = WISHLIST_REMOVE_ITEM_TYPE_NORMAL end
+function WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType)
+    if removeType == nil then removeType = WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL end
     removeWholeSet = removeWholeSet or false
     comingFromWishListWindow = comingFromWishListWindow or false
-    removeFromHistory = removeFromHistory or false
     WL.createWindow(false)
-    WL.CurrentItem = item
+    WL.CurrentItem = data
     WL.checkCurrentCharData()
-    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_REMOVE_MARKER_DIALOG", {itemData=item, wholeSet=removeWholeSet, wlWindow=comingFromWishListWindow, removeFromHistory=removeFromHistory, removeType=removeType})
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_REMOVE_GEAR_MARKER_DIALOG", {itemData=data, gearData=gearData, wholeSet=removeWholeSet, wlWindow=comingFromWishListWindow, removeType=removeType})
 end

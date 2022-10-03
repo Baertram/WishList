@@ -295,7 +295,25 @@ local strings = {
     WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_WARN = "Do you want to add the FCOIS gear markers to your gear?\nMarkers will only be added. Already added gear markers will be kept!\nYou need to manually clean duplicates/wrong!",
 
     WISHLIST_GEAR_ASSIGN_ICON                   = "Assign gear icon",
-    WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon",
+    WISHLIST_GEAR_ASSIGN_ICON_SET               = "Assign gear icon to set",
+    WISHLIST_GEAR_ASSIGN_ICON_ALL               = "Assign gear icon to all",
+
+    WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon %s",
+    WISHLIST_GEAR_REMOVE_ICON_FROM_SET          = "Remove gear icon %s from set",
+    WISHLIST_GEAR_REMOVE_ICON_FROM_ALL          = "Remove gear icon %s from all",
+
+    WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET         = "Remove gear - whole set \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION= "Really remove all gear markers at set \"<<1>>\"?",
+    WISHLIST_BUTTON_REMOVE_GEAR_ALL_TT            = "Remove all gear markers of selected character from " .. GetString(WISHLIST_TITLE),
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL        = "Remove all gear markers",
+    WISHLIST_DIALOG_REMOVE_GEAR_ALL_QUESTION      = "Really remove all gear markers?",
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER            = "Remove gear marker",
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER_QUESTION   = "Remove gear marker <<1>>",
+
+    WISHLIST_GEAR_MARKER_ADDED                   = "Added gear marker <<1>> to <<2>>",
+    WISHLIST_GEAR_MARKER_REMOVED                 = "Removed gear <<1>> marker from <<2>>",
+    WISHLIST_GEAR_MARKERS_ADDED                  = "<<1[No gear marker/1 gear marker/$d gear markers]>> added",
+    WISHLIST_GEAR_MARKERS_REMOVED                = "<<1[No gear marker/1 gear marker/$d gear markers]>> removed",
 }
 WL.stringsEN = strings
 
