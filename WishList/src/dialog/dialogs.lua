@@ -1243,13 +1243,13 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
             local gearData = data.gearData
             if not gearData.gearId then return end
             local gearMarkerTextureStr = WL_getGearMarkerTexture(nil, true, gearData, 28, 28)
-
+d(">gearMarkerTextureStr: " ..tostring(gearMarkerTextureStr))
             --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
             local charNameText = WL.CurrentCharData.name
             charNameText = WL.addCharBrackets(charNameText)
             local setName = data.itemData and data.itemData.name
             --Coming from context menu of e.g. Set Item Collection UI
-            local addType           = dialog.data.addType
+            local assignType        = dialog.data.assignType
             local addToAllWishLists = data.addToAllWishLists
             local noDataCall        = false
             if wlWindow == false then
@@ -1258,16 +1258,18 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                     noDataCall = true
                 end
             end
+d(">wholeSet: " ..tostring(data.wholeSet) .. ", noDataCall: " ..tostring(noDataCall).. ", assignType: " ..tostring(assignType).. ", addToAllWishLists: " ..tostring(addToAllWishLists))
+
             --Add gear marker from item / whole set
             if data.wholeSet then
                 title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET), setName))
                 --Add all gear markers to the set
-                if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                if assignType ~= WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                     --Not possible, only 1 gear marker icon can be added
                     return
                     --descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
                 else
-                    --Add only selected gear marker of the set
+                    --Add only selected gear marker to the set
                     descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
                 end
             else
@@ -1301,7 +1303,7 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                 end
                 if noDataCall == false then
                     --Description text of the dialog
-                    if data.addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                    if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                         descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
                     end
                 end
@@ -1322,12 +1324,12 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                     [WISHLIST_ADD_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS] = ZO_CachedStrFormat(GetString(WISHLIST_CONTEXTMENU_ADD_ITEM_KNOWN_SETITEMCOLLECTION_OF_SET_ALL_WISHLISTS), setName),
                     ]]
                 }
-                local titelForAddItem = addItemTitles[data.assignType]
+                local titelForAddItem = addItemTitles[assignType]
                 if titelForAddItem == "" then titelForAddItem = addItemTitles[WISHLIST_ADD_GEAR_MARKER_ITEM_TYPE_NORMAL] end
                 title:SetText(titelForAddItem)
 
                 --Build the tooltip data, but only if a single item will be addd
-                if data.addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                     local virtualListRowControl = {}
                     local style = ""
                     virtualListRowControl.data      = {}
@@ -1359,15 +1361,15 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                     if dialog.data and dialog.data.gearData and dialog.data.gearData.gearId then
                         local gearData = dialog.data.gearData
                         local noDataCall = (not wlWindow and dialog.data.itemData == nil) or false
-                        local addType = dialog.data.addType
-                        local setId = noDataCall == false and dialog.data and dialog.data.itemData and dialog.data.itemData.setId
+                        local assignType = dialog.data.assignType
+                        local setId      = noDataCall == false and dialog.data and dialog.data.itemData and dialog.data.itemData.setId
                         if dialog.data.wholeSet then
-                            if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
+                            if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
                                 --Not possible, only 1 gear texture can be assigned
                                 --Add all gear markers from the set
                                 --WishList:AddGearMarkerToSet(setId, WL.CurrentCharData, gearData, true)
                                 return
-                            elseif addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                            elseif assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                                 --Add only selected gear marker from the set
                                 WishList:AddGearMarkerToSet(setId, WL.CurrentCharData, gearData, false)
                             end
@@ -1375,7 +1377,7 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                         else
                             local isLinkHandlerItem = (not wlWindow and dialog.data ~= nil and dialog.data.itemData ~= nil and dialog.data.itemData.itemLink ~= nil) or false
                             --Removing one selected item?
-                            if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
+                            if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                                 if isLinkHandlerItem then
                                     --Coming from the link handler
                                     local linkHandlerItem = {}
@@ -1833,7 +1835,7 @@ function WL.showAddGearMarkerIcon(data, gearData, assignWholeSet, comingFromWish
     WL.currentSetId = data.setId
     WL.currentSetName = (data.names ~= nil and data.names[clientLang]) or data.name
     WL.checkCurrentCharData()
-    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {setData=data, gearData=gearData, wholeSet=assignWholeSet, wlWindow=comingFromWishListWindow, assignType=assignType, addToAllWishLists=addToAllWishLists})
+    ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_GEAR_MARKER_DIALOG", {itemData=data, gearData=gearData, wholeSet=assignWholeSet, wlWindow=comingFromWishListWindow, assignType=assignType, addToAllWishLists=addToAllWishLists})
 end
 
 function WL.showRemoveGearMarkerIcon(data, gearData, removeWholeSet, comingFromWishListWindow, removeType, removeFromAllWishLists)
