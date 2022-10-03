@@ -1600,6 +1600,151 @@ d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAl
     WishList:ReloadItems()
 end
 
+function WishList:AddAllGearMarkersWithCriteria(criteria, charData, addToWishListsInLoop, gearData, addGearMarkersToAllItensOnWishList)
+    addToWishListsInLoop = addToWishListsInLoop or false
+    addGearMarkersToAllItensOnWishList = addGearMarkersToAllItensOnWishList or false
+d("[WL]AddAllGearMarkersWithCriteria-addToWishListsInLoop: " ..tos(addToWishListsInLoop) .. ", addGearMarkersToAllItensOnWishList: " ..tos(addGearMarkersToAllItensOnWishList))
+    if criteria == nil then return false end
+    if gearData == nil or gearData.gearId == nil then return end
+    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersWithCriteria")
+    if wishList == nil then return true end
+    --local charNameChat = WL.buildCharNameChatText(charData, nil)
+    local displayName = GetDisplayName()
+    local savedVarsServer = getSavedVarsServer()
+    local addonVars = WL.addonVars
+    local charNameChat = charData.name
+    local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
+    local checkSetId = false
+    if criteria.setId ~= nil then
+        checkSetId = true
+    end
+    --d(">checkSetId: " ..tos(checkSetId))
+    local cnt = 0
+    for i = #wishList, 1, -1 do
+        local itm = wishList[i]
+        --Check the criteria now, which is specified, and combine them for a check against the WishList items
+        local addItemNow = false
+        if addItemNow == false and addGearMarkersToAllItensOnWishList == true then
+            addItemNow = true
+        end
+        if addItemNow == false then
+            local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
+            --setId must match or wasn't given as criteria
+            if checkSetId == false or setIdGiven == true then
+                if addItemNow == false and criteria.timestamp ~= nil then
+                    --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
+                    if itm.timestamp == criteria.timestamp then
+                        addItemNow = true
+                    else
+                        addItemNow = false
+                    end
+                end
+                if addItemNow == false and criteria.itemType ~= nil then
+                    --d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
+                    if itm.itemType == criteria.itemType then
+                        if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
+                            addItemNow = true
+                        else
+                            if criteria.armorOrWeaponType ~= nil then
+                                --d(">>armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
+                                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                                    if criteria.slot ~= nil then
+                                        --d(">>>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                                        if itm.slot == criteria.slot then
+                                            addItemNow = true
+                                        else
+                                            addItemNow = false
+                                        end
+                                    else
+                                        addItemNow = false
+                                    end
+                                else
+                                    addItemNow = false
+                                end
+                            else
+                                if criteria.slot ~= nil then
+                                    --d(">>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                                    if itm.slot == criteria.slot then
+                                        addItemNow = true
+                                    else
+                                        addItemNow = false
+                                    end
+                                else
+                                    addItemNow = false
+                                end
+                            end
+                        end
+                    else
+                        addItemNow = false
+                    end
+                end
+                if addItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
+                    --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
+                    if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                        addItemNow = true
+                    else
+                        addItemNow = false
+                    end
+                end
+                if addItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
+                    --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                    if itm.slot == criteria.slot then
+                        addItemNow = true
+                    else
+                        addItemNow = false
+                    end
+                end
+                if addItemNow == false and criteria.trait ~= nil then
+                    --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
+                    if criteria.trait == allTraitsId or itm.trait == criteria.trait then
+                        addItemNow = true
+                    else
+                        addItemNow = false
+                    end
+                end
+            end
+        end
+        if addItemNow then
+            --d(">>>remove item now!")
+            local itemLink
+            if itm.itemLink ~= nil then
+                itemLink = itm.itemLink
+            else
+                itemLink = WL.buildItemLink(itm.id, itm.quality)
+            end
+            local traitId = itm.trait
+            local itemTraitText = WL.TraitTypes[traitId]
+            itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
+            itemTraitText = itemTraitText or ""
+            --Remove the gear marker
+            --table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], i)
+            --d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
+            local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
+            if itemAtWishList ~= nil then
+                local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
+                if gearMarkerTextureOld ~= nil then
+                    d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_ADDED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                end
+            end
+
+            cnt = cnt +1
+        end
+    end
+    d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_ADDED) .. " " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
+
+    local updateNow = false
+    if addToWishListsInLoop == true then
+        if WL.CurrentCharData ~= nil and WL.CurrentCharData.id ~= nil and charData.id == WL.CurrentCharData.id then
+            updateNow = true
+        end
+    else
+        updateNow = true
+    end
+    if updateNow then
+        WishList:ReloadItems()
+    end
+end
+
 
 function WishList:RemoveGearMarker(item, charData, gearData)
 --d("WishList:RemoveGearMarker")

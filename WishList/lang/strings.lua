@@ -301,7 +301,7 @@ local strings = {
     WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION= "Really assign gear marker <<1>> to set \"<<2>>\"?",
     WISHLIST_DIALOG_ADD_GEAR_MARKER            = "Assign gear marker",
     WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION   = "Assign gear marker <<1>>",
-    WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL        = "Assign gear marker to all items",
+    WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL        = "Assign gear marker <<1>> to all items",
 
     WISHLIST_GEAR_REMOVE_ICON                   = "Remove gear icon %s",
     WISHLIST_GEAR_REMOVE_ICON_FROM_SET          = "Remove gear icon %s from set",

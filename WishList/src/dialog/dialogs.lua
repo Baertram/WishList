@@ -1310,7 +1310,7 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                 --Title of the dialog
                 local addItemTitles = {
                     [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL] = GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER),
-                    [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL]    = GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL),
+                    [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL]    = zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL), gearMarkerTextureStr),
                     --[[
                     [WISHLIST_ADD_ITEM_TYPE_DATEANDTIME]         = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_DATETIME), dateAndTime),
                     [WISHLIST_ADD_ITEM_TYPE]                     = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_TYPE), itemType),
@@ -1394,40 +1394,36 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                                     WishList:AddGearMarker(WL.CurrentItem, WL.CurrentCharData, gearData)
                                 end
 
-                            --Add several gear markers (e.g. all)
+                            --Add gear markers dependent on criteria, e.g. add to all items
                             else
-                                --Onyl 1 gear marker can be added
-                                return
-                                --[[
-                                local addAllGearMarkers = false
-                                local criteriaToIdentifyItemsToAdd = {}
-                                local addFromAllWishLists = dialog.data.addFromAllWishLists
-                                addFromAllWishLists = addFromAllWishLists or false
-                                if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
-                                    addAllGearMarkers = true
+                                local addGearMarkersToAllItensOnWishList = false
+                                local criteriaToIdentifyItemsToAdd       = {}
+                                local addToAllWishLists = dialog.data.addToAllWishLists
+                                addToAllWishLists = addToAllWishLists or false
+                                if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
+                                    addGearMarkersToAllItensOnWishList = true
                                 end
                                 if noDataCall == false then
                                     local data = dialog.data.itemData
-                                    if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
-                                        addAllGearMarkers = true
+                                    if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        addGearMarkersToAllItensOnWishList = true
                                         criteriaToIdentifyItemsToAdd.setId = nil
-                                        criteriaToIdentifyItemsToAdd.addFromAllWishLists = addFromAllWishLists
+                                        criteriaToIdentifyItemsToAdd.addToAllWishLists = addToAllWishLists
                                     end
                                 else
-                                    if addType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
-                                        addAllGearMarkers = true
+                                    if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL then
+                                        addGearMarkersToAllItensOnWishList = true
                                         criteriaToIdentifyItemsToAdd.setId = nil
-                                        criteriaToIdentifyItemsToAdd.addFromAllWishLists = addFromAllWishLists
+                                        criteriaToIdentifyItemsToAdd.addToAllWishLists = addToAllWishLists
                                     end
                                 end
-                                if addFromAllWishLists == true then
+                                if addToAllWishLists == true then
                                     for _, charDataInLoop in pairs(WL.charsData) do
-                                        WishList:AddAllGearMarkersWithCriteria(criteriaToIdentifyItemsToAdd, charDataInLoop, true, gearData, addAllGearMarkers)
+                                        WishList:AddAllGearMarkersWithCriteria(criteriaToIdentifyItemsToAdd, charDataInLoop, true, gearData, addGearMarkersToAllItensOnWishList)
                                     end
                                 else
-                                    WishList:AddAllGearMarkersWithCriteria(criteriaToIdentifyItemsToAdd, WL.CurrentCharData, false, gearData, addAllGearMarkers)
+                                    WishList:AddAllGearMarkersWithCriteria(criteriaToIdentifyItemsToAdd, WL.CurrentCharData, false, gearData, addGearMarkersToAllItensOnWishList)
                                 end
-                                ]]
                             end
                         end
                     end
