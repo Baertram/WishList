@@ -322,24 +322,27 @@ local function updateWishListGearsWithFCOISGearMarkerIcons()
                     local iconSettings = settingsIcon[gearIconId]
                     if iconSettings ~= nil then
                         local iconColorForSV = iconSettings.color
-                        local iconTextureString = textureVars[iconSettings.texture]
-                        if iconTextureString ~= nil and iconTextureString ~= ""
-                                and iconColorForSV ~= nil and iconColorForSV.r ~= nil and iconColorForSV.g ~= nil and iconColorForSV.b ~= nil and iconColorForSV.a ~= nil then
-                            local timeStamp = GetTimeStamp()
-                            local addedDateStr = os.date("%c", timeStamp)
-                            --Create the SV table entry
-                            WL.data.gears[nextFreeGearId] = {
-                                name = gearNameStr,
-                                comment = "Added from FCOIS: " .. addedDateStr,
-                                gearMarkerTextureId = gearIconId, --icon/txture Ids need to be the same within WL and FCOIS!
-                                gearMarkerTextureColor = iconColorForSV,
-                                ------------------------
-                                copiedFromFCOIS = true,
-                                copiedFromFCOISTimestamp = timeStamp,
-                            }
-                            anyFCOISgearWasAdded = true
-                            nextFreeGearId = nil
-                            buildGearsDropdownEntries(false)
+                        local textureId = iconSettings.texture
+                        if textureId ~= nil then
+                            local iconTextureString = textureVars[textureId]
+                            if iconTextureString ~= nil and iconTextureString ~= ""
+                                    and iconColorForSV ~= nil and iconColorForSV.r ~= nil and iconColorForSV.g ~= nil and iconColorForSV.b ~= nil and iconColorForSV.a ~= nil then
+                                local timeStamp = GetTimeStamp()
+                                local addedDateStr = os.date("%c", timeStamp)
+                                --Create the SV table entry
+                                WL.data.gears[nextFreeGearId] = {
+                                    name = gearNameStr,
+                                    comment = "Added from FCOIS: " .. addedDateStr,
+                                    gearMarkerTextureId = textureId, --icon/texture Ids need to be the same within WL and FCOIS!
+                                    gearMarkerTextureColor = iconColorForSV,
+                                    ------------------------
+                                    copiedFromFCOIS = true,
+                                    copiedFromFCOISTimestamp = timeStamp,
+                                }
+                                anyFCOISgearWasAdded = true
+                                nextFreeGearId = nil
+                                buildGearsDropdownEntries(false)
+                            end
                         end
                     end
                 end

@@ -2467,7 +2467,7 @@ local WL_assignGearMarkerTexture = WL.assignGearMarkerTexture
 function WL.buildGearContextMenuEntries(data)
     local gears = WL.data.gears
     if gears == nil then return end
-    local gearMarkerTextureId = data.gearMarkerTextureId
+    local currentGearIcon = data.gearMarkerTextureId
 
     local gearsSorted = {}
     local gearContextMenuEntries = {}
@@ -2482,20 +2482,26 @@ function WL.buildGearContextMenuEntries(data)
         if gearData ~= nil then
             local gearName = gearData.name
             --Do not add already marked gear
-            if gearMarkerTextureId ~= nil and gearData.gearMarkerTextureId == gearMarkerTextureId then
+            local gearIcon = gearData.gearMarkerTextureId
+            if currentGearIcon ~= nil and gearData.gearMarkerTextureId == currentGearIcon then
                 gearName = nil
             end
             if gearName ~= nil then
+                local gearColor = gearData.gearMarkerTextureColor
+                local gearColorDef = ZO_ColorDef:New(gearColor.r,gearColor.g,gearColor.b,gearColor.a)
+                local gearNameTextureStr = gearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTextures[gearIcon], 28, 28)) .. " " .. gearName
+
                 local gearDataNew = ZO_ShallowTableCopy(gearData)
                 gearDataNew.gearId = gearId
                 local subMenuEntry = {
-                    label 		    = gearName,
+                    label 		    = gearNameTextureStr,
                     callback 	    = function() WL_assignGearMarkerTexture(data, gearDataNew) end
                 }
                 table.insert(gearContextMenuEntries, subMenuEntry)
             end
         end
     end
+
     --Add submenu in contextmenus howing the different zoneId names as each new row
     if gearContextMenuEntries and #gearContextMenuEntries > 0 then
         AddCustomMenuItem("-", function() end)
