@@ -1523,6 +1523,7 @@ end
 function WishList:AddGearMarker(item, charData, gearData)
 d("WishList:AddGearMarker")
     if gearData == nil or gearData.gearMarkerTextureId == nil then return end
+d(">1")
     local index = -1
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveGearMarker")
     if wishList == nil then return true end
@@ -1540,7 +1541,7 @@ d("WishList:AddGearMarker")
 	end
 	if index ~= -1 then
         local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index]
-        if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and itemAtWishList.gearMarkerTextureId ~= gearData.gearMarkerTextureId then
+        if itemAtWishList ~= nil then
             local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index], gearData)
             if gearMarkerTextureOld ~= nil then
                 local itemLink
@@ -1583,7 +1584,7 @@ d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAl
                 setName = zo_strformat("<<C:1>>", setLocName)
             end
                 local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
-                if itemAtWishList ~= nil and itemAtWishList.gearMarkerTextureId ~= nil and itemAtWishList.gearMarkerTextureId ~= gearData.gearMarkerTextureId then
+                if itemAtWishList ~= nil then
                     local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                     if gearMarkerTextureOld ~= nil then
                         local traitId = itm.trait
