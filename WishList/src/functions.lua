@@ -2467,7 +2467,7 @@ function WL.getGearMarkerTexture(gearMarkerTextureId, doColorize, gearData, widt
     if doColorize == true and gearData ~= nil then
         local currentGearColor = gearData.gearMarkerTextureColor or {r=1, g=1, b=1, a=1}
         local currentGearColorDef = ZO_ColorDef:New(currentGearColor.r,currentGearColor.g,currentGearColor.b,currentGearColor.a)
-        currentGearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTexture, 28, 28))
+        gearMarkerTexture = currentGearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTexture, 28, 28))
     end
     return gearMarkerTexture
 end
