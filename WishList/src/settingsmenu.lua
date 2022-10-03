@@ -246,6 +246,8 @@ local function resetGearAddAndDeleteVariables()
     addNewGearEnabled = false
     editExistingGearEnabled = false
     deleteExistingGearWasDone = false
+
+    nextFreeGearId = nil
 end
 
 local function addNewGear()
@@ -253,7 +255,7 @@ local function addNewGear()
     resetGearAddAndDeleteVariables()
 
     --Get the next free gear id at the SV
-    nextFreeGearId = getNextFreeGearId()
+    getNextFreeGearId()
 
     --Place the cursor into the name editbox and put the gear ID in there
     if nextFreeGearId ~= nil then
