@@ -1507,7 +1507,7 @@ local function removeGearDataFromWishListEntry(wishListItem, gearData)
 end
 
 local function assignGearDataToWishListEntry(wishListItem, gearData)
-d("[WL.assignGearDataToWishListEntry]")
+--d("[WL.assignGearDataToWishListEntry]")
     if wishListItem ~= nil and gearData ~= nil and gearData.gearId ~= nil then
         removeGearDataFromWishListEntry(wishListItem)
         wishListItem.gearId = gearData.gearId
