@@ -262,6 +262,60 @@ local strings = {
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_HEADER  = "Auto-Entfernen von der " .. GetString(WISHLIST_TITLE),
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE         = "Auto-Entfernen gefundenet Gegenstände",
     WISHLIST_LAM_ITEM_FOUND_AUTO_REMOVE_TT      = "Entfernt automatisch Gegenstände von der ".. GetString(WISHLIST_TITLE)..", welche du selber gelootet hast.",
+
+
+    --Gear
+    WISHLIST_LAM_GEAR                           = "Gear Einstellungen",
+    WISHLIST_LAM_GEAR_DESC                      = "Erstelle deine eigenen \'Gear\' Symbole und Farben, füge eine Beschreibung und einen Kommentar hinzu.\nDiese Gear Symbole kannst du dann deiner Wunschliste hinzufügen (Kontext Menü).",
+    WISHLIST_LAM_GEARS_DROPDOWN                 = "Verfügbares Gear",
+    WISHLIST_LAM_GEARS_DROPDOWN_TT              = "Wähle ein erstelltes Gear zum Ändern/Löschen",
+    WISHLIST_LAM_GEARS_NAME_EDIT                = "Gear Name",
+    WISHLIST_LAM_GEARS_NAME_EDIT_TT             = "Gebe den Gear Namen an. Er wird am Gear Symbol an deiner Wunschliste, im Tooltip, angezeigt",
+    WISHLIST_LAM_GEARS_COMMENT_EDIT             = "Gear Kommentar",
+    WISHLIST_LAM_GEARS_COMMENT_EDIT_TT          = "Gebe den Gear Kommentar an. Er wird am Gear Symbol an deiner Wunschliste, im Tooltip, angezeigt",
+
+    WISHLIST_LAM_GEARS_BUTTON_ADD               = "Neu",
+    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Klicke hier, um ein neues Gear Symbol zu erstellen. Du musst mindestens den Namen angeben, kannst aber auch die Farbe/Symbol/Kommentar abändern.\n\nNachdem dein Gear konfiguriert wurde klicke bitte auf den \'Speichern\' Knopf!.",
+    WISHLIST_LAM_GEARS_BUTTON_SAVE              = "Speichern",
+    WISHLIST_LAM_GEARS_BUTTON_SAVE_TT           = "Klicke hier, um dein neu hinzugefügtes (via Knopf \'Neu\') Gear zu speichern.\nBereits existierendes Gear, welches du in der Aufklapp Box ausgewählt hast, wird automatisch gespeichert, sobald du etwas an der Gear Konfiguration veränderst. Hier muss nicht auf den Speichern Knopf gedrückt werden.",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE            = "Löschen",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE_TT         = "Lösche das aktuell ausgewählte Gear",
+    WISHLIST_LAM_GEARS_BUTTON_DELETE_WARN       = "Willst du das gewählte Gear löschen?\nBereits markierte Gegenstände werden diese Gear Markierung verlieren!",
+
+    WISHLIST_LAM_GEAR_MARKER_ICON               = "Gear Symbol",
+    WISHLIST_LAM_GEAR_MARKER_ICON_TT            = "Wähle das Symbol für dein Gear",
+    WISHLIST_LAM_GEAR_MARKER_ICON_COLOR         = "Gear Symbol Farbe",
+    WISHLIST_LAM_GEAR_MARKER_ICON_COLOR_TT      = "Wähle die Farbe für das Symbol deines Gears",
+
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS     = "+ FCOIS gear",
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_TT  = "Deine \'Verfügbaren Gears\' werden um die Gear Symbole vom AddOn FCOItemSaver erweitert, so dass du diese verwenden kannst.\nDies ist NUR eie \'visuelle Kopie\' der FCOIS Gear Markierugen und bringt sonst keine FCOIS Vorteile mit!\n\nDie Markierungen werden immer nur hinzugefügt. Sollten diese bereits vorher hinzugefügt worden sein so werden diese nicht überschrieben. Du musst selber doppelte Symbole in den verfügbaren Gears bereinigen!",
+    WISHLIST_LAM_GEAR_MARKER_ICON_ADD_FCOIS_WARN = "Möchtest du die FCOIS Gear Symbole hinzufügen?\nSymbole werden nur hinzugefügt.\nBereits vorhandene werden nicht überschrieben.\nDu musst selber doppelte bereinigen!",
+
+    WISHLIST_GEAR_ASSIGN_ICON                   = "Weise Gear Symbol zu",
+    WISHLIST_GEAR_ASSIGN_ICON_SET               = "Weise Gear Symbol dem Set zu",
+    WISHLIST_GEAR_ASSIGN_ICON_ALL               = "Weise Gear Symbol allen Gegenständen zu",
+    WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET         = "Weise Gear zu - Set \"<<1>>\"",
+    WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION= "Wirklich Gear Symbol <<1>> dem Set \"<<2>>\" zuweisen?",
+    WISHLIST_DIALOG_ADD_GEAR_MARKER            = "Weise Gear zu",
+    WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION   = "Weise Gear <<1>> zu",
+    WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL        = "Weise Gear <<1>> allen Gegenständen zu",
+
+    WISHLIST_GEAR_REMOVE_ICON                   = "Entferne Gear Symbol %s",
+    WISHLIST_GEAR_REMOVE_ICON_FROM_SET          = "Entferne Gear Symbol %s vom Set",
+    WISHLIST_GEAR_REMOVE_ALL_ICONS_FROM_SET     = "Entferne alle Gear Symbole vom Set",
+    WISHLIST_GEAR_REMOVE_ICON_FROM_ALL          = "Entferne Gear Symbol %s von allen Gegenständen",
+    WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET         = "Entferne Gear - Set \"<<1>>\"",
+    WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION= "Wirklich alle Gear Symbol vom Set \"<<1>>\" entfernen?",
+    WISHLIST_DIALOG_REMOVE_SELECTED_GEAR_WHOLE_SET_QUESTION= "Wirklich Gear Symbol <<1>> vom Set \"<<2>>\" entfernen?",
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL        = "Entferne alle Gear Symbole",
+    WISHLIST_DIALOG_REMOVE_GEAR_ALL_QUESTION      = "Wirklich alle Gear Symbole entfernen?",
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER            = "Entferne Gear Symbol",
+    WISHLIST_DIALOG_REMOVE_GEAR_MARKER_QUESTION   = "Entferne Gear Symbol <<1>>",
+
+    WISHLIST_GEAR_MARKER_ADDED                   = "Gear Symbol <<1>> wurde <<2>> zugewiesen",
+    WISHLIST_GEAR_MARKER_REMOVED                 = "Gear Symbol <<1>> von <<2>> entfernt",
+    WISHLIST_GEAR_MARKERS_ADDED                  = "<<1[Kein Gear Symbol/1 Gear Symbol/$d Gear Symbole]>> zugewiesen",
+    WISHLIST_GEAR_MARKERS_REMOVED                = "<<1[Kein Gear Symbol/1 Gear Symbol/$d Gear Symbole]>> entfernt",
 }
 
 --Add missing translations from language "en" strings table as "fallback" (metatable)

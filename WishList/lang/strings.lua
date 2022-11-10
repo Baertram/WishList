@@ -269,7 +269,7 @@ local strings = {
 
     --Gear
     WISHLIST_LAM_GEAR                           = "Gear setup",
-    WISHLIST_LAM_GEAR_DESC                      = "Define your own \'Gear\' marker icon and color, add a description and a comment.\nYou can assign this gear icon to your WishList items (context menu/add item dialog).",
+    WISHLIST_LAM_GEAR_DESC                      = "Define your own \'Gear\' marker icon and color, add a description and a comment.\nYou can assign this gear icon to your WishList items (context menu).",
     WISHLIST_LAM_GEARS_DROPDOWN                 = "Available gear",
     WISHLIST_LAM_GEARS_DROPDOWN_TT              = "Select one of your created gears to edit/delete it",
     WISHLIST_LAM_GEARS_NAME_EDIT                = "Gear name",
