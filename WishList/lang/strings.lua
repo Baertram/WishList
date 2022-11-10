@@ -278,7 +278,7 @@ local strings = {
     WISHLIST_LAM_GEARS_COMMENT_EDIT_TT          = "Enter your gear's comment. It will be shown at the tooltip of the gear icon at the WishList's items",
 
     WISHLIST_LAM_GEARS_BUTTON_ADD               = "Add new",
-    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Click here to add a new gear. You need to fill in at least the name, but you can change the comment/icon/color too.\n\nAfter your gear ist setup according to your needs click the \'Save\' button!.",
+    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Click here to add a new gear. You need to fill in the name.\n\nAfter your gear name is setup click the \'Save\' button!.\nIf you want to can change the comment/icon/color please select the new gear from the dropdown box \'Available gear\'.",
     WISHLIST_LAM_GEARS_BUTTON_SAVE              = "Save",
     WISHLIST_LAM_GEARS_BUTTON_SAVE_TT           = "Click here to save the new added (via button \'Add new\') gear data.\nAlready existing gear data selected from the dropdown box will automatically save upon change of the settings.",
     WISHLIST_LAM_GEARS_BUTTON_DELETE            = "Delete",
