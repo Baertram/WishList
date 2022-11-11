@@ -1810,8 +1810,7 @@ d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(remov
         local itm = wishList[i]
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
-
-        if removeItemNow == false and removeAll == true and NonContiguousCount(criteria) == 0 then
+        if removeItemNow == false and removeAll == true then
             removeItemNow = true
         else
             local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
@@ -1894,13 +1893,13 @@ d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(remov
             end
         end
         if removeItemNow == true then
-            --d(">>>remove item now!")
             local itemLink
             if itm.itemLink ~= nil then
                 itemLink = itm.itemLink
             else
                 itemLink = WL.buildItemLink(itm.id, itm.quality)
             end
+d(">>>remove item now! " ..itemLink)
             local traitId = itm.trait
             local itemTraitText = WL.TraitTypes[traitId]
             itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
@@ -1911,6 +1910,7 @@ d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(remov
             local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
             if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and (removeAll == true or (removeAll == false and itemAtWishList.gearId == gearData.gearId)) then
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
+d(">>>>gearMarkerTextureOld: " ..tostring(gearMarkerTextureOld))
                 if gearMarkerTextureOld ~= nil then
                     d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
                 end
