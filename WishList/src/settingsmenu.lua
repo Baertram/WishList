@@ -263,6 +263,10 @@ local function addNewGear()
         -->Allows to change the name/comment etc. fields now
         -->Changing the name field to a value ~= "" will enable the save button as the currentSettingsGearId will be set then!
         editExistingGearEnabled = false
+
+        if WishList_Settings_GearNameEditControl ~= nil then
+            WishList_Settings_GearNameEditControl.editbox:TakeFocus()
+        end
     end
 end
 
@@ -769,7 +773,7 @@ function WL.buildAddonMenu()
                 --d("gear save - addNewGearEnabled: " ..tostring(addNewGearEnabled) ..", nextFreeGearId: " ..tostring(nextFreeGearId).. ", currentGearId: " ..tostring(currentSettingsGearId))
                 --currentSettingsGearId will be set at the setFunc of the "name" editBox control, if addNewGearEnabled was enabled.
                 --Else it will be set as the dropdown box selected an exisitng entry and editExistingGearEnabled was set to true there.
-                if addNewGearEnabled and currentSettingsGearId ~= nil then
+                if addNewGearEnabled == true and currentSettingsGearId ~= nil then
                     saveCurrentGear()
                 end
             end,

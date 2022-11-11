@@ -275,7 +275,7 @@ local strings = {
     WISHLIST_LAM_GEARS_COMMENT_EDIT_TT          = "Gebe den Gear Kommentar an. Er wird am Gear Symbol an deiner Wunschliste, im Tooltip, angezeigt",
 
     WISHLIST_LAM_GEARS_BUTTON_ADD               = "Neu",
-    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Klicke hier, um ein neues Gear Symbol zu erstellen. Du musst den Namen angeben.\n\nNachdem dein Name eingegeben wurde klicke auf den \'Speichern\' Knopf!.\NWenn du dann den Kommentar, das Symbol und die Farbe anpassen möchtest wähle bitte den neuen Eintrag aus der Liste \'Verfügbares Gear\' aus.",
+    WISHLIST_LAM_GEARS_BUTTON_ADD_TT            = "Klicke hier, um ein neues Gear Symbol zu erstellen. Du musst den Namen angeben.\n\nNachdem dein Name eingegeben wurde klicke auf den \'Speichern\' Knopf!.\nWenn du dann Kommentar/Symbol/Farbe anpassen möchtest wähle bitte den neuen Eintrag aus der Liste \'Verfügbares Gear\' aus.",
     WISHLIST_LAM_GEARS_BUTTON_SAVE              = "Speichern",
     WISHLIST_LAM_GEARS_BUTTON_SAVE_TT           = "Klicke hier, um dein neu hinzugefügtes (via Knopf \'Neu\') Gear zu speichern.\nBereits existierendes Gear, welches du in der Aufklapp Box ausgewählt hast, wird automatisch gespeichert, sobald du etwas an der Gear Konfiguration veränderst. Hier muss nicht auf den Speichern Knopf gedrückt werden.",
     WISHLIST_LAM_GEARS_BUTTON_DELETE            = "Löschen",
