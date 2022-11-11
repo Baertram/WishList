@@ -1727,10 +1727,9 @@ function WishList:AddAllGearMarkersWithCriteria(criteria, charData, addToWishLis
                 local gearMarkerTextureOld = assignGearDataToWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                 if gearMarkerTextureOld ~= nil then
                     d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_ADDED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                    cnt = cnt +1
                 end
             end
-
-            cnt = cnt +1
         end
     end
     d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_ADDED) .. " " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
@@ -1918,10 +1917,10 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
 --d(">>>>gearMarkerTextureOld: " ..tostring(gearMarkerTextureOld))
                 if gearMarkerTextureOld ~= nil then
                     d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                    cnt = cnt +1
                 end
             end
 
-            cnt = cnt +1
         end
     end
     d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_REMOVED) .. " " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
@@ -1974,9 +1973,9 @@ function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                 if gearMarkerTextureOld ~= nil then
                     d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))
+                    cnt = cnt +1
                 end
             end
-            cnt = cnt +1
         end
     end
     d(zo_strformat(GetString(WISHLIST_GEAR_MARKERS_REMOVED) .. ", Set: \"" .. setName .. "\" " .. charNameChat .. " (" .. WL.getWishListItemCount(charData) .. ")", cnt))
