@@ -1561,7 +1561,7 @@ end
 
 function WishList:AddGearMarkerToSet(setId, charData, gearData, addAll)
     addAll = addAll or false
-d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAll))
+--d("WishList:AddGearMarkerToSet-setId: " ..tos(setId) .. ", addAll: " ..tos(addAll))
     if setId == nil then return false end
     local wishList = WL.getWishListSaveVars(charData, "WishList:AddGearMarkerToSet")
     if wishList == nil then return true end
@@ -1603,10 +1603,10 @@ end
 function WishList:AddAllGearMarkersWithCriteria(criteria, charData, addToWishListsInLoop, gearData, addGearMarkersToAllItensOnWishList)
     addToWishListsInLoop = addToWishListsInLoop or false
     addGearMarkersToAllItensOnWishList = addGearMarkersToAllItensOnWishList or false
-d("[WL]AddAllGearMarkersWithCriteria-addToWishListsInLoop: " ..tos(addToWishListsInLoop) .. ", addGearMarkersToAllItensOnWishList: " ..tos(addGearMarkersToAllItensOnWishList))
+--d("[WL]AddAllGearMarkersWithCriteria-addToWishListsInLoop: " ..tos(addToWishListsInLoop) .. ", addGearMarkersToAllItensOnWishList: " ..tos(addGearMarkersToAllItensOnWishList))
     if criteria == nil then return false end
     if gearData == nil or gearData.gearId == nil then return end
-    local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersWithCriteria")
+    local wishList = WL.getWishListSaveVars(charData, "WishList:AddAllGearMarkersWithCriteria")
     if wishList == nil then return true end
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
@@ -1789,7 +1789,7 @@ end
 function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFromWishListsInLoop, gearData, removeAll)
     removeFromWishListsInLoop = removeFromWishListsInLoop or false
     removeAll = removeAll or false
-    --d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(removeFromWishListsInLoop) .. ", removeAll: " ..tos(removeAll))
+d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(removeFromWishListsInLoop) .. ", removeAll: " ..tos(removeAll))
     if criteria == nil then return false end
     if gearData == nil or gearData.gearId == nil then return end
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersWithCriteria")
@@ -1804,37 +1804,55 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
     if criteria.setId ~= nil then
         checkSetId = true
     end
-    --d(">checkSetId: " ..tos(checkSetId))
+--d(">checkSetId: " ..tos(checkSetId))
     local cnt = 0
     for i = #wishList, 1, -1 do
         local itm = wishList[i]
         --Check the criteria now, which is specified, and combine them for a check against the WishList items
         local removeItemNow = false
-        local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
-        --setId must match or wasn't given as criteria
-        if checkSetId == false or setIdGiven == true then
-            if removeItemNow == false and criteria.removeFromAllWishLists == true then
-                removeItemNow = true
-            end
-            if removeItemNow == false and criteria.timestamp ~= nil then
-                --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
-                if itm.timestamp == criteria.timestamp then
+
+        if removeItemNow == false and removeAll == true and NonContiguousCount(criteria) == 0 then
+            removeItemNow = true
+        else
+            local setIdGiven = (checkSetId == true and itm.setId and itm.setId == criteria.setId) or false
+            --setId must match or wasn't given as criteria
+            if checkSetId == false or setIdGiven == true then
+                if removeItemNow == false and criteria.removeFromAllWishLists == true then
                     removeItemNow = true
-                else
-                    removeItemNow = false
                 end
-            end
-            if removeItemNow == false and criteria.itemType ~= nil then
-                --d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
-                if itm.itemType == criteria.itemType then
-                    if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
+                if removeItemNow == false and criteria.timestamp ~= nil then
+                    --d(">timestamp: " ..tos(criteria.timestamp) .. "/" .. tos(itm.timestamp))
+                    if itm.timestamp == criteria.timestamp then
                         removeItemNow = true
                     else
-                        if criteria.armorOrWeaponType ~= nil then
-                            --d(">>armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
-                            if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                        removeItemNow = false
+                    end
+                end
+                if removeItemNow == false and criteria.itemType ~= nil then
+                    --d(">itemType: " ..tos(criteria.itemType) .. "/" .. tos(itm.itemType))
+                    if itm.itemType == criteria.itemType then
+                        if criteria.armorOrWeaponType == nil and criteria.slot ~= nil then
+                            removeItemNow = true
+                        else
+                            if criteria.armorOrWeaponType ~= nil then
+                                --d(">>armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
+                                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                                    if criteria.slot ~= nil then
+                                        --d(">>>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                                        if itm.slot == criteria.slot then
+                                            removeItemNow = true
+                                        else
+                                            removeItemNow = false
+                                        end
+                                    else
+                                        removeItemNow = false
+                                    end
+                                else
+                                    removeItemNow = false
+                                end
+                            else
                                 if criteria.slot ~= nil then
-                                    --d(">>>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                                    --d(">>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
                                     if itm.slot == criteria.slot then
                                         removeItemNow = true
                                     else
@@ -1843,52 +1861,39 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
                                 else
                                     removeItemNow = false
                                 end
-                            else
-                                removeItemNow = false
-                            end
-                        else
-                            if criteria.slot ~= nil then
-                                --d(">>slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
-                                if itm.slot == criteria.slot then
-                                    removeItemNow = true
-                                else
-                                    removeItemNow = false
-                                end
-                            else
-                                removeItemNow = false
                             end
                         end
+                    else
+                        removeItemNow = false
                     end
-                else
-                    removeItemNow = false
                 end
-            end
-            if removeItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
-                --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
-                if itm.armorOrWeaponType == criteria.armorOrWeaponType then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if removeItemNow == false and criteria.armorOrWeaponType ~= nil and criteria.itemType == nil and criteria.slot == nil then
+                    --d(">armorOrWeaponType: " ..tos(criteria.armorOrWeaponType) .. "/" .. tos(itm.armorOrWeaponType))
+                    if itm.armorOrWeaponType == criteria.armorOrWeaponType then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
-            end
-            if removeItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
-                --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
-                if itm.slot == criteria.slot then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if removeItemNow == false and criteria.slot ~= nil and criteria.itemType == nil and criteria.armorOrWeaponType == nil then
+                    --d(">slot: " ..tos(criteria.slot) .. "/" .. tos(itm.slot))
+                    if itm.slot == criteria.slot then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
-            end
-            if removeItemNow == false and criteria.trait ~= nil then
-                --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
-                if criteria.trait == allTraitsId or itm.trait == criteria.trait then
-                    removeItemNow = true
-                else
-                    removeItemNow = false
+                if removeItemNow == false and criteria.trait ~= nil then
+                    --d(">trait: " ..tos(criteria.trait) .. "/" .. tos(itm.trait))
+                    if criteria.trait == allTraitsId or itm.trait == criteria.trait then
+                        removeItemNow = true
+                    else
+                        removeItemNow = false
+                    end
                 end
             end
         end
-        if removeItemNow then
+        if removeItemNow == true then
             --d(">>>remove item now!")
             local itemLink
             if itm.itemLink ~= nil then
