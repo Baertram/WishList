@@ -2450,14 +2450,18 @@ function WL.getGearNameAndComment(gearId)
     if gearData == nil then return nil, nil end
     return gearData.name, gearData.comment
 end
+local WL_getGearNameAndComment = WL.getGearNameAndComment
 
-function WL.getGearMarkerTexture(gearData, doColorize, width, height)
+function WL.getGearMarkerTexture(gearData, doColorize, width, height, withName, nameLeft)
     doColorize = doColorize or false
     width = width or 28
     height = height or 28
+    withName = withName or false
+    nameLeft = nameLeft or false
     local defaultColor = {r=1, g=1, b=1, a=1}
     if gearData == nil or gearData.gearId == nil then return nil, nil end
-    local gearsData =  WL.data.gears[gearData.gearId]
+    local gearId = gearData.gearId
+    local gearsData =  WL.data.gears[gearId]
     local gearMarkerTextureId = gearData.gearMarkerTextureId
     if gearMarkerTextureId == nil then
         gearMarkerTextureId = gearsData.gearMarkerTextureId
@@ -2471,9 +2475,21 @@ function WL.getGearMarkerTexture(gearData, doColorize, width, height)
         local currentGearColorDef = ZO_ColorDef:New(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
         gearMarkerTexture = currentGearColorDef:Colorize(zo_iconFormatInheritColor(gearMarkerTexture, 28, 28))
     end
+    if withName == true then
+        local gearName, _ = WL_getGearNameAndComment(gearId)
+        if gearName ~= nil and gearName ~= "" then
+            if gearMarkerTexture == nil then gearMarkerTexture = "" end
+            if nameLeft == true then
+                gearMarkerTexture = gearName .. " " .. gearMarkerTexture
+            else
+                gearMarkerTexture = gearMarkerTexture .. " " .. gearName
+            end
+        end
+    end
     return gearMarkerTexture, gearMarkerTextureColor
 end
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
+
 
 function WL.assignGearMarkerTexture(data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists)
 --d(">Assign gear: " .. data.itemLink .. ", gearId: " ..tostring(gearData.gearId) .. ", assignWholeSet: " ..tostring(assignWholeSet) .. ", comingFromWishListWindow: " .. tostring(comingFromWishListWindow) ..", assignType: " .. tostring(assignType) .. ", addToAllWishLists: " ..tostring(addToAllWishLists))
@@ -2535,7 +2551,8 @@ function WL.buildGearContextMenuEntries(data)
                 end
             end
             if gearName ~= nil then
-                local gearNameTextureStr = WL_getGearMarkerTexture(gearDataNew, true, 28, 28)
+                --Add the gear name after the icon
+                local gearNameTextureStr = WL_getGearMarkerTexture(gearDataNew, true, 28, 28, true, false)
                 if gearNameTextureStr ~= nil and gearNameTextureStr ~= "" then
                     --data, gearData, assignWholeSet, comingFromWishListWindow, assignType, addToAllWishLists
                     local subMenuEntry = {

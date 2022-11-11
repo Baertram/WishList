@@ -267,7 +267,7 @@ local function addNewGear()
         if WishList_Settings_GearNameEditControl ~= nil then
             WishList_Settings_GearNameEditControl.editbox:TakeFocus()
             if WishList_Settings_GearSaveButton ~= nil then
-                WishList_Settings_GearSaveButton:UpdateDisabled()
+                WishList_Settings_GearSaveButton.button:SetEnabled(true)
             end
         end
     end
