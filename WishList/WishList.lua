@@ -637,7 +637,7 @@ function WL.CreateWishListEntryForItem(item)
 
     --If the quality is not set, set it with no matter which quality now
     if item.quality == nil then
-    item.quality = WISHLIST_QUALITY_ALL
+        item.quality = WISHLIST_QUALITY_ALL
     end
     --Get the names of the types (for search and order functions)
     local itemTypeName, itemArmorOrWeaponTypeName, itemSlotName, itemTraitName, itemQualityName = WL.getItemTypeNamesForSortListEntry(item.itemType, item.armorOrWeaponType, item.slot, item.trait, item.quality)
@@ -663,45 +663,47 @@ function WL.CreateWishListEntryForItem(item)
     local setsData = WL.accData.sets[setId]
 
     if not setsData then
-    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tos(setId))
-    return
+        df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing sets data!", tos(setId))
+        return
     end
-    if not setsData.armorTypes then
-    df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing armor types!", tos(setId))
+        if not setsData.armorTypes then
+        df("[WISHLIST - ERROR]CreateWishListEntryForItem - setId: %s: Missing armor types!", tos(setId))
     end
 
+    item.gearId = item.gearId or 0 --for sorting
+
     local wlEntryTable = {
-    type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
-    setId                   = setId,
-    id                      = item.id,
-    itemType                = item.itemType,
-    itemTypeName            = itemTypeName,
-    trait                   = item.trait,
-    traitName               = itemTraitName,
-    armorOrWeaponType       = item.armorOrWeaponType,
-    armorOrWeaponTypeName   = itemArmorOrWeaponTypeName,
-    slot                    = item.slot,
-    slotName                = itemSlotName,
-    name                    = setName,
-    itemLink                = itemLink,
-    timestamp               = item.timestamp,
-    quality                 = item.quality,
-    qualityName             = itemQualityName,
-    bonuses                 = bonuses,
-    knownInSetItemCollectionBook = (item.knownInSetItemCollectionBook and 1) or 0,
-    gearId     = item.gearId,
-    --LibSets data
-    setType     = setType,
-    traitsNeeded= traitsNeeded,
-    dlcId       = dlcId,
-    zoneIds     = dropLocationsZoneIds,
-    wayshrines  = setWayshrines,
-    zoneIdNames = zoneIdNames,
-    wayshrineNames = wayshrineNames,
-    dlcName     = dlcName,
-    setTypeName = setTypeName,
-    armorTypes  = setsData.armorTypes,
-    dropMechanics = setsData.dropMechanics,
+        type                    = 1, -- for the search method to work -> Find the processor in zo_stringsearch:Process()
+        setId                   = setId,
+        id                      = item.id,
+        itemType                = item.itemType,
+        itemTypeName            = itemTypeName,
+        trait                   = item.trait,
+        traitName               = itemTraitName,
+        armorOrWeaponType       = item.armorOrWeaponType,
+        armorOrWeaponTypeName   = itemArmorOrWeaponTypeName,
+        slot                    = item.slot,
+        slotName                = itemSlotName,
+        name                    = setName,
+        itemLink                = itemLink,
+        timestamp               = item.timestamp,
+        quality                 = item.quality,
+        qualityName             = itemQualityName,
+        bonuses                 = bonuses,
+        knownInSetItemCollectionBook = (item.knownInSetItemCollectionBook and 1) or 0,
+        gearId     = item.gearId,
+        --LibSets data
+        setType     = setType,
+        traitsNeeded= traitsNeeded,
+        dlcId       = dlcId,
+        zoneIds     = dropLocationsZoneIds,
+        wayshrines  = setWayshrines,
+        zoneIdNames = zoneIdNames,
+        wayshrineNames = wayshrineNames,
+        dlcName     = dlcName,
+        setTypeName = setTypeName,
+        armorTypes  = setsData.armorTypes,
+        dropMechanics = setsData.dropMechanics,
     }
     --Build the data entry for the ZO_SortScrollList row (for searching and sorting with the names AND the ids!)
     return wlEntryTable
@@ -1508,7 +1510,7 @@ end
 
 local function assignGearDataToWishListEntry(wishListItem, gearData)
 --d("[WL.assignGearDataToWishListEntry]")
-    if wishListItem ~= nil and gearData ~= nil and gearData.gearId ~= nil then
+    if wishListItem ~= nil and gearData ~= nil and gearData.gearId ~= nil and gearData.gearId > 0 then
         removeGearDataFromWishListEntry(wishListItem)
         wishListItem.gearId = gearData.gearId
         return WL_getGearMarkerTexture(gearData, true, 28, 28)
@@ -1519,7 +1521,7 @@ end
 
 function WishList:AddGearMarker(item, charData, gearData)
 --d("WishList:AddGearMarker-item.id: " ..tos(item.id))
-    if gearData == nil or gearData.gearId == nil then return end
+    if gearData == nil or gearData.gearId == nil or gearData.gearId == 0 then return end
     local index = -1
     local wishList = WL.getWishListSaveVars(charData, "WishList:AddGearMarker")
     if wishList == nil then return true end
@@ -1605,7 +1607,7 @@ function WishList:AddAllGearMarkersWithCriteria(criteria, charData, addToWishLis
     addGearMarkersToAllItensOnWishList = addGearMarkersToAllItensOnWishList or false
 --d("[WL]AddAllGearMarkersWithCriteria-addToWishListsInLoop: " ..tos(addToWishListsInLoop) .. ", addGearMarkersToAllItensOnWishList: " ..tos(addGearMarkersToAllItensOnWishList))
     if criteria == nil then return false end
-    if gearData == nil or gearData.gearId == nil then return end
+    if gearData == nil or gearData.gearId == nil or gearData.gearId == 0 then return end
     --local gearId = gearData.gearId
     local wishList = WL.getWishListSaveVars(charData, "WishList:AddAllGearMarkersWithCriteria")
     if wishList == nil then return true end
@@ -1749,7 +1751,7 @@ end
 
 function WishList:RemoveGearMarker(item, charData, gearData)
 --d("WishList:RemoveGearMarker")
-    if gearData == nil or gearData.gearId == nil then return end
+    if gearData == nil or gearData.gearId == nil or gearData.gearId == 0 then return end
     local gearId = gearData.gearId
     local index = -1
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveGearMarker")
@@ -1768,7 +1770,7 @@ function WishList:RemoveGearMarker(item, charData, gearData)
 	end
 	if index ~= -1 then
         local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index]
-        if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and itemAtWishList.gearId == gearId then
+        if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and itemAtWishList.gearId > 0 and itemAtWishList.gearId == gearId then
             local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][index], gearData)
             if gearMarkerTextureOld ~= nil then
                 local itemLink
@@ -1793,7 +1795,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
     removeAll = removeAll or false
 --d("[WL]RemoveAllGearMarkersWithCriteria-removeFromWishListsInLoop: " ..tos(removeFromWishListsInLoop) .. ", removeAll: " ..tos(removeAll))
     if criteria == nil then return false end
-    if gearData == nil or gearData.gearId == nil then return end
+    if gearData == nil or gearData.gearId == nil or gearData.gearId == 0 then return end
     local gearId = gearData.gearId
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersWithCriteria")
     if wishList == nil then return true end
@@ -1911,7 +1913,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
             --table.remove(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab], i)
             --d(tos(itemLink)..GetString(WISHLIST_REMOVED) .. ", " .. itemTraitText .. charNameChat)
             local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
-            if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and itemAtWishList.gearId == gearId then
+            if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and itemAtWishList.gearId > 0 and itemAtWishList.gearId == gearId then
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
 --d(">>>>gearMarkerTextureOld: " ..tostring(gearMarkerTextureOld))
                 if gearMarkerTextureOld ~= nil then
@@ -1941,7 +1943,7 @@ end
 function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
     --d("[WhishList]RemoveAllGearMarkersOfSet, setId: " ..tos(setId) .. ", removeAll: " ..tos(removeAll))
     if setId == nil then return false end
-    if gearData == nil or gearData.gearId == nil then return end
+    if gearData == nil or gearData.gearId == nil or gearData.gearId == 0 then return end
     local gearId = gearData.gearId
     removeAll = removeAll or false
     local wishList = WL.getWishListSaveVars(charData, "WishList:RemoveAllGearMarkersOfSet")
@@ -1968,7 +1970,7 @@ function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
             itemTraitText = itemTraitText or ""
             --Remove the gear marker of the current, or the selected char
             local itemAtWishList = WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i]
-            if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and (removeAll == true or (removeAll == false and itemAtWishList.gearId == gearId)) then
+            if itemAtWishList ~= nil and itemAtWishList.gearId ~= nil and itemAtWishList.gearId > 0 and (removeAll == true or (removeAll == false and itemAtWishList.gearId == gearId)) then
                 local gearMarkerTextureOld = removeGearDataFromWishListEntry(WishList_Data[savedVarsServer][displayName][charData.id][addonVars.addonSavedVarsDataTab][addonVars.addonSavedVarsWishListTab][i], gearData)
                 if gearMarkerTextureOld ~= nil then
                     d(zo_strformat(GetString(WISHLIST_GEAR_MARKER_REMOVED), gearMarkerTextureOld, tos(itemLink) .. ", " .. itemTraitText .. charNameChat))

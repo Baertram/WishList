@@ -650,7 +650,7 @@ function WishListWindow:SetupItemRow( control, data )
         gearColumn:SetHidden(false)
         gearColumn:ClearAnchors()
         gearColumn:SetAnchor(LEFT, setItemCollectionStateColumn, RIGHT, 0, 0)
-        if data.gearId ~= nil then
+        if data.gearId ~= nil and data.gearId > 0 then
             local gearMarkerTexture, gearMarkerTextureColor = WL_getGearMarkerTexture(data, false, nil, nil)
             if gearMarkerTexture ~= nil and gearMarkerTextureColor ~= nil then
                 markerTextureGear:SetTexture(gearMarkerTexture)
