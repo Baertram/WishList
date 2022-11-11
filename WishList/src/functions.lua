@@ -2452,6 +2452,23 @@ function WL.getGearNameAndComment(gearId)
 end
 local WL_getGearNameAndComment = WL.getGearNameAndComment
 
+function WL.getGearTooltipText(gearId)
+    local gearName, gearComment = WL_getGearNameAndComment(gearId)
+    local tooltipText
+    if gearName ~= nil and gearName ~= "" then
+        tooltipText = gearName
+    end
+    if gearComment ~= nil and gearComment ~= "" then
+        if tooltipText == nil then tooltipText = "" end
+        if tooltipText ~= "" then
+            tooltipText = tooltipText .. "\n"
+        end
+        tooltipText = tooltipText .. gearComment
+    end
+    return tooltipText
+end
+local WL_getGearTooltipText = WL.getGearTooltipText
+
 function WL.getGearMarkerTexture(gearData, doColorize, width, height, withName, nameLeft)
     doColorize = doColorize or false
     width = width or 28

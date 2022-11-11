@@ -7,7 +7,8 @@ WL.searchBoxLastSelected = {}
 -- ZO_SortFilterList:RefreshFilters()                           =>  FilterScrollList()  =>  SortScrollList()    =>  CommitScrollList()
 -- ZO_SortFilterList:RefreshSort()                                                      =>  SortScrollList()    =>  CommitScrollList()
 
-local getGearMarkerTexture = WL.getGearMarkerTexture
+local WL_getGearMarkerTexture = WL.getGearMarkerTexture
+local WL_getGearTooltipText   = WL.getGearTooltipText
 
 ------------------------------------------------
 --- WishList Window -> ZO_SortFilterList
@@ -650,20 +651,37 @@ function WishListWindow:SetupItemRow( control, data )
         gearColumn:ClearAnchors()
         gearColumn:SetAnchor(LEFT, setItemCollectionStateColumn, RIGHT, 0, 0)
         if data.gearId ~= nil then
-            local gearMarkerTexture, gearMarkerTextureColor = getGearMarkerTexture(data, false, nil, nil)
+            local gearMarkerTexture, gearMarkerTextureColor = WL_getGearMarkerTexture(data, false, nil, nil)
             if gearMarkerTexture ~= nil and gearMarkerTextureColor ~= nil then
                 markerTextureGear:SetTexture(gearMarkerTexture)
                 markerTextureGear:SetDimensions(26, 26)
                 markerTextureGear:SetColor(gearMarkerTextureColor.r,gearMarkerTextureColor.g,gearMarkerTextureColor.b,gearMarkerTextureColor.a)
                 markerTextureGear:SetMouseEnabled(true)
                 markerTextureGear:SetHidden(false)
+                markerTextureGear.data = {
+                    tooltipText = WL_getGearTooltipText(data.gearId)
+                }
+                markerTextureGear:SetHandler("OnMouseEnter", function(ctrl)
+                    if ctrl.data.tooltipText ~= nil and ctrl.data.tooltipText ~= "" then
+                        ZO_Tooltips_ShowTextTooltip(ctrl, RIGHT, ctrl.data.tooltipText)
+                    end
+                end)
+                markerTextureGear:SetHandler("OnMouseExit",  function() ZO_Tooltips_HideTextTooltip()  end)
             else
                 markerTextureGear:SetTexture("")
                 markerTextureGear:SetHidden(true)
+                markerTextureGear:SetMouseEnabled(false)
+                markerTextureGear:SetHandler("OnMouseEnter", nil)
+                markerTextureGear:SetHandler("OnMouseExit",  nil)
+                markerTextureGear.data = nil
             end
         else
             markerTextureGear:SetTexture("")
             markerTextureGear:SetHidden(true)
+            markerTextureGear:SetMouseEnabled(false)
+            markerTextureGear:SetHandler("OnMouseEnter", nil)
+            markerTextureGear:SetHandler("OnMouseExit",  nil)
+            markerTextureGear.data = nil
         end
         gearColumn:SetAnchor(RIGHT, control, RIGHT, -4, 0)
         ------------------------------------------------------------------------------------------------------------------------

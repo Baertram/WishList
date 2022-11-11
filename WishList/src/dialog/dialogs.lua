@@ -1,6 +1,8 @@
 WishList = WishList or {}
 local WL = WishList
 
+local zostrfor = zo_strformat
+
 local WL_getGearMarkerTexture = WL.getGearMarkerTexture
 
 ------------------------------------------------
@@ -571,11 +573,11 @@ function WL.WishListWindowRemoveItemInitialize(control)
             --Remove item from WishList or history?
             if data.wholeSet then
                 if removeFromHistory then
-                    title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName) .. " [" .. GetString(WISHLIST_HISTORY_TITLE) .. "]")
+                    title:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName) .. " [" .. GetString(WISHLIST_HISTORY_TITLE) .. "]")
                 else
-                    title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName))
+                    title:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET), setName))
                 end
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+                descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
             else
                 local timeStamp
                 local dateAndTime
@@ -619,7 +621,7 @@ function WL.WishListWindowRemoveItemInitialize(control)
                     itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
                     --Description text of the dialog
                     if data.removeType == WISHLIST_REMOVE_ITEM_TYPE_NORMAL then
-                        descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
+                        descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_ITEM_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
                     end
                 end
                 --Title of the dialog
@@ -1007,7 +1009,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                 --local charNameText = WL.buildCharNameChatText(WL.CurrentCharData, WL.CurrentCharData.id)
                 local charNameText = WL.CurrentCharData.name
                 charNameText = WL.addCharBrackets(charNameText)
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
+                descLabel:SetText(zostrfor(GetString(WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_COPY_WL), charNameText))
             else
                 labelQuality:SetHidden(false)
                 labelQuality:SetText(GetString(WISHLIST_HEADER_QUALITY))
@@ -1021,7 +1023,7 @@ function WL.WishListWindowChooseCharInitialize(control)
                     local itemLink = data.dataForChar[1].itemLink
                     local countMoreItems = #data.dataForChar - 1
                     local textId = countMoreItems <= 0 and WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM or WISHLIST_BUTTON_CHOOSE_CHARACTER_QUESTION_ADD_ITEM_AND_MORE
-                    descLabel:SetText(zo_strformat(GetString(textId), itemLink, tostring(countMoreItems)))
+                    descLabel:SetText(zostrfor(GetString(textId), itemLink, tostring(countMoreItems)))
                 end
             end
         end,
@@ -1124,8 +1126,8 @@ function WL.WishListWindowChangeQualityInitialize(control)
             --Change quality of whole set or single item?
             if data.wholeSet then
                 local setName = data.itemData.name
-                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " \'<<1>>\'", setName))
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
+                title:SetText(zostrfor(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET) .. " \'<<1>>\'", setName))
+                descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_WHOLE_SET_QUESTION).. "\n" .. charNameText,  setName))
             else
                 local timeStamp
                 local dateAndTime
@@ -1165,7 +1167,7 @@ function WL.WishListWindowChangeQualityInitialize(control)
                 local itemTraitText = WL.TraitTypes[traitId]
                 itemTraitText = WL.buildItemTraitIconText(itemTraitText, traitId)
                 --Description text of the dialog
-                descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
+                descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_CHANGE_QUALITY_QUESTION) .. "\n" .. itemTraitText .. charNameText, itemLink))
                 --Title of the dialog
                 title:SetText(GetString(WISHLIST_DIALOG_CHANGE_QUALITY))
 
@@ -1262,15 +1264,15 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
 
             --Add gear marker from item / whole set
             if data.wholeSet then
-                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET), setName))
+                title:SetText(zostrfor(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET), setName))
                 --Add all gear markers to the set
                 if assignType ~= WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
                     --Not possible, only 1 gear marker icon can be added
                     return
-                    --descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
+                    --descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_ADD_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
                 else
                     --Add only selected gear marker to the set
-                    descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
+                    descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_ADD_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
                 end
             else
                 --[[
@@ -1304,13 +1306,13 @@ function WL.WishListWindowAddGearMarkerInitialize(control)
                 if noDataCall == false then
                     --Description text of the dialog
                     if assignType == WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL then
-                        descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
+                        descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
                     end
                 end
                 --Title of the dialog
                 local addItemTitles = {
                     [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_NORMAL] = GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER),
-                    [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL]    = zo_strformat(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL), gearMarkerTextureStr),
+                    [WISHLIST_ASSIGN_GEAR_MARKER_ITEM_TYPE_ALL]    = zostrfor(GetString(WISHLIST_DIALOG_ADD_GEAR_MARKER_ALL), gearMarkerTextureStr),
                     --[[
                     [WISHLIST_ADD_ITEM_TYPE_DATEANDTIME]         = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_DATETIME), dateAndTime),
                     [WISHLIST_ADD_ITEM_TYPE]                     = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_ADD_ITEM_TYPE), itemType),
@@ -1475,13 +1477,13 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
             end
             --Remove gear marker from item / whole set
             if data.wholeSet then
-                title:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET), setName))
+                title:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET), setName))
                 --Remove all gear markes of the set
                 if removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL then
-                    descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
+                    descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, setName))
                 else
                     --Remove only selected gear marker of the set
-                    descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
+                    descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_SELECTED_GEAR_WHOLE_SET_QUESTION).. "\n" .. charNameText, gearMarkerTextureStr, setName))
                 end
             else
                 --[[
@@ -1515,13 +1517,13 @@ function WL.WishListWindowRemoveGearMarkerInitialize(control)
                 if noDataCall == false then
                     --Description text of the dialog
                     if data.removeType == WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL then
-                        descLabel:SetText(zo_strformat(GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
+                        descLabel:SetText(zostrfor(GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_QUESTION) .. "\n" .. gearMarkerTextureStr .. charNameText, itemLink))
                     end
                 end
                 --Title of the dialog
                 local removeItemTitles = {
                     [WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_NORMAL] = GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER),
-                    [WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL]    = GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL),
+                    [WISHLIST_REMOVE_GEAR_MARKER_ITEM_TYPE_ALL]    = zostrfor(GetString(WISHLIST_DIALOG_REMOVE_GEAR_MARKER_ALL), gearMarkerTextureStr),
                     --[[
                     [WISHLIST_REMOVE_ITEM_TYPE_DATEANDTIME]         = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_DATETIME), dateAndTime),
                     [WISHLIST_REMOVE_ITEM_TYPE]                     = ZO_CachedStrFormat(GetString(WISHLIST_DIALOG_REMOVE_ITEM_TYPE), itemType),
