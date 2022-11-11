@@ -266,6 +266,9 @@ local function addNewGear()
 
         if WishList_Settings_GearNameEditControl ~= nil then
             WishList_Settings_GearNameEditControl.editbox:TakeFocus()
+            if WishList_Settings_GearSaveButton ~= nil then
+                WishList_Settings_GearSaveButton:UpdateDisabled()
+            end
         end
     end
 end
@@ -783,6 +786,7 @@ function WL.buildAddonMenu()
             end,
             --warning = GetString(WISHLIST_LAM_GEARS_BUTTON_ADD_WARN),
             width="half",
+            reference = "WishList_Settings_GearSaveButton"
         },
         {
             type = "button",
