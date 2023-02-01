@@ -1,7 +1,7 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
         <TopLevelControl name="WishListRemoveGearMarkerDialog" inherits="ZO_CustomDialogBase">
-            <Dimensions x="550" y="250" />
+            <!-- <Dimensions x="550" y="250" /> -->
             <Anchor point="CENTER" offsetY="-45" />
             <Controls>
                 <Control name="$(parent)Content" inherits="ZO_DialogContentAnchors">

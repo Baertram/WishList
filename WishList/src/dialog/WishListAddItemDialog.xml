@@ -3,7 +3,7 @@
 
     <Controls>
         <TopLevelControl name="WishListAddItemDialog" inherits="ZO_CustomDialogBase" resizeToFitDescendents="true">
-            <Dimensions x="470" y="415" />
+            <!-- <Dimensions x="470" y="415" /> -->
             <Anchor point="CENTER" offsetY="-45" />
             <Controls>
                 <Control name="$(parent)Content" inherits="ZO_DialogContentAnchors" >
