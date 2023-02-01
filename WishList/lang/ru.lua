@@ -151,7 +151,7 @@ local strings = {
     WISHLIST_NO_ITEMS_COPIED                    = "No items copied, maybe all items are already on the target's " .. GetString(WISHLIST_TITLE),
 
     WISHLIST_DIALOG_RELOAD_ITEMS             = "Обновить предметы",
-    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "Это обновит все предметы используя базу \'LibSets\'!\nМожет занять около 10 сек.",
+    WISHLIST_DIALOG_RELOAD_ITEMS_QUESTION    = "Это обновит все предметы используя базу \'LibSets\'!\nМожет занять около 5 сек.",
     WISHLIST_LINK_ITEM_TO_CHAT               = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
     WISHLIST_WHISPER_RECEIVER                = "Шепнуть \"<<C:1>>\" и спросить за <<2>>",
     WISHLIST_WHISPER_RECEIVER_QUESTION       = "Hey <<1>>, can I have <<2>> pls?",
