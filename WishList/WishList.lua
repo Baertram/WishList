@@ -11,6 +11,9 @@ WishList v3.03
 --Local speedup variables for lua functions
 local tos = tostring
 
+--Local WishList name etc.
+local addonVars = WL.addonVars
+local wlName = addonVars.addonName
 
 --LibSets
 local libSets = WL.LibSets
@@ -67,7 +70,7 @@ local function checkAntiLootDisableTime(disable)
     --This funciton will reset the anti-loot-check variable after 3 seconds, or increase the timer by 3 seconds
     --so the looted containers are not checked against set items and the unneeded scans stress the client this way
     disable = disable or false
-    local antiLootUpdaterName = WL.addonVars.addonName .. "_DisableAntiLootTimer"
+    local antiLootUpdaterName = wlName .. "_DisableAntiLootTimer"
     EVENT_MANAGER:UnregisterForUpdate(antiLootUpdaterName)
     if disable then return false end
     --If anti loot flag is not enabled, abort now
@@ -267,7 +270,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
                 --Is the item on the wishlist?
                 if isOnWishList then
                     --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
-                    if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(WL.addonVars.addonName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
+                    if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(wlName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
                     --Add the current date & time to the item
                     item = WL.addTimeStampToItem(item)
                     --Remove the gender stuff from the setname
@@ -297,7 +300,7 @@ local function lootReceivedWishListCheck(itemId, itemLink, isLootedByPlayer, rec
         end
         if not isOnWishList then return false end
         --Simulate the EVENT_INVENTORY_SINGLE_SLOT_UPDATE now to fill the needed variables for the automatic icon marking
-        if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(WL.addonVars.addonName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
+        if debug and bagId and slotIndex then WL.Inv_Single_Slot_Update(wlName, bagId, slotIndex, true, _, INVENTORY_UPDATE_REASON_DEFAULT, _, debug) end
         --Add the current date & time to the item
         item = WL.addTimeStampToItem(item)
         --Remove the gender stuff from the setname
@@ -806,7 +809,7 @@ function WishList:AddItem(items, charData, alreadyOnWishlistCheckDone, noAddedCh
     local charNameChat = charData.name
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     for i = 1, #items do
 		local item = items[i]
         --Is the item already on the WishList?
@@ -922,7 +925,7 @@ function WishList:AddHistoryItem(items, charData)
     local charNameChat = charData.name
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local showItemFoundHistoryChatOutput = WL.data.showItemFoundHistoryChatOutput
     for i = 1, #items do
         local item = items[i]
@@ -969,7 +972,7 @@ function WishList:RemoveItem(item, charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
 	for i = 1, #wishList do
 		local itm = wishList[i]
@@ -1004,7 +1007,7 @@ function WishList:RemoveHistoryItem(item, charData)
     if history == nil then return true end
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local charNameChat = charData.name
     for i = 1, #history do
@@ -1043,7 +1046,7 @@ function WishList:RemoveAllItemsWithCriteria(criteria, charData, removeFromWishL
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
     local checkSetId = false
@@ -1187,7 +1190,7 @@ function WishList:RemoveAllItemsOfSet(setId, charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1224,7 +1227,7 @@ function WishList:ChangeQualityOfItem(item, charData, newQuality)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     for i = 1, #wishList do
         local itm = wishList[i]
@@ -1261,7 +1264,7 @@ function WishList:ChangeQualityOfItemsOfSet(setId, charData, newQuality)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1300,7 +1303,7 @@ function WishList:RemoveAllHistoryItemsWithCriteria(criteria, charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1379,7 +1382,7 @@ function WishList:RemoveAllHistoryItemsOfSet(setId, charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1415,7 +1418,7 @@ function WishList:RemoveAllItems(charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local cnt = 0
     for i = #wishList, 1, -1 do
@@ -1446,7 +1449,7 @@ function WishList:ClearHistory(charData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local cnt = 0
 --d("[WishList:ClearHistory]char: " .. tos(charNameChat))
@@ -1528,7 +1531,7 @@ function WishList:AddGearMarker(item, charData, gearData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
 --d(">charNameChat: " ..tos(charNameChat))
 	for i = 1, #wishList do
@@ -1570,7 +1573,7 @@ function WishList:AddGearMarkerToSet(setId, charData, gearData, addAll)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -1614,7 +1617,7 @@ function WishList:AddAllGearMarkersWithCriteria(criteria, charData, addToWishLis
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
     local checkSetId = false
@@ -1758,7 +1761,7 @@ function WishList:RemoveGearMarker(item, charData, gearData)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
 	for i = 1, #wishList do
 		local itm = wishList[i]
@@ -1801,7 +1804,7 @@ function WishList:RemoveAllGearMarkersWithCriteria(criteria, charData, removeFro
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local allTraitsId = WISHLIST_TRAIT_TYPE_ALL --All traits
     local checkSetId = false
@@ -1950,7 +1953,7 @@ function WishList:RemoveGearMarkerOfSet(setId, charData, gearData, removeAll)
     --local charNameChat = WL.buildCharNameChatText(charData, nil)
     local displayName = GetDisplayName()
     local savedVarsServer = getSavedVarsServer()
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local charNameChat = charData.name
     local setName = ""
     local cnt = 0
@@ -2196,7 +2199,7 @@ local function migrateSavedVarsToServerDependent()
     d(GetString(WISHLIST_SV_MIGRATION_TO_SERVER_START))
     local accountName = GetDisplayName()
     if not accountName then return end
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     --local accountWideSaved = addonVars.addonSavedVarsAccountWide
     --[[
          ["Default"] =
@@ -2229,7 +2232,7 @@ end
 
 function WL.loadSettings()
     WL.SVrelated_doReloadUINow = false
-    local addonVars = WL.addonVars
+    addonVars = WL.addonVars
     local lang = GetCVar("language.2")
     if lang == "de" then
         WL.defaultAccSettings.use24hFormat = true
@@ -2296,7 +2299,7 @@ local function WL_addMainMenuButton()
     WL.LMM2:Init()
 
     --The name of the button, descriptor
-    local descriptor = WL.addonVars.addonName
+    local descriptor = wlName
     -- Add to main menu
     local categoryLayoutInfo =
     {
@@ -2667,8 +2670,8 @@ local function WL_AddButtons()
 end
 
 function WL.init(_, addonName)
-    local addonVars = WL.addonVars
-    if addonName ~= addonVars.addonName then
+    addonVars = WL.addonVars
+    if addonName ~= wlName then
         --Check if addon "LazyWritCreator" is active
         if(addonName == "DolgubonsLazyWritCreator" or WritCreater ~= nil) then
             WL.otherAddons.LazyWritCreatorActive = true
@@ -2678,7 +2681,7 @@ function WL.init(_, addonName)
     if WL.initDone then return end
 
     --Unregister for on loaded event
-    EVENT_MANAGER:UnregisterForEvent(addonVars.addonName, EVENT_ADD_ON_LOADED)
+    EVENT_MANAGER:UnregisterForEvent(wlName, EVENT_ADD_ON_LOADED)
 
     --The client language
     WL.clientLang = GetCVar("language.2")
@@ -2729,13 +2732,27 @@ function WL.init(_, addonName)
     end
 
     --EVENTs
-    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_LOOT_RECEIVED, lootReceived)
+    EVENT_MANAGER:RegisterForEvent(wlName, EVENT_LOOT_RECEIVED, lootReceived)
     --Register for player inventory slot update
-    EVENT_MANAGER:RegisterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, inv_Single_Slot_Update)
+    EVENT_MANAGER:RegisterForEvent(wlName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, inv_Single_Slot_Update)
     --Add a filter to the event to speed up item checks only on default items not a weapon charge etc.
-    EVENT_MANAGER:AddFilterForEvent(addonVars.addonName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, true)
+    EVENT_MANAGER:AddFilterForEvent(wlName, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT, REGISTER_FILTER_IS_NEW_ITEM, true)
 
-    EVENT_MANAGER:RegisterForEvent(addonVars.addonName.. "_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, function()
+    local registerTooltipHookDone = false
+    EVENT_MANAGER:RegisterForEvent(wlName.. "_PLAYER_ACTIVATED", EVENT_PLAYER_ACTIVATED, function()
+        if registerTooltipHookDone == false then
+            --API function in LibSets is missing? Simulate everything done
+            if libSets.RegisterCustomTooltipHook == nil then
+                registerTooltipHookDone = true
+            else
+                --Regisetr the LibSets tooltip hook for WishList tooltips now
+                if libSets.RegisterCustomTooltipHook("WishListTooltip", wlName) == true then
+                    registerTooltipHookDone = true
+                end
+            end
+
+        end
+
         if WL.SVrelated_doReloadUINow == true then
             zo_callLater(function()
                 d(GetString(WISHLIST_SV_MIGRATION_RELOADUI))
@@ -2785,4 +2802,4 @@ end
 ------------------------------------------------
 --- Addon Start Event
 ------------------------------------------------
-EVENT_MANAGER:RegisterForEvent(WL.addonVars.addonName, EVENT_ADD_ON_LOADED, WL.init)
+EVENT_MANAGER:RegisterForEvent(wlName, EVENT_ADD_ON_LOADED, WL.init)
