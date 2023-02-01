@@ -451,7 +451,7 @@
 
 		<TopLevelControl name="WishListTooltipTopLevel" inherits="TooltipTopLevel">
 			<Controls>
-				<Tooltip name="WishListTooltip" inherits="ZO_ItemIconTooltip" />
+				<Tooltip name="WishListTooltip" inherits="ZO_ItemIconTooltip"/>
 			</Controls>
 		</TopLevelControl>
 	</Controls>
