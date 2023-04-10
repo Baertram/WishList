@@ -3,8 +3,8 @@ local WL = WishList
 
 --[[
 -- ==================Changelog===================
-WishList v3.03
---Added gear markers + settings enu + FCOItemSaver gear marker support (only visual + names)
+WishList v3.05
+--Removed "Show current zone" at set collections button as this is integrated into LibSets direcly now
 -- ==================Error messages===================
 ]]
 
@@ -2091,54 +2091,52 @@ end
 ------------------------------------------------
 local function fixSVData()
     --Fix the entries with ["traitId"] = 34 or 35 to 999 --all traits
-    if GetAPIVersion() >= 100035 then
-        local atLeastOneEntryFixed = false
-        local traitIdsToReplace = {
-            [34] = true,
-            [35] = true,
-        }
-        local traitIdToReplaceWith = WISHLIST_TRAIT_TYPE_ALL
-        local traitIdsFixedCount = 0
+    local atLeastOneEntryFixed = false
+    local traitIdsToReplace = {
+        [34] = true,
+        [35] = true,
+    }
+    local traitIdToReplaceWith = WISHLIST_TRAIT_TYPE_ALL
+    local traitIdsFixedCount = 0
 
-        --Per character data
-        WL.charsData = WL.buildCharsDropEntries()
-        if WL.charsData and #WL.charsData > 0 then
-            for _, charData in ipairs(WL.charsData) do
-                local wishList = WL.getWishListSaveVars(charData, "WishList:fixSVData", nil)
-                if wishList ~= nil then
-                    for wlIndex, wlEntryData in pairs(wishList) do
-                        if wlEntryData and wlEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(wlEntryData["trait"])] then
-                            wishList[wlIndex]["trait"] = traitIdToReplaceWith
-                            atLeastOneEntryFixed = true
-                            traitIdsFixedCount = traitIdsFixedCount + 1
-                        end
+    --Per character data
+    WL.charsData = WL.buildCharsDropEntries()
+    if WL.charsData and #WL.charsData > 0 then
+        for _, charData in ipairs(WL.charsData) do
+            local wishList = WL.getWishListSaveVars(charData, "WishList:fixSVData", nil)
+            if wishList ~= nil then
+                for wlIndex, wlEntryData in pairs(wishList) do
+                    if wlEntryData and wlEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(wlEntryData["trait"])] then
+                        wishList[wlIndex]["trait"] = traitIdToReplaceWith
+                        atLeastOneEntryFixed = true
+                        traitIdsFixedCount = traitIdsFixedCount + 1
                     end
                 end
-                local history = WL.getHistorySaveVars(charData, "WishList:fixSVData", nil)
-                if history ~= nil then
-                    for histIndex, hisEntryData in pairs(history) do
-                        if hisEntryData and hisEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(hisEntryData["trait"])] then
-                            history[histIndex]["trait"] = traitIdToReplaceWith
-                            atLeastOneEntryFixed  = true
-                            traitIdsFixedCount = traitIdsFixedCount + 1
-                        end
+            end
+            local history = WL.getHistorySaveVars(charData, "WishList:fixSVData", nil)
+            if history ~= nil then
+                for histIndex, hisEntryData in pairs(history) do
+                    if hisEntryData and hisEntryData["trait"] ~= nil and traitIdsToReplace[tonumber(hisEntryData["trait"])] then
+                        history[histIndex]["trait"] = traitIdToReplaceWith
+                        atLeastOneEntryFixed  = true
+                        traitIdsFixedCount = traitIdsFixedCount + 1
                     end
                 end
             end
         end
-        --Account wide data
-        for addedIndex, addedData in pairs(WL.accData.lastAddedViaDialog) do
-            if addedData and addedData["trait"] and traitIdsToReplace[tonumber(addedData["trait"])] then
-                WL.accData.lastAddedViaDialog[addedIndex]["trait"] = traitIdToReplaceWith
-                atLeastOneEntryFixed = true
-                traitIdsFixedCount = traitIdsFixedCount + 1
-            end
+    end
+    --Account wide data
+    for addedIndex, addedData in pairs(WL.accData.lastAddedViaDialog) do
+        if addedData and addedData["trait"] and traitIdsToReplace[tonumber(addedData["trait"])] then
+            WL.accData.lastAddedViaDialog[addedIndex]["trait"] = traitIdToReplaceWith
+            atLeastOneEntryFixed = true
+            traitIdsFixedCount = traitIdsFixedCount + 1
         end
+    end
 
-        if atLeastOneEntryFixed == true then
-            d("[WishList]Fixed " ..tos(traitIdsFixedCount) .. " traitIds in the SavedVariables to the new ALL constant!")
-            ReloadUI("ingame")
-        end
+    if atLeastOneEntryFixed == true then
+        d("[WishList]Fixed " ..tos(traitIdsFixedCount) .. " traitIds in the SavedVariables to the new ALL constant!")
+        ReloadUI("ingame")
     end
 end
 
@@ -2622,6 +2620,8 @@ local function WL_Hooks()
 end
 
 local function WL_AddButtons()
+    --[[
+    --Integrated nto LibSets now!
     --Add "show current parent zone" button to item set collection UI top right corner
     local buttonDataOpenCurrentParentZone =
     {
@@ -2648,6 +2648,10 @@ local function WL_AddButtons()
         disabled        = "/esoui/art/buttons/dropbox_arrow_disabled.dds",
     }
     WL.itemSetCollectionBookMoreOptionsButton = W_addWLButton(LEFT, ZO_ItemSetsBook_Keyboard_TopLevelFilters, RIGHT, (buttonDataOpenCurrentParentZone.width+4)*-1, 10, buttonDataOpenCurrentParentZone)
+    ]]
+
+    WL.itemSetCollectionBookMoreOptionsButton = libSets.itemSetCollectionBookMoreOptionsButton
+
     --Add WishList button to item set collection UI top right corner
     local buttonDataShowWLUI =
     {
