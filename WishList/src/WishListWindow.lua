@@ -1934,7 +1934,7 @@ end
 function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searchBoxType )
     local isCharCB = ((prefix == WISHLIST_CHARSDROP_PREFIX) or searchBoxType == "char") or false
     local isSetSearchCB = ((prefix == WISHLIST_SEARCHDROP_PREFIX) or searchBoxType == "set") or false
-d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
+--d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
     --local setSearchCBEntryStart = WISHLIST_SEARCHDROP_PREFIX
     control:SetSortsItems(false)
     control:ClearItems()
