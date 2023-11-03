@@ -5,7 +5,7 @@ local WL = WishList
 --- Addon data
 ------------------------------------------------
 WL.addonVars =  {}
-WL.addonVars.addonRealVersion		    = 3.05
+WL.addonVars.addonRealVersion		    = 3.1
 WL.addonVars.addonSavedVarsVersion	    = 2.0 --Changing this will reset the SavedVariables!!!
 WL.addonVars.addonName				    = "WishList"
 WL.addonVars.addonSavedVars			    = "WishList_Data"

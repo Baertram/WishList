@@ -255,27 +255,24 @@
 							offsetX="20" offsetY="14" />
 				</Button>
 
-				<Control name="$(parent)SearchDrop" resizeToFitDescendents="true" mouseEnabled="true">
+				<Control name="$(parent)SearchDrop" inherits="ZO_ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
 					<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Search" />
-					<OnInitialized>
-						ZO_ComboBox:New(self)
-					</OnInitialized>
-					<OnMouseUp>
-						if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-							ZO_ComboBox_DropdownClicked(self)
-						end
-					</OnMouseUp>
 					<Controls>
+						<Control name="$(parent)BG" override="true">
+							<OnInitialized>
+								self:SetHidden(true)
+							</OnInitialized>
+						</Control>
 						<Label name="$(parent)Anchor" inherits="WishListSearchLabel">
 							<Anchor point="RIGHT" />
 						</Label>
 						<Label name="$(parent)ColonText" text=":" inherits="WishListSearchLabel">
 							<Anchor point="RIGHT" relativeTo="$(parent)Anchor" relativePoint="LEFT" offsetX="-8" />
 						</Label>
-						<Label name="$(parent)SelectedItemText" inherits="WishListSearchLabel">
+						<Label name="$(parent)SelectedItemText" inherits="WishListSearchLabel" override="true">
 							<Anchor point="RIGHT" relativeTo="$(parent)ColonText" relativePoint="LEFT" offsetX="-1" />
 						</Label>
-						<Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+						<Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton" override="true">
 							<Dimensions x="16" y="16" />
 							<Anchor point="RIGHT" relativeTo="$(parent)SelectedItemText" relativePoint="LEFT" offsetX="-3" />
 							<OnClicked>
@@ -284,27 +281,24 @@
 						</Button>
 					</Controls>
 				</Control>
-				<Control name="$(parent)CharsDrop" resizeToFitDescendents="true" mouseEnabled="true">
+				<Control name="$(parent)CharsDrop" inherits="ZO_ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
 					<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)SearchDrop" offsetX="-20" />
-					<OnInitialized>
-						ZO_ComboBox:New(self)
-					</OnInitialized>
-					<OnMouseUp>
-							if (button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
-								ZO_ComboBox_DropdownClicked(self)
-							end
-					</OnMouseUp>
                     <Controls>
+						<Control name="$(parent)BG" override="true">
+							<OnInitialized>
+								self:SetHidden(true)
+							</OnInitialized>
+						</Control>
                         <Label name="$(parent)Anchor" inherits="WishListSearchLabel">
                             <Anchor point="RIGHT" />
                         </Label>
                         <Label name="$(parent)ColonText" text="" inherits="WishListSearchLabel">
                             <Anchor point="RIGHT" relativeTo="$(parent)Anchor" relativePoint="LEFT" offsetX="-8" />
                         </Label>
-                        <Label name="$(parent)SelectedItemText" inherits="WishListSearchLabel">
+                        <Label name="$(parent)SelectedItemText" inherits="WishListSearchLabel" override="true">
                             <Anchor point="RIGHT" relativeTo="$(parent)ColonText" relativePoint="LEFT" offsetX="-1" />
                         </Label>
-                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
+                        <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton" override="true">
                             <Dimensions x="16" y="16" />
                             <Anchor point="RIGHT" relativeTo="$(parent)SelectedItemText" relativePoint="LEFT" offsetX="-3" />
                             <OnClicked>

@@ -85,16 +85,26 @@ function WishListWindow:Setup( )
         end
         return(ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys, self.currentSortOrder))
 	end
-	self.searchDrop = ZO_ComboBox_ObjectFromContainer(self.frame:GetNamedChild("SearchDrop"))
+    --LibScrollableMenu - Add scrollable dropdown helper at the search dropdown
+    local searchDropControl = self.frame:GetNamedChild("SearchDrop")
+    self.searchDropControl = searchDropControl
+    self.searchDrop = ZO_ComboBox_ObjectFromContainer(searchDropControl)
+    self.searchDrop.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.frame, searchDropControl, { visibleRowsDropdown = 15, visibleRowsSubmenu = 15, sortEntries = true })
     WL.initializeSearchDropdown(self, WISHLIST_TAB_SEARCH, "set")
+
     --Character/toon dropdown box
     WL.charsData = WL.charsData or {}
-    if not WL.charsData or #WL.charsData == 0 then
+    if ZO_IsTableEmpty(WL.charsData) then
         WL.charsData = WL.buildCharsDropEntries()
     end
-    self.charsDrop = ZO_ComboBox_ObjectFromContainer(self.frame:GetNamedChild("CharsDrop"))
 
+    --LibScrollableMenu - Add scrollable dropdown helper at the character dropdown
+    local charsDropControl       = self.frame:GetNamedChild("CharsDrop")
+    self.charsDropControl       = charsDropControl
+    self.charsDrop = ZO_ComboBox_ObjectFromContainer(charsDropControl)
+    self.charsDrop.scrollHelper = AddCustomScrollableComboBoxDropdownMenu(self.frame, charsDropControl, { visibleRowsDropdown = 15, visibleRowsSubmenu = 15, sortEntries = true })
     WL.initializeSearchDropdown(self, WISHLIST_TAB_WISHLIST, "char")
+
     --Search box and search functions
 	self.searchBox = self.frame:GetNamedChild("SearchBox")
 	self.searchBox:SetHandler("OnTextChanged", function() self:RefreshFilters() end)
@@ -865,7 +875,8 @@ function WishListWindow:FilterScrollList()
 	ZO_ClearNumericallyIndexedTable(scrollData)
 
     --Get the search method chosen at the search dropdown
-    self.searchType = self.searchDrop:GetSelectedItemData().id
+    local selectedItem = self.searchDrop:GetSelectedItemData()
+    self.searchType = selectedItem ~= nil and selectedItem.id
     --Check the search text
     local searchInput = self.searchBox:GetText()
 
@@ -1923,14 +1934,23 @@ end
 function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searchBoxType )
     local isCharCB = ((prefix == WISHLIST_CHARSDROP_PREFIX) or searchBoxType == "char") or false
     local isSetSearchCB = ((prefix == WISHLIST_SEARCHDROP_PREFIX) or searchBoxType == "set") or false
---d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
+d("[WishListWindow:InitializeComboBox]isSetSearchCB: " .. tostring(isSetSearchCB) .. ", isCharCB: " .. tostring(isCharCB) .. ", prefix: " .. tostring(prefix) ..", max: " .. tostring(max))
     --local setSearchCBEntryStart = WISHLIST_SEARCHDROP_PREFIX
     control:SetSortsItems(false)
     control:ClearItems()
 
-    local callback = function( _, _, entry, _ ) --comboBox, entryText, entry, selectionChanged )
+    local callback = function( _, _, entry, _ ) --comboBox, entryText, entry, selectionChanged, oldItem )
         self:SetSearchBoxLastSelected(WL.CurrentTab, searchBoxType, entry.selectedIndex)
         self:RefreshFilters()
+    end
+    local function charTooltipFunc(charName, charData)
+        local tooltipText
+        if WL.CurrentTab == WISHLIST_TAB_WISHLIST then
+            tooltipText = zo_strformat(WISHLIST_CHARDROPDOWN_ITEMCOUNT_WISHLIST, charName, WL.getWishListItemCount(charData))
+        elseif WL.CurrentTab == WISHLIST_TAB_HISTORY then
+            tooltipText = zo_strformat(WISHLIST_CHARDROPDOWN_ITEMCOUNT_HISTORY, charName, WL.getHistoryItemCount(charData))
+        end
+        return tooltipText
     end
 
     local selectedCharDataBeforeUpdate
@@ -1950,6 +1970,27 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searc
             currentCharId = GetCurrentCharacterId()
         end
     end
+
+--Normal entries
+    local comboBoxMenuEntries = {
+        --[[
+        {
+            name            = "Normal entry 1",
+            callback        =   function(comboBox, itemName, item, selectionChanged, oldItem)
+                d("Normal entry 1")
+            end,
+            icon			= "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Up.dds",
+            isNew			= true,
+            --entries         = submenuEntries,
+            --tooltip         =
+        },
+        {
+            name            = "-", --Divider
+        },
+        ...
+        ]]
+    }
+
     local numEntriesAdded = 0
     for i = 1, max do
         if not exclude or (exclude and not exclude[i]) then
@@ -1958,10 +1999,7 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searc
             if isCharCB then
                 local charData = WL.charsData[i]
                 local charNameToken = prefix .. tostring(charData.id)
-                --d(">charNameToken: " ..tostring(charNameToken))
-                local charName = GetString(charNameToken)
-                --d(">charName: " .. tostring(charName))
-                entry = ZO_ComboBox:CreateItemEntry(charName, callback)
+                local charName = (charData and charData.name) or GetString(charNameToken)
                 local charId = -1
                 if charData ~= nil then
                     charId = charData.id
@@ -1976,29 +2014,60 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searc
                 else
                     charId = i
                 end
-                entry.id         = charId
-                entry.name       = charData.name
-                entry.nameClean  = charData.nameClean
-                entry.class      = charData.class
 
-            --Search type combo box
+                numEntriesAdded = numEntriesAdded + 1
+
+                entry = {
+                    name            = charName,
+                    --label           = ""
+                    callback        = callback,
+                    --icon			= "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Up.dds",
+                    --isNew			= true,
+                    --entries         = submenuEntries,
+                    tooltip         = function() return charTooltipFunc(charName, charData) end,
+
+                    --Custom entry data
+                    id = charId,
+                    selectedIndex = numEntriesAdded,
+                    nameClean = charData.nameClean,
+                    class = charData.class,
+                }
+                table.insert(comboBoxMenuEntries, entry)
+
+                --Search type combo box
             elseif isSetSearchCB then
                 local entryText = GetString(prefix, i)
-                --entryText = entryText .. GetString(setSearchCBEntryStart, i)
-                entry = ZO_ComboBox:CreateItemEntry(entryText, callback)
-                entry.id = i
+
+                numEntriesAdded = numEntriesAdded + 1
+
+                entry = {
+                    name            = entryText,
+                    --label           = ""
+                    callback        = callback,
+                    --icon			= "EsoUI/Art/TradingHouse/Tradinghouse_Weapons_Staff_Frost_Up.dds",
+                    --isNew			= true,
+                    --entries         = submenuEntries,
+                    --tooltip         = tooltipText,
+
+                    --Custom entry data
+                    id = i,
+                    selectedIndex = numEntriesAdded,
+                }
+                table.insert(comboBoxMenuEntries, entry)
             end
-            numEntriesAdded = numEntriesAdded + 1
-            entry.selectedIndex = numEntriesAdded
-            control:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
         end
     end
+
+    --Add the entries (menu and submenu) to the combobox
+    control:AddItems(comboBoxMenuEntries)
+
     if itemToSelect ~= nil then
         if isSetSearchCB then
             itemToSelect = self:GetSearchBoxLastSelected(WL.CurrentTab, "set")
         end
         control:SelectItemByIndex(itemToSelect, true)
     end
+
 
     --Character dropdown box?
     if isCharCB then
@@ -2011,6 +2080,8 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searc
             end
         end)
 
+        --[[ Not working anymore since ZO_ComboBox is not using ZO_Menu anymore since API101040
+             ->Code was moved to LibScrollableMenu code above, see comboBoxMenuEntries -> if isCharCB then
         --Show tooltips in WishList char dropdown entries, if the dropdown box is allowed
         ZO_PreHook("ZO_Menu_SetSelectedIndex", function(index)
             if(not WL.activeCharDropdown) then return end
@@ -2036,6 +2107,8 @@ function WishListWindow:InitializeComboBox( control, prefix, max, exclude, searc
                 end
             end
         end)
+        ]]
+
     end
 end
 
