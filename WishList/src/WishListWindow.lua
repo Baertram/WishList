@@ -780,10 +780,15 @@ function WL.createWindow(doShow)
     end
 end
 
+function WishList:IsHidden()
+    if WishListFrame == nil then return true end
+    return WishListFrame:IsControlHidden()
+end
+
 function WishList:Show()
     WL.createWindow(true)
 
-    if (WishListFrame:IsControlHidden()) then
+    if WishList:IsHidden() then
         SCENE_MANAGER:Show("WishListScene")
         WL.windowShown = true
     else

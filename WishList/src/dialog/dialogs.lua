@@ -1721,13 +1721,18 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     return items, selectedCharData
 end
 
-function WL.showAddItem(setData, comingFromWishListWindow)
+function WL.showAddItem(setData, comingFromWishListWindow, doNotUpdateCurrentCharData)
     comingFromWishListWindow = comingFromWishListWindow or false
+    doNotUpdateCurrentCharData = doNotUpdateCurrentCharData or false
     WL.createWindow(false)
     local clientLang = WL.clientLang or WL.fallbackSetLang
     WL.currentSetId = setData.setId
-    WL.currentSetName = setData.names[clientLang]
-    WL.checkCurrentCharData()
+    WL.currentSetName = setData.names and setData.names[clientLang] or setData.setNames[clientLang]
+    --Character data was chosen at external addon? Or are we coming from internal WishList?
+    if not doNotUpdateCurrentCharData then
+d(">WL.showAddItem -> checkCurrentCharData")
+        WL.checkCurrentCharData()
+    end
     ZO_Dialogs_ShowDialog("WISHLIST_EVENT_ADD_ITEM_DIALOG", {set=setData.setId, wlWindow=comingFromWishListWindow})
 end
 

@@ -3,8 +3,7 @@ local WL = WishList
 
 --[[
 -- ==================Changelog===================
-WishList v3.05
---Removed "Show current zone" at set collections button as this is integrated into LibSets direcly now
+
 -- ==================Error messages===================
 ]]
 
@@ -2455,7 +2454,7 @@ local function WL_Hooks()
 
     --Set collection item book: Determine unknown items of setId by help of the collectionCategoryIndex and the parent'S category data
     local function getUnknownSetItemsInCollection(setId)
---d("[WishList]getUnknownSetItemsInCollection - setId: " ..tos(setId))
+        --d("[WishList]getUnknownSetItemsInCollection - setId: " ..tos(setId))
         if setId == nil then return end
         local collectionCategoryIdCheck = GetItemSetCollectionCategoryId(setId)
         local parentCategoryId = GetItemSetCollectionCategoryParentId(setId)
@@ -2570,10 +2569,10 @@ local function WL_Hooks()
                         end)  -- Remove all sets items of the setId already known in Set Item Collection book from ALL WishLists
             end
             AddCustomMenuItem(GetString(WISHLIST_CONTEXTMENU_REMOVE_ITEM_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS),
-                function()
-                    WL.CurrentCharData = WL.LoggedInCharData
-                    WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS)
-                end)  -- Remove all sets items already known in Set Item Collection book from ALL WishLists
+                    function()
+                        WL.CurrentCharData = WL.LoggedInCharData
+                        WL.showRemoveItem(nil, false, false, false, WISHLIST_REMOVE_ITEM_TYPE_KNOWN_SETITEMCOLLECTION_ALL_WISHLISTS)
+                    end)  -- Remove all sets items already known in Set Item Collection book from ALL WishLists
             ShowMenu()
         end
     end)
@@ -2617,11 +2616,90 @@ local function WL_Hooks()
         )
         ShowMenu()
     end)
+
+
+    --LibSets - Add "Add to WishList" to the set search UI's result list context menu
+    local function getSubmenuOwnerControlData(menu)
+        -->Get the menu's owner which should be the rowControl, and read the data of the owner then to get the setId
+        local owner = GetMenuOwner(menu)
+        if owner == nil then return end
+WL._debugOwnerSubmenu = owner
+        local ownerData = owner.data
+        if ownerData == nil then return end
+        return ownerData
+    end
+
+    local function visibleFunc(rowControl, setId)
+        return true
+    end
+
+    local submenuEntriesWishList = {
+        --Add item dialog via WishList
+        {
+            label = function()
+                local setData = getSubmenuOwnerControlData()
+                if setData == nil or setData.setId == nil then return end
+                local setName = setData.name or setData["setNames"][WL.clientLang] or libSets.GetSetName(setData.setId)
+                return GetString(WISHLIST_DIALOG_ADD_ITEM) .. ": " ..tostring(setName)
+            end,
+            callback = function()
+                local setData = getSubmenuOwnerControlData()
+                if setData == nil or setData.setId == nil then return end
+
+                WL.CurrentCharData = WL.LoggedInCharData
+                if WL:IsHidden() then
+                    WL.Show()
+                end
+                WL.SetTab(WISHLIST_TAB_SEARCH)
+                --Change the selected user at the WL dropdownbox to the currently logged in one
+                WL.showAddItem(setData, true, true) --pass in doNotUpdateCurrentCharData = true (3rd param) so the characterData will not be reset again at the dialog!
+            end,
+        },
+        --Remove set from WishList
+        {
+            label = function()
+                local setData = getSubmenuOwnerControlData()
+                if setData == nil or setData.setId == nil then return zo_strformat(WISHLIST_DIALOG_REMOVE_WHOLE_SET, "n/a") end
+                local setName = setData.name or setData["setNames"][WL.clientLang] or libSets.GetSetName(setData.setId)
+                return zo_strformat(WISHLIST_DIALOG_REMOVE_WHOLE_SET, setName)
+            end,
+            callback = function()
+                local setData = getSubmenuOwnerControlData()
+                if setData == nil or setData.setId == nil then return end
+                local setId = setData.setId
+                local setName = setData.name or setData["setNames"][WL.clientLang] or libSets.GetSetName(setId)
+
+                WL.CurrentCharData = WL.LoggedInCharData
+                if WL:IsHidden() then
+                    WL.Show()
+                end
+                WL.SetTab(WISHLIST_TAB_WISHLIST)
+                --Delete the whole set from the WishList
+                local data = {
+                    --setId is needed and the setName for the dialog title
+                    setId = setId,
+                    name = setName,
+                }
+                WL.showRemoveItem(data, true, false, false, WISHLIST_REMOVE_ITEM_TYPE_NORMAL)
+            end,
+            visible = function(menu)
+                --Only passes in ZO_Menu as param -> See LibCustomMenu
+                --Check if this setId got any entry on the WishList of the currently logged in Character
+                local setData = getSubmenuOwnerControlData()
+                if setData == nil or setData.setId == nil then return end
+                --Check if any item of this setId is on the WishList of the currently logged in char
+                WL.LoggedInCharData = WL.LoggedInCharData or WL.checkCurrentCharData(true)
+                WL.CurrentCharData = WL.LoggedInCharData
+                return WL.isSetIdOnWishlist(WL.LoggedInCharData, setData.setId)
+            end,
+        },
+    }
+    libSets.RegisterCustomSetSearchResultsListContextMenu(wlName, wlName, GetString(WISHLIST_TITLE), submenuEntriesWishList, visibleFunc)
 end
 
 local function WL_AddButtons()
     --[[
-    --Integrated nto LibSets now!
+    --Integrated directly into LibSets now!
     --Add "show current parent zone" button to item set collection UI top right corner
     local buttonDataOpenCurrentParentZone =
     {

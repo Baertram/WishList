@@ -422,13 +422,14 @@ function WL.checkCurrentCharData(loggedIn, fallbackLoggedIn)
         end
     end
 ------------------------------------------------------------------------------------------------------------------------
---d("[WL.checkCurrentCharData] loggedIn: " .. tostring(loggedIn))
+--d("[WL.checkCurrentCharData] loggedIn: " .. tostring(loggedIn) .. ", fallbackLoggedIn: " .. tostring(fallbackLoggedIn))
     if loggedIn then
         checkLoggedInCharData()
     else
         --Currently selected char data of the chasr dropdown at the WishList tab needs to be determined on demand
         local selectedCharData = WL.window and WL.window.charsDrop:GetSelectedItemData()
         if selectedCharData and selectedCharData.id ~= nil then
+--d(">selected char data found: " ..tostring(selectedCharData.nameClean))
             WL.CurrentCharData.id           = selectedCharData.id
             WL.CurrentCharData.name         = selectedCharData.name
             WL.CurrentCharData.nameClean    = selectedCharData.nameClean
@@ -953,6 +954,18 @@ local function isItemSetCollectionItemOnWishList(item, itemId, itemSetCollection
     return false, itemId, itemCopyTraitFixed
 end
 
+--Check if any item witht his setId is already on the WishLsit of the char
+function WL.isSetIdOnWishlist(charData, setId)
+    if charData == nil then return false end
+    if setId == nil then return false end
+    local wishList = WL.getWishListSaveVars(charData, "WL.isSetIdOnWishlist")
+    if wishList == nil then return false end
+    for i = 1, #wishList do
+        local item = wishList[i]
+        if setId == item.setId then return true end
+    end
+    return false
+end
 
 --Checks if the item is already on the WishList and returns isAlreadyOnWishList boolean, itemId of the item, item data
 --itemSetCollectionKey will be setId:id64OfItemSetCollectionSlot and only be filled if the setId is not a craftable one -> Comparison of items via ZOs' setItemCollection slotId 64 e.g. ring
