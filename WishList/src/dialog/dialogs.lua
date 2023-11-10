@@ -1716,7 +1716,7 @@ function WL.buildSetItemDataFromAddItemDialog(comboItemType, comboArmorOrWeaponT
     selectedCharData.nameClean  = charNameClean
     selectedCharData.class      = charClass
 
-    local items = WL.getSetItemsByCriteria(WL.currentSetId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId, false)
+    local items = WL.getSetItemsByCriteria(WL.currentSetId, itemTypeId, armorOrWeaponTypeId, traitId, slotId, qualityId, traitId == WISHLIST_TRAIT_TYPE_ALL)
 
     return items, selectedCharData
 end
