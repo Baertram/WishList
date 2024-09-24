@@ -237,6 +237,7 @@ WL.defaultSettings = {
         ["de"] = false,
         ["en"] = true,
         ["fr"] = false,
+        ["pl"] = false,
         ["ru"] = false,
         ["jp"] = false,
     },
